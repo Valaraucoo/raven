@@ -10,20 +10,20 @@ class UserAdmin(BaseUserAdmin):
     form = CustomUserChangeForm
     model = User
     list_display = (
-        'email', 'first_name', 'last_name', 'is_staff', 'is_teacher',
+        'email', 'first_name', 'last_name', 'is_staff', 'role',
     )
     list_filter = (
-        'is_staff', 'is_active', 'is_teacher', 'is_student'
+        'is_staff', 'is_active', 'role',
     )
     fieldsets = (
         (None, {
             'fields': (
-                'email', 'fullname', 'first_name', 'last_name', 'date_birth', 'phone', 'address', 'gender',
+                'email', 'fullname', 'first_name', 'last_name', 'role','date_birth', 'phone', 'address', 'gender',
             )
         }),
         ('Permissions', {
             'fields': (
-                'is_staff', 'is_active', 'is_teacher', 'is_student'
+                'is_staff', 'is_active',
             )
         }),
     )
@@ -31,9 +31,8 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': (
-                'email', 'first_name', 'last_name', 'address', 'phone', 'date_birth', 'gender',
+                'email', 'first_name', 'last_name',  'role', 'address', 'phone', 'date_birth', 'gender',
                 'password1', 'password2', 'is_staff', 'is_active',
-                'is_teacher', 'is_student',
                 )
             }
          ),

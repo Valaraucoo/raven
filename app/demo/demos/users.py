@@ -19,21 +19,20 @@ class UsersDemo:
         user.address = 'Warszawa'
         user.is_staff = True
         user.is_superuser = True
-        user.is_teacher = False
-        user.is_student = False
+        user.role = 'teacher'
         user.set_password('admin')
         user.save()
 
     def generate_students(self) -> None:
         for i in range(10):
             user_factories.UserFactory(
-                email=f'student{i}@gmail.com', password='example123', is_student=True
+                email=f'student{i}@gmail.com', password='example123', role='student'
             )
 
     def generate_teachers(self) -> None:
         for i in range(5):
             user_factories.UserFactory(
-                email=f'teacher{i}@gmail.com', password='example123', is_teacher=True
+                email=f'teacher{i}@gmail.com', password='example123', role='teacher'
             )
 
     def get_info(self):

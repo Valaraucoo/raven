@@ -55,7 +55,7 @@
    ```
 
 ##### 3\. Try:
-    - open `localhost:8080/admin` on your web browser and try login to demo account.
+   - open `localhost:8080/admin` on your web browser and try login to demo account.
     
      
    

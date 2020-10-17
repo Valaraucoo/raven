@@ -118,3 +118,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 AUTH_USER_MODEL = 'users.User'
 ACCOUNT_UNIQUE_EMAIL = True
+
+# email config
+SENDER_EMAIL = ''

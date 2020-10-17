@@ -12,11 +12,27 @@ GENDER_CHOICES = (
     ('none', 'none'),
 )
 
+ROLE_CHOICES = (
+    ('student', _('Student')),
+    ('teacher', _('Teacher')),
+)
+
 
 class User(auth_models.AbstractUser):
     '''
-    Custom User model for eSchool management platform.
-    email: PK       used for logging in
+    Custom User model for raven platform.
+
+    email: PK                 user's email, used for logging in
+    first_name: str           user's first name
+    last_name: str            user's last name
+    ...
+
+    if role == 'student'
+    grade: FK(...)            user's grade/class model
+    grades: FK(...)           user's grades
+
+    if role == 'teacher':
+    running_courses: FK(...)
     '''
     username = None
 
@@ -29,9 +45,7 @@ class User(auth_models.AbstractUser):
     phone = models.CharField(max_length=9, blank=True, verbose_name=_('Phone number'))
     gender = models.CharField(max_length=10, default='none', choices=GENDER_CHOICES,
                               verbose_name=_("User's gender"))
-
-    is_student = models.BooleanField(default=False)
-    is_teacher = models.BooleanField(default=False)
+    role = models.CharField(max_length=9, choices=ROLE_CHOICES)
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -47,6 +61,14 @@ class User(auth_models.AbstractUser):
     @property
     def full_username(self) -> str:
         return f"{self.first_name} {self.last_name} ({self.email})"
+
+    @property
+    def is_student(self) -> bool:
+        return self.role == 'student'
+
+    @property
+    def is_teacher(self) -> bool:
+        return self.role == 'teacher'
 
     def __str__(self):
         return self.full_username
