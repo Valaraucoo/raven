@@ -45,6 +45,10 @@
    ```bash
    docker-compose up
    ```
+   - migrate database
+   ```bash
+   docker-compose exec web python manage.py migrate
+   ```
    - open second terminal and generate developers demo:
    ```bash
    docker-compose exec web python manage.py generate_demo
