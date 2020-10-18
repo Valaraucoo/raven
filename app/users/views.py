@@ -17,7 +17,15 @@ class LoginView(generic.View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
-        if context.get('is_authenticated'):
+
+        email = request.session.get('email')
+        password = request.session.get('password')
+        user = None
+
+        if email and password:
+            user = authenticate(request, email=email, password=password)
+
+        if request.user.is_authenticated or user:
             messages.info(request, 'jestes juz zalogowany')
             # TODO: redirect to dashboard
         return render(request, self.template_name, context)
