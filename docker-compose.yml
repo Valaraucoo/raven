@@ -12,6 +12,7 @@ services:
       - ./.env.dev
     depends_on:
       - db
+      - redis
   db:
     image: postgres:12.0-alpine
     volumes:
@@ -20,6 +21,26 @@ services:
       - POSTGRES_USER=django
       - POSTGRES_PASSWORD=django
       - POSTGRES_DB=django_dev
+  redis:
+    image: redis:alpine
+  celery:
+    build: ./app
+    command: celery -A core worker -l info
+    volumes:
+      - ./app/:/usr/src/app/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - redis
+  celery-beat:
+    build: ./app
+    command: celery -A core beat -l info
+    volumes:
+      - ./app/:/usr/src/app/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - redis
 
 volumes:
   postgres_data:
