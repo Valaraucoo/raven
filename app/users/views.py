@@ -28,10 +28,17 @@ class LoginView(generic.View):
             pass
         email = request.POST.get('email')
         password = request.POST.get('password')
+        remember = request.POST.get('remember')
 
         user = authenticate(request, email=email, password=password)
         if user:
             login(request, user)
+            if remember == 'on':
+                request.session['email'] = email
+                request.session['password'] = password
+                request.session.set_expiry(1209600)
+            else:
+                request.session.set_expiry(0)
             messages.info(request, 'Pomyślnie udało się zalogować!')
             # TODO: redirect to dashboard
         else:
@@ -44,4 +51,7 @@ class LogoutView(LoginRequiredMixin, generic.View):
         if request.user.is_authenticated:
             messages.info(request, 'See you soon!')
             logout(request)
+            request.session['email'] = None
+            request.session['password'] = None
+            request.session.set_expiry(0)
         return redirect(settings.LOGIN_URL)
