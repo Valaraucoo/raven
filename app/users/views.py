@@ -5,14 +5,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 from core import settings
+from users import forms
 
 
 class LoginView(generic.View):
     template_name = 'users/login.html'
+    form_class = forms.LoginForm
 
     def get_context_data(self, *args, **kwargs):
         return {
-            'is_authenticated': self.request.user.is_authenticated
+            'is_authenticated': self.request.user.is_authenticated,
+            'form': self.form_class,
         }
 
     def get(self, request, *args, **kwargs):
@@ -32,25 +35,31 @@ class LoginView(generic.View):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
-        if context.get('is_authenticated'):
+        if request.user.is_authenticated:
+            # TODO: redirect
             pass
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        remember = request.POST.get('remember')
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            email = data.get('email')
+            password = data.get('password')
+            remember = data.get('remember')
 
-        user = authenticate(request, email=email, password=password)
-        if user:
-            login(request, user)
-            if remember == 'on':
-                request.session['email'] = email
-                request.session['password'] = password
-                request.session.set_expiry(1209600)
+            user = authenticate(request, email=email, password=password)
+            if user:
+                login(request, user)
+                if remember:
+                    request.session['email'] = email
+                    request.session['password'] = password
+                    request.session.set_expiry(1209600)
+                else:
+                    request.session.set_expiry(0)
+                messages.info(request, 'Pomyślnie udało się zalogować!')
+                # TODO: redirect to dashboard
             else:
-                request.session.set_expiry(0)
-            messages.info(request, 'Pomyślnie udało się zalogować!')
-            # TODO: redirect to dashboard
+                messages.error(request, 'Niestety, nie udało się zalogować, spróbuj ponownie.')
         else:
-            messages.error(request, 'Niestety, nie udało się zalogować, spróbuj ponownie.')
+            messages.error(request, 'Popraw błędy w formularzu.')
         return render(request, self.template_name, context)
 
 
