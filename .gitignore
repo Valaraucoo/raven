@@ -4,4 +4,6 @@ __pycache
 .env.dev
 .env.prod
 .env.prod.db
-*prod*
+docker-compose.prod.yml
+Dockerfile.prod
+.idea
