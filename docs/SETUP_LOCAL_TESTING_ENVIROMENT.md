@@ -56,7 +56,7 @@
 
 ##### 3\. Try:
    - open `localhost:8080/admin` on your web browser and try login to demo account.
-    
+   - change permissions for `chmod +x ./app/scripts/test.sh` and run `./app/scripts/test.sh`.
      
    
    
