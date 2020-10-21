@@ -1,10 +1,9 @@
-from django.db import models
 from django.contrib.auth import models as auth_models
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from users.managers import CustomUserManager
-
 
 GENDER_CHOICES = (
     ('male', _('Male')),

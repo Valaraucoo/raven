@@ -1,7 +1,7 @@
 import datetime
 
-from users import models as user_models
 from tests.users import factories as user_factories
+from users import models as user_models
 
 
 class UsersDemo:

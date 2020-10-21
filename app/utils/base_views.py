@@ -1,7 +1,7 @@
 import typing
 
-from django.views import generic
 from django.db import models
+from django.views import generic
 
 
 class DetailBaseView(generic.DetailView):
@@ -19,6 +19,3 @@ class DetailBaseView(generic.DetailView):
 
     def get_context_obj(self) -> typing.Dict[str, models.Model]:
         return {'obj': self.object}
-
-
-

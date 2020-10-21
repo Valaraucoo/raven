@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
-from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect, render
+from django.views import generic
 
 from core import settings
 from users import forms

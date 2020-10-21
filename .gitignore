@@ -9,3 +9,5 @@ Dockerfile.prod
 .idea
 app/celerybeat.pid
 app/celerybeat-schedule
+app/.coverage
+app/htmlcov
