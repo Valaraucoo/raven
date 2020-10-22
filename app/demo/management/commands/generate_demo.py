@@ -1,6 +1,5 @@
 from django.conf import settings
-from django.core.management import base
-from django.core.management import call_command
+from django.core.management import base, call_command
 
 from demo import demos_registry
 

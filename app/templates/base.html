@@ -1,0 +1,46 @@
+{% load static i18n admin_urls %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static "css/main.css" %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+  {% block extraheads %}{% endblock extraheads %}
+  <title>{% block title %}Raven{% endblock title %}</title>
+</head>
+<body>
+<div id="app">
+  {% block content %}{% endblock content %}
+</div>
+<script>
+  const messagesArr = [
+    {% for message in messages %}{
+    tag:"{{ message.tags }}",
+        msg: "{{ message }}" },
+  {% endfor %}
+  ];
+  messagesArr.forEach(msg => {
+    if (msg.tag === "info") {
+      Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: msg.msg,
+        showConfirmButton: false,
+        timer: 2500
+      })
+    } else {
+      Swal.fire({
+        position: 'top-end',
+        icon: 'error',
+        title: msg.msg,
+        showConfirmButton: false,
+        timer: 2000
+      })
+    }
+  })
+</script>
+<script>{% block extrascripts %}{% endblock extrascripts %}</script>
+<script src="{% static "js/main.js" %}"></script>
+</body>
+</html>
