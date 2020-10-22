@@ -8,6 +8,21 @@ from core import settings
 from users import forms
 
 
+class DashboardView(generic.View, LoginRequiredMixin):
+    template_name = 'dashboard/dashboard.html'
+
+    def get_context_data(self, *args, **kwargs):
+        return {
+            'user': self.request.user,
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        context = self.get_context_data(*args, **kwargs)
+        return render(request, self.template_name, context)
+
+
 class LoginView(generic.View):
     template_name = 'users/login.html'
     form_class = forms.LoginForm
@@ -19,6 +34,9 @@ class LoginView(generic.View):
         }
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('users:dashboard')
+
         context = self.get_context_data(*args, **kwargs)
 
         email = request.session.get('email')
@@ -28,16 +46,17 @@ class LoginView(generic.View):
         if email and password:
             user = authenticate(request, email=email, password=password)
 
-        if request.user.is_authenticated or user:
-            messages.info(request, 'jestes juz zalogowany')
-            # TODO: redirect to dashboard
+        if user:
+            login(request, user)
+            if request.user.is_authenticated:
+                messages.info(request, 'jestes juz zalogowany')
+                return redirect('users:dashboard')
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         if request.user.is_authenticated:
-            # TODO: redirect
-            pass
+            return redirect('users:dashboard')
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data
@@ -55,7 +74,7 @@ class LoginView(generic.View):
                 else:
                     request.session.set_expiry(0)
                 messages.info(request, 'Pomyślnie udało się zalogować!')
-                # TODO: redirect to dashboard
+                return redirect('users:dashboard')
             else:
                 messages.error(request, 'Niestety, nie udało się zalogować, spróbuj ponownie.')
         else:
