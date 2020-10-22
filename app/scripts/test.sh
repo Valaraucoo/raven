@@ -12,3 +12,5 @@ docker-compose exec web flake8 .
 
 echo "${GREEN}Running isort${NOCOLOR}"
 docker-compose exec web isort .
+
+echo "${GREEN}Done.${NOCOLOR}"

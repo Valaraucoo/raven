@@ -38,7 +38,7 @@ services:
     volumes:
       - ./app/:/usr/src/app/
     env_file:
-      - ./.env.dev
+      - ./.env.dev-sample
     depends_on:
       - redis
 
