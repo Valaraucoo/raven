@@ -1,4 +1,5 @@
 import os
+import sys
 
 from django.utils.translation import gettext_lazy as _
 
@@ -130,3 +131,15 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 LOGIN_URL = 'users:login'
+
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+
+if 'test' in sys.argv:
+    try:
+        from test_settings import *
+    except ImportError:
+        pass
+
+TEST_RUNNER = 'core.runner.PytestTestRunner'

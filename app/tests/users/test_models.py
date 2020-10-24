@@ -1,12 +1,17 @@
 import datetime
 
-from django.test import TestCase
+import pytest
 
 from users import models as user_models
 
 
-class UserModelTest(TestCase):
-    def setUp(self) -> None:
+@pytest.mark.django_db
+class TestUserModel:
+    user = None
+    user_email = None
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self, db):
         user = user_models.User()
         user.first_name = 'John'
         user.last_name = 'Doe'
@@ -20,11 +25,11 @@ class UserModelTest(TestCase):
 
     def test_create_user_model(self) -> None:
         user = user_models.User.objects.get(email=self.user_email)
-        self.assertEqual(user.email, self.user_email)
+        assert user.email == self.user_email
 
-        self.assertEqual(user.is_staff, False)
-        self.assertEqual(user.is_student, False)
-        self.assertEqual(user.is_teacher, False)
+        assert not user.is_staff
+        assert not user.is_student
+        assert not user.is_teacher
 
     def test_string_user_model(self) -> None:
-        self.assertEqual('John Doe (johndoe@example.com)', str(self.user))
+        assert 'John Doe (johndoe@example.com)' == str(self.user)

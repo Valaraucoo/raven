@@ -49,7 +49,7 @@ class User(auth_models.AbstractUser):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(verbose_name=_('Date joined'), default=timezone.now)
-    date_birth = models.DateField(verbose_name=_('Date of birth'), blank=True,
+    date_birth = models.DateField(verbose_name=_('Date of birth'), blank=True, null=True,
                                   help_text=_('<b>Birthday date in format:</b> YYYY-MM-DD'))
 
     USERNAME_FIELD = 'email'
