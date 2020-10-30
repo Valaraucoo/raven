@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from users.models import User
+from users.models import User, Student, Teacher
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -47,4 +48,11 @@ class UserAdmin(BaseUserAdmin):
         return f'{obj.first_name} {obj.last_name}'
 
 
-admin.site.register(User, UserAdmin)
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    pass

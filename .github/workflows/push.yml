@@ -7,5 +7,18 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build the stack
         run: docker-compose up -d --build
+        env:
+          DEBUG: ${{ DEBUG }}
+          SECRET_KEY: ${{ SECRET_KEY }}
+          DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1 [::1]
+          SQL_ENGINE: django.db.backends.postgresql
+          SQL_DATABASE: django_dev
+          SQL_USER: django
+          SQL_PASSWORD: {{ SQL_PASSWORD }}
+          SQL_HOST: db
+          SQL_PORT: 5432
+          DATABASE: postgres
+          EMAIL_HOST_USER: ${{ EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ EMAIL_HOST_PASSWORD }}
       - name: Test
         run: chmod +x ./app/scripts/test.sh && ./app/scripts/test.sh

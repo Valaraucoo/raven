@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from users.managers import CustomUserManager
+from users import managers
 
 GENDER_CHOICES = (
     ('male', _('Male')),
@@ -55,7 +55,7 @@ class User(auth_models.AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name',)
 
-    objects = CustomUserManager()
+    objects = managers.CustomUserManager()
 
     @property
     def full_username(self) -> str:
@@ -71,3 +71,21 @@ class User(auth_models.AbstractUser):
 
     def __str__(self):
         return self.full_username
+
+
+class Teacher(User):
+    objects = managers.TeacherUserManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Teacher")
+        verbose_name_plural = _("Teachers")
+
+
+class Student(User):
+    objects = managers.StudentUserManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Student")
+        verbose_name_plural = _("Students")
