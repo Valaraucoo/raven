@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class StudentUserManager(models.Manager):
+class StudentUserManager(CustomUserManager, models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(role='student')
 
