@@ -11,3 +11,13 @@ class GradeAdmin(admin.ModelAdmin):
 @admin.register(models.Course)
 class CourseAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.CourseGroup)
+class CourseGroupAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.CourseFile)
+class CourseFileAdmin(admin.ModelAdmin):
+    pass

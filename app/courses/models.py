@@ -1,9 +1,14 @@
+import uuid
+import os
 import datetime
 
-from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from typing import Any
 
 
 PROFILE_CHOICES = (
@@ -15,6 +20,32 @@ LANGUAGE_CHOICES = (
     ('EN', 'English',),
     ('PL', 'Polish',),
 )
+
+
+def get_file_path(instance: Any, filename: str) -> str:
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    return os.path.join(settings.UPLOAD_FILES_DIR, today, str(uuid.uuid4()) + filename)
+
+
+class CourseFile(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    file = models.FileField(upload_to=get_file_path, verbose_name=_('File'))
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-created_at', '-updated_at',)
+        verbose_name = _('File')
+        verbose_name_plural = _('Files')
+
+    def __str__(self):
+        return f"{self.name} - {self.filename}"
+
+    @property
+    def filename(self) -> str:
+        return self.file.name.split('/')[-1]
 
 
 class Grade(models.Model):
@@ -51,7 +82,7 @@ class Grade(models.Model):
 
 class Course(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('Course\'s name'))
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     head_teacher = models.ForeignKey(
         to='users.Teacher',
         on_delete=models.CASCADE,
@@ -76,6 +107,8 @@ class Course(models.Model):
 
     lecture_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
     labs_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
+
+    files = models.ManyToManyField(CourseFile, blank=True)
     # TODO: additional fields
 
     class Meta:
@@ -90,3 +123,33 @@ class Course(models.Model):
         if not self.head_teacher.role == 'teacher':
             raise ValidationError(_('Head teacher must have teacher role'))
         super().clean()
+
+
+class CourseGroup(models.Model):
+    name = models.CharField(max_length=20, verbose_name=_('Course group\'s name'))
+    description = models.TextField(null=True, blank=True)
+    course = models.ForeignKey(
+        to=Course,
+        on_delete=models.CASCADE,
+        related_name='course'
+    )
+    teacher = models.ForeignKey(
+        to='users.Teacher',
+        on_delete=models.CASCADE,
+        related_name='groups_teaching'
+    )
+    # WARNING: take care of handling only students from corresponding grade / validate form
+    students = models.ManyToManyField(
+        to='users.Student',
+        verbose_name=_('Students'),
+        related_name='students_groups'
+    )
+    files = models.ManyToManyField(CourseFile, blank=True)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = _('Course Group')
+        verbose_name_plural = _('Course Groups')
+
+    def __str__(self) -> str:
+        return 'Course Group: {} - {}'.format(self.course.name, self.name)
