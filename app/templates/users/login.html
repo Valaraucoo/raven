@@ -6,34 +6,34 @@
 <div class="container">
   <div class="left">
     <div class="header">
-      <img class="mx-auto w-auto" style="height:150px" src="{% static 'images/logo.png' %}" alt="Workflow">
-      <h2 class="animation a1" >Witaj ponownie</h2>
+      <img class="mx-auto w-auto" src="{% static 'images/logo.png' %}" alt="Workflow">
+      <h2 class="animation a1" >Witaj ponownie!</h2>
       <h4 class="animation a2">Aby się zalogować podaj e-mail i hasło</h4>
     </div>
     <div class="form">
         <form class="mt-8" method="POST">
       {% csrf_token %}
       <input type="hidden" name="remember" value="true">
-      <div class="rounded-md shadow-sm">
+      <div >
         <div>
           {{ form.email }}
         </div>
-        <div class="-mt-px">
+        <div>
           {{ form.password }}
         </div>
       </div>
 
-      <div class="mt-6 flex items-center justify-between">
-        <div class="flex items-center">
+      <div class="mt-6" id="flex_centered">
+        <div id="flex_centered">
           {{ form.remember }}
-          <label for="remember_me" class="ml-2 block text-sm leading-5 text-gray-900">
+          <label for="remember_me">
             Nie wylogowuj
           </label>
         </div>
       </div>
 
-      <div class="mt-6">
-        <button type="submit" class="group relative w-full flex justify-center ">
+      <div class="login-button">
+        <button type="submit" class="group">
             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
               <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 transition ease-in-out duration-150" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
@@ -44,8 +44,8 @@
       </div>
     </form>
 
-       <div class="text-sm leading-5 py-5">
-      <button id="modal-trigger" >feat
+    <div class="first_time_check">
+      <button id="modal-trigger" >
         Czy jesteś w tym serwisie po raz pierwszy?
       </button>
     </div>
@@ -115,12 +115,4 @@ modal.classList.toggle('open-modal');
 
 {% block extraheads %}
 <link rel="stylesheet" href="{% static "css/login.css" %}">
-<style type="text/css">
-  .modal {
-    display: none;
-  }
-  .open-modal {
-    display: block;
-  }
-</style>
 {% endblock extraheads %}
