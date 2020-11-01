@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.detail import DetailView
 from django.shortcuts import redirect, render
 from django.views import generic
 
 from core import settings
 from users import forms
+from users import models
 
 
 class ProfileView(generic.View, LoginRequiredMixin):
@@ -21,6 +23,22 @@ class ProfileView(generic.View, LoginRequiredMixin):
             return redirect(settings.LOGIN_URL)
         context = self.get_context_data(*args, **kwargs)
         return render(request, self.template_name, context)
+
+
+class ProfileDetailView(LoginRequiredMixin, DetailView):
+    model = models.User
+    template_name = 'dashboard/profile-detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = self.object
+        return context
+
+    def get(self, request, *args, **kwargs):
+        # TODO: przerobić to
+        if request.user == self.model.objects.get(pk=self.kwargs['pk']):
+            return redirect('users:profile')
+        return super().get(request, *args, **kwargs)
 
 
 class ProfileEditView(ProfileView):
@@ -56,10 +74,17 @@ class ProfileEditView(ProfileView):
         if data:
             address = data.get('address')
             description = data.get('description')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+
             if description:
                 request.user.description = description
             if address:
                 request.user.address = address
+            if first_name:
+                request.user.first_name = first_name
+            if last_name:
+                request.user.last_name = last_name
             messages.info(request, 'Pomyślnie zaktualizowano profil!')
 
         request.user.save()

@@ -1,12 +1,25 @@
+import datetime
+import os
+import uuid
+
+from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 
+from PIL import Image
 from users import managers
+
+
+def get_file_path(instance, filename: str) -> str:
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    return os.path.join(settings.UPLOAD_FILES_DIR, today, str(uuid.uuid4()) + filename)
+
 
 GENDER_CHOICES = (
     ('male', _('Male')),
@@ -56,6 +69,7 @@ class User(auth_models.AbstractUser):
                                   help_text=_('<b>Birthday date in format:</b> YYYY-MM-DD'))
     is_online = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to=get_file_path, default="defaults/default-user.png")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name',)
@@ -77,7 +91,19 @@ class User(auth_models.AbstractUser):
     def __str__(self):
         return self.full_username
 
-    # TODO: get_absolute_url
+    def get_absolute_url(self):
+        return reverse('users:profile-detail', args=(self.pk,))
+
+    def get_image_url(self):
+        return self.image.url
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+        if img.width > 300 or img.height> 300:
+            output_size = (300, 300)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
 
 
 class Teacher(User):

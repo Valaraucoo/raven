@@ -6,9 +6,8 @@ tailwind_form = 'appearance-none rounded-none relative block w-full px-3 py-2 bo
                 'placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue ' \
                 'focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5'
 
-tailwind_form2 = 'appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 ' \
-                 'placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue ' \
-                 'focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5'
+tailwind_form2 = 'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4' \
+                 ' mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
 
 
 class LoginForm(forms.Form):
@@ -28,11 +27,11 @@ class LoginForm(forms.Form):
 class PasswordChangeForm(forms.Form):
     password1 = forms.CharField(max_length=100, widget=forms.PasswordInput(attrs={
         'class': tailwind_form2,
-        'placeholder': 'Hasło',
+        'placeholder': '***********',
     }))
     password2 = forms.CharField(max_length=100, widget=forms.PasswordInput(attrs={
         'class': tailwind_form2,
-        'placeholder': 'Powtórz Hasło',
+        'placeholder': '***********',
     }))
 
     def clean(self):
