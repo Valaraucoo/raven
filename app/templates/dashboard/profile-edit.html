@@ -1,0 +1,23 @@
+{% extends "dashboard/profile.html" %}
+{% load static %}
+
+{% block profile_content %}
+  Zmień hasło
+  <form method="POST">
+    {% csrf_token %}
+    {{ password_change_form.password1 }}
+    {{ password_change_form.password2 }}
+    <input type="submit" value="Zmień hasło">
+  </form>
+
+  Zmień swoje dane
+  <form method="POST">
+    {% csrf_token %}
+    <input name="address" type="text" class="'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5" value="{{ profile.address }}">
+    <label class="block">
+      <span class="text-gray-700">Description</span>
+      <textarea name="description" class="form-textarea mt-1 block w-full" rows="3" value="{{ profile.description }}">{{ profile.description }}</textarea>
+    </label>
+    <input type="submit" value="Zapisz">
+  </form>
+{% endblock profile_content %}

@@ -8,6 +8,64 @@ from core import settings
 from users import forms
 
 
+class ProfileView(generic.View, LoginRequiredMixin):
+    template_name = 'dashboard/profile.html'
+
+    def get_context_data(self, *args, **kwargs):
+        return {
+            'profile': self.request.user
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        context = self.get_context_data(*args, **kwargs)
+        return render(request, self.template_name, context)
+
+
+class ProfileEditView(ProfileView):
+    template_name = 'dashboard/profile-edit.html'
+    form_class = forms.PasswordChangeForm
+
+    def get_context_data(self, *args, **kwargs):
+        return {
+            'profile': self.request.user,
+            'password_change_form': self.form_class,
+        }
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        context = self.get_context_data(*args, **kwargs)
+        password_change_form = self.form_class(request.POST)
+        data = password_change_form.data
+        if password_change_form.is_valid():
+            password = data.get('password1')
+            if len(password) > 5:
+                request.user.set_password(password)
+                request.user.save()
+                messages.info(request, 'Pomyślnie zmieniono hasło!')
+            else:
+                messages.error(request, 'Hasło musi być dłuższe niż 5 znaków!')
+            return render(request, self.template_name, context)
+        elif data.get('password1') != data.get('password2'):
+            messages.error(request, 'Hasła muszą być takie same!')
+            return render(request, self.template_name, context)
+
+        data = request.POST
+        if data:
+            address = data.get('address')
+            description = data.get('description')
+            if description:
+                request.user.description = description
+            if address:
+                request.user.address = address
+            messages.info(request, 'Pomyślnie zaktualizowano profil!')
+
+        request.user.save()
+        return render(request, self.template_name, context)
+
+
 class DashboardView(generic.View, LoginRequiredMixin):
     template_name = 'dashboard/dashboard.html'
 
@@ -54,9 +112,9 @@ class LoginView(generic.View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        context = self.get_context_data(*args, **kwargs)
         if request.user.is_authenticated:
             return redirect('users:dashboard')
+        context = self.get_context_data(*args, **kwargs)
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data

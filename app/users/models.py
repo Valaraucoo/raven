@@ -3,6 +3,9 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.dispatch import receiver
+
 from users import managers
 
 GENDER_CHOICES = (
@@ -51,6 +54,8 @@ class User(auth_models.AbstractUser):
     date_joined = models.DateTimeField(verbose_name=_('Date joined'), default=timezone.now)
     date_birth = models.DateField(verbose_name=_('Date of birth'), blank=True, null=True,
                                   help_text=_('<b>Birthday date in format:</b> YYYY-MM-DD'))
+    is_online = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name',)
@@ -72,6 +77,8 @@ class User(auth_models.AbstractUser):
     def __str__(self):
         return self.full_username
 
+    # TODO: get_absolute_url
+
 
 class Teacher(User):
     objects = managers.TeacherUserManager()
@@ -89,3 +96,15 @@ class Student(User):
         proxy = True
         verbose_name = _("Student")
         verbose_name_plural = _("Students")
+
+
+@receiver(user_logged_in)
+def got_online(sender, user, request, **kwargs):
+    user.is_online = True
+    user.save()
+
+
+@receiver(user_logged_out)
+def got_offline(sender, user, request, **kwargs):
+    user.is_online = False
+    user.save()
