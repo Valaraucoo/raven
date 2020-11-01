@@ -2,18 +2,16 @@
 {% load static %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full rounded-lg shadow-lg border-b-4 border-indigo-600 bg-gray-100 px-5 py-6">
-    <div>
-      <img class="mx-auto w-auto" style="height:150px" src="{% static 'images/raven.png' %}" alt="Workflow">
-      <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-gray-900">
-        Uczelniana platforma
-      </h2>
-      <p class="mt-2 text-center text-sm leading-5 text-gray-600">
-        Zaloguj się na swoje konto
-      </p>
+
+<div class="container">
+  <div class="left">
+    <div class="header">
+      <img class="mx-auto w-auto" style="height:150px" src="{% static 'images/logo.png' %}" alt="Workflow">
+      <h2 class="animation a1" >Witaj ponownie</h2>
+      <h4 class="animation a2">Aby się zalogować podaj e-mail i hasło</h4>
     </div>
-    <form class="mt-8" method="POST">
+    <div class="form">
+        <form class="mt-8" method="POST">
       {% csrf_token %}
       <input type="hidden" name="remember" value="true">
       <div class="rounded-md shadow-sm">
@@ -35,7 +33,7 @@
       </div>
 
       <div class="mt-6">
-        <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+        <button type="submit" class="group relative w-full flex justify-center ">
             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
               <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 transition ease-in-out duration-150" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
@@ -45,8 +43,9 @@
         </button>
       </div>
     </form>
-    <div class="text-sm leading-5 py-5">
-      <button id="modal-trigger" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
+
+       <div class="text-sm leading-5 py-5">
+      <button id="modal-trigger" >feat
         Czy jesteś w tym serwisie po raz pierwszy?
       </button>
     </div>
@@ -71,10 +70,10 @@
                   </h3>
                   <div class="mt-2">
                     <p class="text-sm leading-5 text-gray-600">
-                      Aby zalogować się w obszarze platformy e-learningowej, konieczne jest posiadanie konta w Wirtualnej Uczelni (z uzupełnionym adresem email) lub USOS i utworzenie hasła do platformy UPEL.
+                      Aby zalogować się w obszarze platformy e-learningowej, konieczne jest posiadanie konta w Wirtualnej Uczelni (z uzupełnionym adresem email) lub USOS i utworzenie hasła do platformy Raven.
                     </p>
                     <p class="text-sm leading-5 text-gray-600 pt-2">
-                      Jeżeli posiadasz utworzone hasło w innym obszarze platformy UPEL, możesz się zalogować z tymi samymi danymi. W przeciwnym wypadku, w celu utworzenia hasła proszę przejść do strony: upel.agh.edu.pl/haslo
+                      Jeżeli posiadasz utworzone hasło w innym obszarze platformy Raven, możesz się zalogować z tymi samymi danymi. W przeciwnym wypadku, w celu utworzenia hasła proszę przejść do strony: raven.pl/haslo
                     </p>
                   </div>
                 </div>
@@ -93,7 +92,12 @@
       </div>
     </div>
   </div>
+  </div>
+  <div class="right"></div>
 </div>
+
+
+
 {% include "footer.html" %}
 {% endblock content %}
 
@@ -110,6 +114,7 @@ modal.classList.toggle('open-modal');
 {% endblock extrascripts %}
 
 {% block extraheads %}
+<link rel="stylesheet" href="{% static "css/login.css" %}">
 <style type="text/css">
   .modal {
     display: none;
