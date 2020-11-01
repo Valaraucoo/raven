@@ -16,6 +16,7 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 APPS = [
     'demo',
     'users',
+    'courses',
 ]
 
 INSTALLED_APPS = [
@@ -117,6 +118,8 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
+
+UPLOAD_FILES_DIR = 'uploads/'
 
 AUTH_USER_MODEL = 'users.User'
 ACCOUNT_UNIQUE_EMAIL = True

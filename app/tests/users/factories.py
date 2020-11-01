@@ -24,6 +24,18 @@ class UserFactory(factory.django.DjangoModelFactory):
     is_superuser = False
 
 
+class StudentFactory(UserFactory):
+    class Meta:
+        model = user_models.Student
+    role = 'student'
+
+
+class TeacherFactory(UserFactory):
+    class Meta:
+        model = user_models.Teacher
+    role = 'teacher'
+
+
 class AdminUserFactory(UserFactory):
     is_staff = True
     is_superuser = True
