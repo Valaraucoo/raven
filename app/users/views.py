@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 from django.shortcuts import redirect, render
@@ -8,6 +9,13 @@ from django.views import generic
 from core import settings
 from users import forms
 from users import models
+
+
+def delete_profile_image(request):
+    request.user.image = settings.DEFAULT_USER_IMAGE
+    request.user.save()
+    messages.info(request, 'Twoje zdjęcie zostało usunięte')
+    return redirect('users:profile-edit')
 
 
 class ProfileView(generic.View, LoginRequiredMixin):
@@ -76,6 +84,7 @@ class ProfileEditView(ProfileView):
             description = data.get('description')
             first_name = data.get('first_name')
             last_name = data.get('last_name')
+            image = request.FILES.get('image')
 
             if description:
                 request.user.description = description
@@ -85,6 +94,8 @@ class ProfileEditView(ProfileView):
                 request.user.first_name = first_name
             if last_name:
                 request.user.last_name = last_name
+            if image:
+                request.user.image = image
             messages.info(request, 'Pomyślnie zaktualizowano profil!')
 
         request.user.save()
