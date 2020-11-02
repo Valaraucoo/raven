@@ -15,3 +15,8 @@ class UserCreateEmailFactory(emails.BaseEmailFactory):
         return {
             'user': self.user,
         }
+
+
+class UserChangePasswordEmailFactory(UserCreateEmailFactory):
+    subject_template_name = 'users/user_change_password_subject.txt'
+    email_template_name = 'users/user_change_password_email.html'

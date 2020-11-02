@@ -9,6 +9,7 @@ from django.views import generic
 from core import settings
 from users import forms
 from users import models
+from users import tasks
 
 
 def delete_profile_image(request):
@@ -70,6 +71,9 @@ class ProfileEditView(ProfileView):
             if len(password) > 5:
                 request.user.set_password(password)
                 request.user.save()
+                tasks.send_user_change_password_notification_email(
+                    user=request.user, bcc=[], email_to=[request.user.email]
+                )
                 messages.info(request, 'Pomyślnie zmieniono hasło!')
             else:
                 messages.error(request, 'Hasło musi być dłuższe niż 5 znaków!')
