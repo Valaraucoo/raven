@@ -3,7 +3,7 @@ from typing import List
 from utils import emails
 
 
-class UserCreateEmailFactory(emails.BaseEmailFactory):
+class UserActivateEmailFactory(emails.BaseEmailFactory):
     subject_template_name = 'users/user_create_subject.txt'
     email_template_name = 'users/user_create_email.html'
 
@@ -15,3 +15,8 @@ class UserCreateEmailFactory(emails.BaseEmailFactory):
         return {
             'user': self.user,
         }
+
+
+class UserChangePasswordEmailFactory(UserActivateEmailFactory):
+    subject_template_name = 'users/user_change_password_subject.txt'
+    email_template_name = 'users/user_change_password_email.html'

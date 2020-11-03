@@ -146,3 +146,5 @@ if 'test' in sys.argv:
         pass
 
 TEST_RUNNER = 'core.runner.PytestTestRunner'
+
+DEFAULT_USER_IMAGE = "defaults/default-picture.png"

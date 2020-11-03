@@ -1,0 +1,98 @@
+{% extends "dashboard/profile.html" %}
+{% load static %}
+
+{% block profile_header %}
+  <a href="{% url 'users:profile' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+    Powrót
+  </a>
+{% endblock profile_header %}
+
+{% block profile_content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="flex flex-wrap -mx-3">
+      <div class="w-full sm:w-1/2 md:w-1/3 px-3">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
+          Hasło
+        </label>
+        {{ password_change_form.password1 }}
+      </div>
+      <div class="w-full sm:w-1/2 md:w-1/3 px-3">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
+          Powtórz Hasło
+        </label>
+        {{ password_change_form.password2 }}
+      </div>
+    </div>
+    <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
+      Zmień hasło
+    </button>
+  </form>
+  <div class="mt-2 border-b border-gray-300 w-full md:w-2/3"></div>
+
+  <form method="POST" class="mt-8" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="flex flex-wrap -mx-3 mb-6">
+      <div class="w-full sm:w-1/2 md:w-1/3 px-3 mb-6 md:mb-0">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+          Imię
+        </label>
+        <input name="first_name" value="{{ profile.first_name }}" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Jan">
+      </div>
+      <div class="w-full sm:w-1/2 md:w-1/3 px-3">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
+          Nazwisko
+        </label>
+        <input name="last_name" value="{{ profile.last_name }}" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Nowak">
+      </div>
+    </div>
+    <div class="flex flex-wrap -mx-3 mb-6">
+      <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+          Adres
+        </label>
+        <input name="address" value="{{ profile.address }}" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Kraków, Polska">
+      </div>
+    </div>
+    <div class="flex flex-wrap -mx-3 mb-6">
+      <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+          Opis
+        </label>
+        <textarea name="description" cols="30" rows="10" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">{{ profile.description }}</textarea>
+      </div>
+    </div>
+    <div class="flex flex-wrap -mx-3 mb-6">
+      <div class="w-full md:w-2/3 px-3 mb-6 md:mb-0">
+        <label class="transition-all duration-300 w-full flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-gray-200">
+          <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+          </svg>
+          <span id="file_label" class="mt-2  uppercase tracking-wide text-gray-700 text-xs font-bold">Zmień zdjęcie profilowe</span>
+          <input type="file" name="image" accept="image/*" id="id_image" type='file' class="hidden" />
+        </label>
+      </div>
+    </div>
+    {% if 'defaults/default-picture.png' not in profile.image.path %}
+      <a href="{% url 'users:profile-img-delete' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-red-500 text-white hover:text-gray-100 hover:bg-red-600">USUŃ ZDJĘCIE</a>
+    {% endif %}
+    <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
+      Zapisz zmiany
+    </button>
+  </form>
+{% endblock profile_content %}
+
+{% block extrascripts %}
+const fileSpan = document.querySelector('#file_label');
+const fileInput = document.querySelector('#id_image');
+  console.log(fileInput);
+fileInput.addEventListener('change', () => {
+  if(fileInput.files.length > 0) {
+    fileSpan.innerHTML = 'Wybrano plik';
+  } else {
+    fileSpan.innerHTML = 'Zmień zdjęcie profilowe';
+  }
+});
+{% endblock %}
