@@ -68,8 +68,9 @@ class User(auth_models.AbstractUser):
     date_birth = models.DateField(verbose_name=_('Date of birth'), blank=True, null=True,
                                   help_text=_('<b>Birthday date in format:</b> YYYY-MM-DD'))
     is_online = models.BooleanField(default=False)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True, default="")
     image = models.ImageField(upload_to=get_file_path, default=settings.DEFAULT_USER_IMAGE)
+    first_login = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name',)

@@ -8,7 +8,6 @@ from django.views import generic
 
 from core import settings
 from users import forms
-from users import models
 from users import tasks
 
 
@@ -35,7 +34,7 @@ class ProfileView(generic.View, LoginRequiredMixin):
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
-    model = models.User
+    model = get_user_model()
     template_name = 'dashboard/profile-detail.html'
 
     def get_context_data(self, **kwargs):
@@ -44,8 +43,7 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         return context
 
     def get(self, request, *args, **kwargs):
-        # TODO: przerobić to
-        if request.user == self.model.objects.get(pk=self.kwargs['pk']):
+        if request.user == self.get_object():
             return redirect('users:profile')
         return super().get(request, *args, **kwargs)
 
@@ -61,7 +59,8 @@ class ProfileEditView(ProfileView):
         }
 
     def post(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
+        user = request.user
+        if not user.is_authenticated:
             return redirect(settings.LOGIN_URL)
         context = self.get_context_data(*args, **kwargs)
         password_change_form = self.form_class(request.POST)
@@ -69,10 +68,10 @@ class ProfileEditView(ProfileView):
         if password_change_form.is_valid():
             password = data.get('password1')
             if len(password) > 5:
-                request.user.set_password(password)
-                request.user.save()
+                user.set_password(password)
+                user.save()
                 tasks.send_user_change_password_notification_email(
-                    user=request.user, bcc=[], email_to=[request.user.email]
+                    user=user, bcc=[], email_to=[user.email]
                 )
                 messages.info(request, 'Pomyślnie zmieniono hasło!')
             else:
@@ -91,18 +90,18 @@ class ProfileEditView(ProfileView):
             image = request.FILES.get('image')
 
             if description:
-                request.user.description = description
+                user.description = description
             if address:
-                request.user.address = address
+                user.address = address
             if first_name:
-                request.user.first_name = first_name
+                user.first_name = first_name
             if last_name:
-                request.user.last_name = last_name
+                user.last_name = last_name
             if image:
-                request.user.image = image
+                user.image = image
             messages.info(request, 'Pomyślnie zaktualizowano profil!')
 
-        request.user.save()
+        user.save()
         return render(request, self.template_name, context)
 
 
@@ -147,7 +146,7 @@ class LoginView(generic.View):
         if user:
             login(request, user)
             if request.user.is_authenticated:
-                messages.info(request, 'jestes juz zalogowany')
+                messages.info(request, 'Jestes juz zalogowany!')
                 return redirect('users:dashboard')
         return render(request, self.template_name, context)
 
@@ -171,6 +170,12 @@ class LoginView(generic.View):
                     request.session.set_expiry(1209600)
                 else:
                     request.session.set_expiry(0)
+                if request.user.first_login:
+                    messages.info(request, 'Zalogowałeś się po raz pierwszy! Zmień swoje hasło!')
+                    request.user.first_login = False
+                    request.user.save()
+                    tasks.send_user_create_notification_email(request.user, bcc=[], email_to=[request.user.email])
+                    return redirect('users:profile-edit')
                 messages.info(request, 'Pomyślnie udało się zalogować!')
                 return redirect('users:dashboard')
             else:

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block profile_header %}
-  <a href="{% url 'users:profile' %}" class="text-sm font-bold mt-2 mb-4 px-4 bg-teal-500 transition-all duration-200 hover:bg-white border-teal-500 hover:border-teal-500 text-md border text-white hover:text-teal-500 py-2 px-2 rounded-full">
+  <a href="{% url 'users:profile' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
     Powrót
   </a>
 {% endblock profile_header %}
@@ -25,7 +25,7 @@
         {{ password_change_form.password2 }}
       </div>
     </div>
-    <button class="text-sm font-bold mt-2 mb-4 px-4 bg-teal-500 transition-all duration-200 hover:bg-white border-teal-500 hover:border-teal-500 text-md border text-white hover:text-teal-500 py-2 px-2 rounded-full" type="submit">
+    <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
       Zmień hasło
     </button>
   </form>
@@ -70,16 +70,29 @@
           <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
             <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
           </svg>
-          <span class="mt-2  uppercase tracking-wide text-gray-700 text-xs font-bold">Zmień zdjęcie profilowe</span>
-          <input type="file" name="image" accept="image/*" required="" id="id_image" type='file' class="hidden" />
+          <span id="file_label" class="mt-2  uppercase tracking-wide text-gray-700 text-xs font-bold">Zmień zdjęcie profilowe</span>
+          <input type="file" name="image" accept="image/*" id="id_image" type='file' class="hidden" />
         </label>
       </div>
     </div>
     {% if 'defaults/default-picture.png' not in profile.image.path %}
-      <a href="{% url 'users:profile-img-delete' %}" class="mr-2 text-sm font-bold mt-2 mb-4 px-4 bg-red-500 transition-all duration-200 hover:bg-red-700 border-red-400 hover:border-red-600 text-md border text-white py-2 px-2 rounded-full">USUŃ ZDJĘCIE</a>
+      <a href="{% url 'users:profile-img-delete' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-red-500 text-white hover:text-gray-100 hover:bg-red-600">USUŃ ZDJĘCIE</a>
     {% endif %}
-    <button class="text-sm font-bold mt-2 mb-4 px-4 bg-teal-500 transition-all duration-200 hover:bg-white border-teal-500 hover:border-teal-500 text-md border text-white hover:text-teal-500 py-2 px-2 rounded-full" type="submit">
+    <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
       Zapisz zmiany
     </button>
   </form>
 {% endblock profile_content %}
+
+{% block extrascripts %}
+const fileSpan = document.querySelector('#file_label');
+const fileInput = document.querySelector('#id_image');
+  console.log(fileInput);
+fileInput.addEventListener('change', () => {
+  if(fileInput.files.length > 0) {
+    fileSpan.innerHTML = 'Wybrano plik';
+  } else {
+    fileSpan.innerHTML = 'Zmień zdjęcie profilowe';
+  }
+});
+{% endblock %}

@@ -21,7 +21,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'fields': (
                 'email', 'fullname', 'first_name', 'last_name', 'role', 'date_birth', 'phone', 'address',
-                'gender', 'description', 'image'
+                'gender', 'description', 'image', 'first_login',
             )
         }),
         ('Permissions', {
