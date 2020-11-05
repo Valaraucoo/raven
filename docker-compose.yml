@@ -9,7 +9,7 @@ services:
     ports:
       - 8080:8080
     env_file:
-      - ./.env.dev-sample
+      - ./.env.dev
     depends_on:
       - db
       - redis
@@ -38,7 +38,7 @@ services:
     volumes:
       - ./app/:/usr/src/app/
     env_file:
-      - ./.env.dev-sample
+      - ./.env.dev
     depends_on:
       - redis
 

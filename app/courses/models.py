@@ -1,15 +1,13 @@
-import uuid
-import os
 import datetime
+import os
+import uuid
+from typing import Any
 
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
-from typing import Any
-
 
 PROFILE_CHOICES = (
     ('CS', 'Computer Science',),

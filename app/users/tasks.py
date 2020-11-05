@@ -4,13 +4,13 @@ from core import celery
 from users.emails import factories
 
 
-@celery.app.task
+@celery.app.task(shared=True)
 def send_user_create_notification_email(user, bcc: List[str], email_to: List[str]):
     email = factories.UserActivateEmailFactory(user, bcc)
     email.send(email_to)
 
 
-@celery.app.task
+@celery.app.task(shared=True)
 def send_user_change_password_notification_email(user, bcc: List[str], email_to: List[str]):
     email = factories.UserChangePasswordEmailFactory(user, bcc)
     email.send(email_to)

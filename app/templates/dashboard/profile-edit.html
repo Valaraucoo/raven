@@ -87,10 +87,11 @@
 {% block extrascripts %}
 const fileSpan = document.querySelector('#file_label');
 const fileInput = document.querySelector('#id_image');
-  console.log(fileInput);
+
 fileInput.addEventListener('change', () => {
   if(fileInput.files.length > 0) {
-    fileSpan.innerHTML = 'Wybrano plik';
+    console.log(fileInput.files[0]);
+    fileSpan.innerHTML = `Wybrano plik ${fileInput.files[0].name}`;
   } else {
     fileSpan.innerHTML = 'Zmień zdjęcie profilowe';
   }

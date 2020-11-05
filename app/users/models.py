@@ -4,15 +4,14 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth import models as auth_models
+from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db import models
+from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse
-
-from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.dispatch import receiver
-
 from PIL import Image
+
 from users import managers
 
 

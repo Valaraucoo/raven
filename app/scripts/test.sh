@@ -6,6 +6,7 @@ GREEN='\033[0;32m'
 echo "${GREEN}Running Tests${NOCOLOR}"
 docker-compose exec web coverage run --source='.' --omit=*/venv/*,*/migrations/*,*/__init__* manage.py test
 docker-compose exec web coverage report
+docker-compose exec web coverage html
 
 echo "${GREEN}Running flake8${NOCOLOR}"
 docker-compose exec web flake8 .

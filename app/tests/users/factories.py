@@ -1,5 +1,6 @@
 import factory
 import factory.fuzzy as fuzzy
+from django.core.files.base import ContentFile
 
 from users import models as user_models
 from users.models import GENDER_CHOICES
@@ -22,6 +23,17 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     is_staff = False
     is_superuser = False
+
+    description = fuzzy.FuzzyText(length=30)
+
+    image = factory.LazyAttribute(
+        lambda _: ContentFile(
+            factory.django.ImageField()._make_data(
+                {'width': 200, 'height': 200}
+            ), 'example.jpg'
+        )
+    )
+    first_login = fuzzy.FuzzyChoice([True, False])
 
 
 class StudentFactory(UserFactory):

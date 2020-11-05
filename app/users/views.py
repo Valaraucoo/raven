@@ -1,14 +1,13 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.detail import DetailView
 from django.shortcuts import redirect, render
 from django.views import generic
+from django.views.generic.detail import DetailView
 
 from core import settings
-from users import forms
-from users import tasks
+from users import forms, tasks
 
 
 def delete_profile_image(request):
@@ -174,7 +173,7 @@ class LoginView(generic.View):
                     messages.info(request, 'Zalogowałeś się po raz pierwszy! Zmień swoje hasło!')
                     request.user.first_login = False
                     request.user.save()
-                    tasks.send_user_create_notification_email(request.user, bcc=[], email_to=[request.user.email])
+                    tasks.send_user_create_notification_email.delay(request.user, bcc=[], email_to=[request.user.email])
                     return redirect('users:profile-edit')
                 messages.info(request, 'Pomyślnie udało się zalogować!')
                 return redirect('users:dashboard')
