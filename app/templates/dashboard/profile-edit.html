@@ -85,6 +85,7 @@
 {% endblock profile_content %}
 
 {% block extrascripts %}
+{{ block.super }}
 const fileSpan = document.querySelector('#file_label');
 const fileInput = document.querySelector('#id_image');
 

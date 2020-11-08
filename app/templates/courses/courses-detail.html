@@ -1,0 +1,73 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4">
+        <div class="mb-8 mt-2">
+          <a href="{% url 'courses:courses' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+            Wroc do moich kursow
+          </a>
+        </div>
+        <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+          <a href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a>
+        </h4>
+        <p class="text-sm text-gray-600"><span class="text-bold">Główny prowadzący: </span>
+          <a href="{% url 'users:profile-detail' course.head_teacher.pk %}" class="text-blue-500 hover:text-blue-400">
+            {{ course.head_teacher.first_name }} {{ course.head_teacher.last_name }}
+          </a>
+        </p>
+        <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Prowadzący: </span>
+          {% for teacher in course.teachers.all %}
+            <a href="{% url 'users:profile-detail' teacher.pk %}" class="text-blue-500 hover:text-blue-400">
+              {{ teacher.first_name }} {{ teacher.last_name }}{% if not forloop.last %}, {% endif %}
+            </a>
+          {% endfor %}
+        </p>
+        <p class="text-sm leading-6 text-gray-600">{{ course.description }}</p>
+
+        <button id="details-btn" class="text-sm flex flex-row items-center px-4 py-2 mt-2 font-semibold text-left bg-transparent bg-gray-200 rounded-lg dark-mode:bg-transparent dark-mode:focus:text-white dark-mode:hover:text-white dark-mode:focus:bg-gray-600 dark-mode:hover:bg-gray-600 md:block hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
+          <span class="">Szczegoly</span>
+          <svg id="indicator" fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+        <div class="course__details mt-2">
+          <div class="text-sm text-gray-600">
+            <p class="font-bold">Opis kursu:</p>
+            <p>{% if course.description %}{{ course.description }}{% else %}-{% endif %}</p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus adipisci delectus, dicta labore magni nihil nostrum omnis praesentium quasi sit ullam ut. Adipisci alias assumenda dicta illo. Ad autem blanditiis dolorem dolores facere fugiat incidunt ipsum iure magnam modi, nemo nihil nobis perspiciatis provident qui quo repellat rerum saepe ut.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+
+{% block extraheads %}
+  <style type="text/css">
+  .course__details {
+    max-height: 0;
+    transition: max-height 0.5s ease-in-out;
+    overflow: hidden;
+  }
+  .course__details--active {
+    max-height: 100%;
+  }
+  .indicator-active {
+    transform: rotate(180deg);
+  }
+  </style>
+{% endblock extraheads %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  const button = document.querySelector('#details-btn');
+  const detailsContent = button.nextElementSibling;
+  const indicator = document.querySelector('#indicator');
+
+  button.addEventListener('click', () => {
+    button.classList.toggle('button-active');
+    indicator.classList.toggle('indicator-active');
+    detailsContent.classList.toggle('course__details--active');
+  });
+{% endblock extrascripts %}

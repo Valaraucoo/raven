@@ -59,9 +59,9 @@
         </span>
         <span class="ml-2">Plan zajęć</span>
       </a>
-      <a class="flex items-center block px-4 py-2 mt-2 text-sm font-semibold text-gray-900 bg-transparent rounded-lg dark-mode:bg-transparent dark-mode:hover:bg-gray-600 dark-mode:focus:bg-gray-600 dark-mode:focus:text-white dark-mode:hover:text-white dark-mode:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="#">
+      <a class="flex items-center block px-4 py-2 mt-2 text-sm font-semibold text-gray-900 bg-transparent {% if '/courses/' in request.path %}bg-gray-200{% endif %}  rounded-lg dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 dark-mode:focus:bg-gray-600 dark-mode:focus:text-white dark-mode:hover:text-white dark-mode:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url "courses:courses" %}">
         <span>
-          <i class="fas fa-book"></i>
+          <i class="fas fa-home"></i>
         </span>
         <span class="ml-2">Kursy</span>
       </a>

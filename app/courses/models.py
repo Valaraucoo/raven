@@ -6,6 +6,7 @@ from typing import Any
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.template.defaultfilters import slugify
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -97,6 +98,9 @@ class Course(models.Model):
         on_delete=models.CASCADE,
         related_name='courses',
     )
+    ects = models.IntegerField(default=1, validators=[
+        validators.MinValueValidator(0), validators.MaxValueValidator(30)
+    ])
     code_meu = models.CharField(max_length=30, verbose_name=_('MEU Code'))
     has_exam = models.BooleanField(default=False)
     semester = models.IntegerField(validators=[validators.MinValueValidator(1)])
@@ -107,7 +111,7 @@ class Course(models.Model):
     labs_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
 
     files = models.ManyToManyField(CourseFile, blank=True)
-    # TODO: additional fields
+    slug = models.SlugField(blank=True, null=True, unique=True)
 
     class Meta:
         ordering = ('name',)
@@ -121,6 +125,18 @@ class Course(models.Model):
         if not self.head_teacher.role == 'teacher':
             raise ValidationError(_('Head teacher must have teacher role'))
         super().clean()
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            uid = str(uuid.uuid4())[:20]
+            year = datetime.date.today().year
+            self.slug = slugify(f"{self.name}-{year}-{uid}")
+        super().save(*args, **kwargs)
+
+
+class CourseLectureSection(models.Model):
+    name = models.CharField(max_length=20, verbose_name=_('Course lecture\'s name'))
+    description = models.TextField(null=True, blank=True)
 
 
 class CourseGroup(models.Model):

@@ -173,7 +173,7 @@ class LoginView(generic.View):
                     messages.info(request, 'Zalogowałeś się po raz pierwszy! Zmień swoje hasło!')
                     request.user.first_login = False
                     request.user.save()
-                    tasks.send_user_create_notification_email.delay(request.user, bcc=[], email_to=[request.user.email])
+                    tasks.send_user_create_notification_email(request.user, bcc=[], email_to=[request.user.email])
                     return redirect('users:profile-edit')
                 messages.info(request, 'Pomyślnie udało się zalogować!')
                 return redirect('users:dashboard')
