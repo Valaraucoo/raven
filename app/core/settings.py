@@ -14,9 +14,9 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 APPS = [
-    'demo',
     'users',
     'courses',
+    'utils',
 ]
 
 INSTALLED_APPS = [
@@ -111,13 +111,13 @@ LANGUAGES = [
     ('en', _('English')),
 ]
 
-STATIC_URL = "/staticfiles/"
+STATIC_URL = "/files/staticfiles/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "staticfiles")
+    os.path.join(BASE_DIR, "files/staticfiles")
 ]
 
-MEDIA_URL = "/mediafiles/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
+MEDIA_URL = "/files/mediafiles/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "files/mediafiles")
 
 UPLOAD_FILES_DIR = 'uploads/'
 

@@ -30,6 +30,10 @@ class CoursesEditPermissionMixin(LoginRequiredMixin, DetailView):
             student = users_models.Student.objects.get(pk=user.pk)
             if student not in self.get_object().grade.students.all():
                 return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(pk=user.pk)
+            if teacher not in self.get_object().teachers.all() or teacher != self.get_object().head_teacher:
+                return redirect('courses:courses')
         return super().get(self, request, *args, **kwargs)
 
 
