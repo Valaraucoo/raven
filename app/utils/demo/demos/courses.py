@@ -1,31 +1,28 @@
 from tests.courses import factories
-from tests.users import factories as users_factories
+
+from users.models import Student, Teacher
 
 
 class CourseDemo:
     def generate(self):
-        for _ in range(3):
-            self.generate_course()
+        for i in range(3):
+            self.generate_course(i)
 
     @staticmethod
-    def generate_course() -> None:
+    def generate_course(i) -> None:
         grade = factories.GradeFactory()
-        students = [users_factories.StudentFactory() for _ in range(10)]
+        students = Student.objects.all()[i*10:i*10+9]
         for student in students:
-            student.set_password("example123")
-            student.save()
             grade.students.add(student)
 
-        teachers = [users_factories.TeacherFactory() for _ in range(3)]
+        teachers = Teacher.objects.all()[i:i+3]
 
         for _ in range(3):
-            course = factories.CourseFactory(grade=grade)
+            course = factories.CourseFactory(grade=grade, teachers=[])
             for teacher in teachers:
-                teacher.set_password("example123")
-                teacher.save()
                 course.teachers.add(teacher)
             course.save()
-
+        grade.save()
 
     def get_info(self):
         return [
