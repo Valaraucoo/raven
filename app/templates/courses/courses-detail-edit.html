@@ -1,0 +1,224 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">
+            Kursy</a> / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' course.slug %}">
+              {{ course.name }}
+            </a> / Edytuj
+          </a>
+        </h4>
+        <form method="POST" class="mt-8" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full md:w-2/3 px-3 mb-6 md:mb-0">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                Nazwa kursu
+              </label>
+              <input name="name" value="{{ course.name }}" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Jan">
+            </div>
+          </div>
+          <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                Opis kursu
+              </label>
+              <textarea name="description" cols="30" rows="10" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">{{ course.description }}</textarea>
+            </div>
+          </div>
+          <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
+            Zapisz zmiany
+          </button>
+        </form>
+      </div>
+      <div id="app">
+        <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+          <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Uczestnicy kursu</h4>
+          <table class="border-collapse w-full">
+            <thead>
+            <tr>
+              <th class="p-3 font-bold uppercase bg-gray-200 text-gray-600 border border-gray-300 hidden lg:table-cell text-sm">Imię i nazwisko</th>
+              <th class="p-3 font-bold uppercase bg-gray-200 text-gray-600 border border-gray-300 hidden lg:table-cell text-sm">Email</th>
+              <th class="p-3 font-bold uppercase bg-gray-200 text-gray-600 border border-gray-300 hidden lg:table-cell text-sm">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for student in course.grade.students.all %}
+              <tr class="bg-white lg:hover:bg-gray-100 flex lg:table-row flex-row lg:flex-row flex-wrap lg:flex-no-wrap mb-10 lg:mb-0">
+                <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b block lg:table-cell relative lg:static">
+                  <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Imię i nazwisko</span>
+                  <a href="{% url 'users:profile-detail' student.pk %}" class="text-blue-400 hover:text-blue-600 hover:underline">{{ student.first_name }} {{ student.last_name }}</a>
+                </td>
+                <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b text-center block lg:table-cell relative lg:static">
+                  <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Email</span>
+                  {{ student.email }}
+                </td>
+                <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b text-center block lg:table-cell relative lg:static">
+                  <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Status</span>
+                  {% if student.is_online %}
+                    <span class="rounded bg-green-300 py-1 px-3 text-xs font-bold">Online</span>
+                  {% else %}
+                    <span class="rounded bg-red-300 py-1 px-3 text-xs font-bold">Offline</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            <tr v-for="(student,index) in additional_students" class="bg-white lg:hover:bg-gray-100 flex lg:table-row flex-row lg:flex-row flex-wrap lg:flex-no-wrap mb-10 lg:mb-0">
+              <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b block lg:table-cell relative lg:static">
+                <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Imię i nazwisko</span>
+                <a href="#" class="text-blue-400 hover:text-blue-600 hover:underline">[[ student.first_name ]] [[ student.last_name ]]</a>
+              </td>
+              <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b text-center block lg:table-cell relative lg:static">
+                <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Email</span>
+                [[ student.email ]]
+              </td>
+              <td class="w-full text-sm lg:w-auto p-3 text-gray-800 text-center border border-b text-center block lg:table-cell relative lg:static">
+                <span class="lg:hidden absolute top-0 left-0 bg-blue-200 px-2 py-1 text-xs font-bold uppercase">Status</span>
+                <span v-if="student.is_online" class="rounded bg-green-300 py-1 px-3 text-xs font-bold">Online</span>
+                <span v-else class="rounded bg-red-300 py-1 px-3 text-xs font-bold">Offline</span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          {% if course.additional_students.all %}
+          {% endif %}
+          <div class="mt-4">
+            <div class="flex flex-wrap items-end -mx-3 mb-6">
+              <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                <span v-if="isErrorProp" class="text-xs text-red-500">Nie znaleziono użytkownika</span>
+                <span v-if="isMessage" class="text-xs text-green-500">[[ message ]]</span>
+                <input v-model="emailAddress"
+                       class="text-sm appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-2 px-2 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                       v-bind:class="getClass"
+                       type="email"
+                       placeholder="student@raven.test">
+              </div>
+              <button @click="addStudent" class="text-sm font-bold transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                Dodaj uczestników
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-4 py-4 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Wykłady</h4>
+        {% if not lectures %}
+          <p class="text-gray-700 text-sm">
+            Nie ma jeszcze żadnego wykładu.
+          </p>
+        {% endif %}
+        {% for lecture in lectures %}
+          <div class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md {% if lecture.was_held %}bg-blue-400{% else %}bg-green-400{% endif %} text-white">
+                {{ forloop.counter }}
+              </div>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                {{ lecture.title }}
+              </h4>
+              <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
+                {{ lecture.date|date:"d.m.Y (H:i)" }}{% if lecture.was_held %}X{% endif %}
+              </p>
+              <p class="text-sm text-gray-600"><span class="font-medium">Szczegóły: </span>
+                {{ lecture.description }}
+              </p>
+              <p class="text-sm text-gray-600"><span class="text-bold">Dodatkowe materiały: </span>
+                {% if lecture.files.all %}
+                  {% for file in lecture.files.all %}
+                    {{ file }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+              <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                <a href="#">Edytuj</a>
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+
+{% block extraheads %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock extraheads %}
+
+{% block extravue %}
+  <script type="text/javascript">
+    var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#app',
+      data: {
+        emailAddress: '',
+        additional_students: [],
+        isError: false,
+        message: '',
+      },
+      computed: {
+        getClass: function() {
+          return this.isError ? 'border-red-500' : '';
+        },
+        isErrorProp: function() {
+          return this.isError;
+        },
+        isMessage: function() {
+          return this.message;
+        }
+      },
+      created: function() {
+        axios({
+          method: 'get',
+          url: 'http://127.0.0.1:8080/api/courses/{{ course.slug }}/',
+          xsrfCookieName: 'csrftoken',
+          xsrfHeaderName: 'X-CSRFToken',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(r => this.additional_students = r.data.additional_students);
+      },
+      methods: {
+        addStudent: function() {
+          axios({
+            method: 'post',
+            url: 'http://127.0.0.1:8080/api/courses/{{ course.slug }}/additional-student/',
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            data: {'email': this.emailAddress},
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }).then(response => {
+            this.isError = false;
+            this.message = response.data.message;
+            axios({
+              method: 'get',
+              url: 'http://127.0.0.1:8080/api/courses/{{ course.slug }}/',
+              xsrfCookieName: 'csrftoken',
+              xsrfHeaderName: 'X-CSRFToken',
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            }).then(r => this.additional_students = r.data.additional_students);
+          }).catch(err => {
+            console.log(err);
+            this.message = '';
+            this.isError = true;
+          });
+          this.emailAddress = '';
+        }
+      }
+    });
+  </script>
+{% endblock extravue %}

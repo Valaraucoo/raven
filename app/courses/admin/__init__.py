@@ -1,7 +1,6 @@
-from .admin import CourseAdmin, CourseGroupAdmin, GradeAdmin
+from .admin import CourseAdmin, GradeAdmin
 
 __all__ = [
     'GradeAdmin',
     'CourseAdmin',
-    'CourseGroupAdmin',
 ]

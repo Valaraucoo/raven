@@ -1,3 +1,5 @@
+import datetime
+
 import factory
 import factory.fuzzy as fuzzy
 
@@ -55,3 +57,15 @@ class CourseFactory(factory.django.DjangoModelFactory):
         else:
             for _ in range(3):
                 self.teachers.add(users_factories.TeacherFactory())
+
+
+class LectureFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Lecture
+    course = factory.SubFactory(CourseFactory)
+    title = fuzzy.FuzzyText(length=16)
+    description = factory.Faker('text')
+    date = fuzzy.FuzzyDate(
+        start_date=datetime.date.today() - datetime.timedelta(days=100),
+        end_date=datetime.date.today() + datetime.timedelta(days=100),
+    )

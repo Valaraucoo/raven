@@ -6,18 +6,21 @@ from typing import Any
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.template.defaultfilters import slugify
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.template.defaultfilters import slugify
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from utils.meetings import meetings
 
 PROFILE_CHOICES = (
-    ('CS', 'Computer Science',),
-    ('IS', 'Intelligent Systems')
+    ('CS', _('Computer Science')),
+    ('IS', _('Intelligent Systems'))
 )
 
 LANGUAGE_CHOICES = (
-    ('EN', 'English',),
-    ('PL', 'Polish',),
+    ('EN', _('English')),
+    ('PL', _('Polish')),
 )
 
 
@@ -106,6 +109,7 @@ class Course(models.Model):
     semester = models.IntegerField(validators=[validators.MinValueValidator(1)])
     language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
     site = models.CharField(max_length=255, null=True, blank=True, verbose_name=_('WWW site'))
+    additional_students = models.ManyToManyField('users.Student', 'additional_courses')
 
     lecture_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
     labs_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
@@ -133,37 +137,51 @@ class Course(models.Model):
             self.slug = slugify(f"{self.name}-{year}-{uid}")
         super().save(*args, **kwargs)
 
+    @property
+    def total_students(self):
+        return self.grade.students.all() | self.additional_students.all()
 
-class CourseLectureSection(models.Model):
-    name = models.CharField(max_length=20, verbose_name=_('Course lecture\'s name'))
+
+class Event(models.Model):
+    title = models.CharField(max_length=100, verbose_name=_('Lecture\'s title'))
+    location = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-
-
-class CourseGroup(models.Model):
-    name = models.CharField(max_length=20, verbose_name=_('Course group\'s name'))
-    description = models.TextField(null=True, blank=True)
-    course = models.ForeignKey(
-        to=Course,
-        on_delete=models.CASCADE,
-        related_name='course'
-    )
-    teacher = models.ForeignKey(
-        to='users.Teacher',
-        on_delete=models.CASCADE,
-        related_name='groups_teaching'
-    )
-    # WARNING: take care of handling only students from corresponding grade / validate form
-    students = models.ManyToManyField(
-        to='users.Student',
-        verbose_name=_('Students'),
-        related_name='students_groups'
-    )
+    date = models.DateTimeField()
+    duration = models.DurationField(default=datetime.timedelta(hours=1.5))
     files = models.ManyToManyField(CourseFile, blank=True)
+    reminders = models.BooleanField(default=True)
+    time_delta = models.DurationField(default=datetime.timedelta(days=7), null=True, blank=True)
+    show = models.BooleanField(default=False)
+
+    create_event = models.BooleanField(default=False)
+    event_id = models.CharField(max_length=500, null=True, blank=True)
+    meeting_link = models.CharField(max_length=500, null=True, blank=True)
+    hangout_link = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
-        ordering = ('name',)
-        verbose_name = _('Course Group')
-        verbose_name_plural = _('Course Groups')
+        ordering = ('date',)
+        abstract = True
+
+    @property
+    def is_available(self) -> bool:
+        if self.show:
+            return True
+        if self.time_delta:
+            today = timezone.now()
+            return (self.date - today) < self.time_delta
+        return False
+
+    @property
+    def was_held(self) -> bool:
+        return self.date < timezone.now()
+
+
+class Lecture(Event):
+    course = models.ForeignKey('Course', related_name='lectures', on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return 'Course Group: {} - {}'.format(self.course.name, self.name)
+        return f'Lecture: {self.title}({self.date})'
+
+    @property
+    def students(self):
+        return self.course.grade.students.all()

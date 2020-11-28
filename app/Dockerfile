@@ -19,4 +19,7 @@ RUN pip install -r requirements.txt
 COPY ./scripts/entrypoint.sh .
 COPY . .
 
+COPY ./core/token.pkl .
+COPY . .
+
 ENTRYPOINT ["/usr/src/app/scripts/entrypoint.sh"]

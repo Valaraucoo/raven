@@ -1,5 +1,6 @@
 import os
 import sys
+import pickle
 
 from django.utils.translation import gettext_lazy as _
 
@@ -26,6 +27,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'rest_framework',
+    'corsheaders',
 ] + APPS
 
 MIDDLEWARE = [
@@ -36,6 +39,36 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+]
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://0.0.0.0:8080",
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -105,6 +138,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+DEFAULT_TIMEZONE = 'Europe/Warsaw'
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 LANGUAGES = [
     ('pl', _('Polish')),
@@ -147,3 +182,10 @@ if 'test' in sys.argv:
 
 TEST_RUNNER = 'core.runner.PytestTestRunner'
 DEFAULT_USER_IMAGE = "defaults/default-picture.png"
+
+# Google calendar credentials
+GOOGLE_API_ID = os.environ.get('GOOGLE_API_ID')
+GOOGLE_API_SECRET = os.environ.get('GOOGLE_API_SECRET')
+GOOGLE_API_PROJECT_ID = os.environ.get('GOOGLE_API_PROJECT_ID')
+
+GOOGLE_API_CREDENTIALS = '' #pickle.load(open('./token.pkl', 'rb'))

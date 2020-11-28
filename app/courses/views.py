@@ -1,7 +1,8 @@
 from typing import List
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic
 from django.views.generic.detail import DetailView
 
@@ -13,26 +14,12 @@ class CoursesGuardianPermissionMixin(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         user = request.user
         if user.is_student:
-            student = users_models.Student.objects.get(pk=user.pk)
+            student = users_models.Student.objects.get(email=user.email)
             if student not in self.get_object().grade.students.all():
                 return redirect('courses:courses')
         if user.is_teacher:
-            teacher = users_models.Teacher.objects.get(pk=user.pk)
+            teacher = users_models.Teacher.objects.get(email=user.email)
             if teacher not in self.get_object().teachers.all():
-                return redirect('courses:courses')
-        return super().get(self, request, *args, **kwargs)
-
-
-class CoursesEditPermissionMixin(LoginRequiredMixin, DetailView):
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if user.is_student:
-            student = users_models.Student.objects.get(pk=user.pk)
-            if student not in self.get_object().grade.students.all():
-                return redirect('courses:courses')
-        if user.is_teacher:
-            teacher = users_models.Teacher.objects.get(pk=user.pk)
-            if teacher not in self.get_object().teachers.all() or teacher != self.get_object().head_teacher:
                 return redirect('courses:courses')
         return super().get(self, request, *args, **kwargs)
 
@@ -92,3 +79,50 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     slug_field = 'slug'
     slug_url_kwarg = 'the_slug'
     context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
+        return context
+
+
+class CourseEditView(CoursesDetailView):
+    template_name = 'courses/courses-detail-edit.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lectures'] = self.object.lectures.all()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        course = models.Course.objects.get(slug=kwargs.get('the_slug'))
+        data = request.POST
+        if data:
+            course_name = data.get('name')
+            course_description = data.get('description')
+            if course_name:
+                course.name = course_name
+            if course_description:
+                course.description = course_description
+            course.save()
+            messages.info(request, 'Pomyślnie zaktualizowano kurs!')
+
+        return super().get(request, *args, **kwargs)
+
+
+class LectureEditView(CoursesDetailView):
+    pass

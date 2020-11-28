@@ -13,11 +13,11 @@ class CourseAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(models.CourseGroup)
-class CourseGroupAdmin(admin.ModelAdmin):
+@admin.register(models.CourseFile)
+class CourseFileAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(models.CourseFile)
-class CourseFileAdmin(admin.ModelAdmin):
+@admin.register(models.Lecture)
+class LectureAdmin(admin.ModelAdmin):
     pass

@@ -1,5 +1,4 @@
 from tests.courses import factories
-
 from users.models import Student, Teacher
 
 
@@ -21,6 +20,9 @@ class CourseDemo:
             course = factories.CourseFactory(grade=grade, teachers=[])
             for teacher in teachers:
                 course.teachers.add(teacher)
+            for _ in range(5):
+                lecture = factories.LectureFactory()
+                course.lectures.add(lecture)
             course.save()
         grade.save()
 
