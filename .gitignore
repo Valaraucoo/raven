@@ -12,3 +12,5 @@ app/celerybeat-schedule
 app/mediafiles/uploads
 app/.coverage
 app/htmlcov
+.env.dev-sample
+app/files/mediafiles/
