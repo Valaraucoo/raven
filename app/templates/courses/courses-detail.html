@@ -59,7 +59,7 @@
             </div>
             <div class="ml-4">
               <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
-                {{ lecture.title }}
+                <a style="cursor: pointer;" href="{% url 'courses:lectures-detail' lecture.pk %}">{{ lecture.title }}</a>
               </h4>
               <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
                 {{ lecture.date|date:"d.m.Y (H:i)" }}{% if lecture.was_held %}X{% endif %}

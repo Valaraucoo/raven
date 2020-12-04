@@ -1,16 +1,13 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import mixins
-from rest_framework import generics
-
+from rest_framework import generics, mixins, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from .serializers import CourseAdditionalStudentsSerializer, CourseSerializer
-from .permissions import IsTeacherOrReadOnly
 
 from courses import models
 from users import models as users_models
+
+from .permissions import IsTeacherOrReadOnly
+from .serializers import CourseAdditionalStudentsSerializer, CourseSerializer
 
 
 class CourseListView(mixins.ListModelMixin, generics.GenericAPIView):
@@ -33,19 +30,22 @@ class CourseListView(mixins.ListModelMixin, generics.GenericAPIView):
 
         name = self.request.query_params.get('name')
         teacher = self.request.query_params.get('teacher')
-        has_exam = self.request.query_params.get('has_exam')
+        has_exam = int(self.request.query_params.get('exam', 0))
         language = self.request.query_params.get('language')
-        semester = self.request.query_params.get('semester')
+        semester = int(self.request.query_params.get('semester', 0))
 
         if name:
             qs = qs.filter(name__icontains=name)
         if teacher:
-            qs = qs.filter(teachers__last_name__icontains=teacher) | qs.filter(head_teacher__address__icontains=teacher)
-        if has_exam:
-            qs = qs.filter(has_exam=bool(has_exam))
+            qs = qs.filter(teachers__last_name__icontains=teacher)
+        if has_exam and has_exam > 0:
+            if has_exam == 1:
+                qs = qs.filter(has_exam=True)
+            if has_exam == 2:
+                qs = qs.filter(has_exam=False)
         if language:
-            qs = qs.filter(language=language)
-        if semester:
+            qs = qs.filter(language=language.upper())
+        if semester and semester > 0:
             qs = qs.filter(semester=semester)
         return qs
 

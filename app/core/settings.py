@@ -1,6 +1,6 @@
 import os
-import sys
 import pickle
+import sys
 
 from django.utils.translation import gettext_lazy as _
 
