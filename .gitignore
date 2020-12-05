@@ -12,3 +12,4 @@ app/celerybeat-schedule
 app/mediafiles/uploads
 app/.coverage
 app/htmlcov
+app/files/mediafiles
