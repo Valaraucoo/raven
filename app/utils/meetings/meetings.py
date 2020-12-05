@@ -2,9 +2,11 @@ import datetime
 import os
 import pickle
 from typing import Dict, List
+import requests
 
 from apiclient.discovery import build
 from django.conf import settings
+
 
 # SERVICE = build('calendar', 'v3', credentials=settings.GOOGLE_API_CREDENTIALS)
 # CALENDAR_ID = SERVICE.calendarList().list().execute()['items'][0]['id']

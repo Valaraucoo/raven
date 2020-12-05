@@ -311,7 +311,6 @@ class LectureCreateView(DetailView):
                 )
                 #TODO: tworzenie wydarzenia w Google Calendar
                 #TODO: powiadomienie (?) do prowadzącego, że utworzył wykład
-                #TODO: pliki (?)
                 messages.info(request, 'Pomyślnie utworzono nowy wykład!')
                 return redirect('courses:lectures-detail', pk=lecture.pk)
             else:
@@ -338,3 +337,58 @@ def delete_lecture_view(request, the_slug, num):
         #TODO: usuwanie spotkania
         messages.info(request, 'Pomyślnie usunięto wykład!')
     return redirect('courses:courses-edit', the_slug=course.slug)
+
+
+def lecture_add_file(request, pk):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    lecture = models.Lecture.objects.get(pk=pk)
+    if lecture:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in lecture.course.teachers.all():
+            return redirect('courses:courses')
+
+        if request.method == 'GET':
+            return render(request, 'courses/lecture-file.html', {'lecture': lecture, 'form': forms.CourseFileForm})
+
+        form = forms.CourseFileForm(request.POST, request.FILES)
+
+        name = form.data.get('filename')
+        description = form.data.get('description')
+        file = request.FILES.get('file')
+
+        if name and file:
+            course_file = models.CourseFile.objects.create(
+                name=name, file=file, description=description
+            )
+            lecture.files.add(course_file)
+            lecture.save()
+            messages.info(request, 'Pomyślnie dodano plik!')
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+            return render(request, 'courses/lecture-file.html', {'lecture': lecture, 'form': forms.CourseFileForm})
+    return redirect('courses:lectures-edit', pk=lecture.pk)
+
+
+def delete_lecture_file(request, pk, num):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    lecture = models.Lecture.objects.get(pk=pk)
+    if lecture:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in lecture.course.teachers.all():
+            return redirect('courses:courses')
+
+        file = lecture.files.all()[num]
+        file.delete()
+        lecture.save()
+        messages.info(request, 'Pomyślnie usunięto plik!')
+    return redirect('courses:lectures-edit', pk=lecture.pk)

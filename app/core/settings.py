@@ -188,4 +188,4 @@ GOOGLE_API_ID = os.environ.get('GOOGLE_API_ID')
 GOOGLE_API_SECRET = os.environ.get('GOOGLE_API_SECRET')
 GOOGLE_API_PROJECT_ID = os.environ.get('GOOGLE_API_PROJECT_ID')
 
-GOOGLE_API_CREDENTIALS = '' #pickle.load(open('./token.pkl', 'rb'))
+# GOOGLE_API_CREDENTIALS = pickle.load(open('./token.pkl', 'rb'))

@@ -17,6 +17,8 @@ urlpatterns = [
     path('courses/<slug:the_slug>/delete/<int:num>/', views.delete_lecture_view, name='lectures-delete'),
     path('courses/lecture/<int:pk>/detail/', views.LectureDetailView.as_view(), name='lectures-detail'),
     path('courses/lecture/<int:pk>/edit/', views.LectureEditView.as_view(), name='lectures-edit'),
+    path('courses/lecture/<int:pk>/file/add/', views.lecture_add_file, name='lectures-file-add'),
+    path('courses/lecture/<int:pk>/file/delete/<int:num>', views.delete_lecture_file, name='lectures-file-delete'),
     path('courses/<slug:the_slug>/lecture/create/', views.LectureCreateView.as_view(), name='lectures-create'),
     path('', include(router.urls)),
     path('api/list/courses/', CourseListView.as_view()),

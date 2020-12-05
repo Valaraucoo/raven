@@ -29,3 +29,18 @@ class LectureCreateForm(forms.Form):
     }))
     show = forms.BooleanField(required=False)
     meeting = forms.BooleanField(initial=True, required=False)
+
+
+class CourseFileForm(forms.Form):
+    filename = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'class': tailwind_form,
+        'placeholder': 'Nazwa pliku',
+    }))
+    description = forms.CharField(required=False, widget=forms.Textarea(attrs={
+        'class': tailwind_form,
+        'cols': 30,
+        'rows': 5
+    }))
+    file = forms.FileField(required=True, widget=forms.FileInput(attrs={
+        'class': tailwind_form
+    }))

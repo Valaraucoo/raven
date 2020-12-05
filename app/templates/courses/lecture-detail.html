@@ -24,7 +24,23 @@
         <p class="text-sm text-gray-600">
           <span class="font-bold">Opis:</span> {% if lecture.description %}{{ lecture.description }}{% else %}-{% endif %}
         </p>
-        <p class="text-sm text-gray-600"> Materiały do zajęć: TODO</p>
+        <div class="flex flex-wrap -mx-3 mb-6">
+          <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+            <label class="flex items-center">
+              <span class="block uppercase tracking-wide text-gray-700 text-xs font-bold ml-2">PLIKI</span>
+            </label>
+            {% if not lecture.files.all %}
+              <p class="pl-4 mt-1 text-sm text-gray-700">
+                Nie dodano jeszcze żadnych plików
+              </p>
+            {% endif %}
+            {% for file in lecture.files.all %}
+              <p class="pl-4 mt-1 text-sm text-gray-700">
+                <a class="text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>
+              </p>
+            {% endfor %}
+          </div>
+        </div>
       </div>
     </div>
   </div>
