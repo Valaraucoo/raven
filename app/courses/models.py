@@ -185,3 +185,32 @@ class Lecture(Event):
     @property
     def students(self):
         return self.course.grade.students.all()
+
+
+class LectureMark(models.Model):
+    MARK_CHOICES = (
+        (2.0, 2.0),
+        (3.0, 3.0),
+        (3.5, 3.5),
+        (4.0, 4.0),
+        (4.5, 4.5),
+        (5.0, 5.0),
+    )
+    mark = models.DecimalField(choices=MARK_CHOICES, decimal_places=10, max_digits=11)
+    date = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+
+    lecture = models.ForeignKey('Lecture', on_delete=models.CASCADE, related_name='marks')
+    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='lecture_marks')
+    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_lecture_marks')
+
+    def __str__(self):
+        return f'Lecture Mark: {self.student}, {self.lecture}'
+
+    class Meta:
+        ordering = ('date', 'lecture',)
+
+    def clean(self):
+        super().clean()
+        if self.student not in self.lecture.course.grade.students.all():
+            raise ValidationError('Student must be one of the course students.')

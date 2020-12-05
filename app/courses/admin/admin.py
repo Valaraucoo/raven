@@ -21,3 +21,8 @@ class CourseFileAdmin(admin.ModelAdmin):
 @admin.register(models.Lecture)
 class LectureAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.LectureMark)
+class LectureMarkAdmin(admin.ModelAdmin):
+    pass
