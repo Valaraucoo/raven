@@ -141,6 +141,28 @@ class Course(models.Model):
     def total_students(self):
         return self.grade.students.all() | self.additional_students.all()
 
+    @property
+    def students_without_groups(self):
+        groups = self.groups.all()
+        students = []
+        for group in groups:
+            for student in group.students.all():
+                students.append(student)
+        return [student for student in self.grade.students.all() if student not in students]
+
+
+class CourseGroup(models.Model):
+    name = models.CharField(max_length=255)
+    course = models.ForeignKey('Course', related_name='groups', on_delete=models.CASCADE)
+    students = models.ManyToManyField('users.Student', related_name='laboratories')
+
+    def __str__(self) -> str:
+        return f'CourseGroup: {self.course}'
+
+    @property
+    def students_count(self) -> int:
+        return self.students.count()
+
 
 class Event(models.Model):
     title = models.CharField(max_length=100, verbose_name=_('Lecture\'s title'))
@@ -187,16 +209,17 @@ class Lecture(Event):
         return self.course.grade.students.all()
 
 
+class Laboratory(Event):
+    course = models.ForeignKey('Course', related_name='laboratories', on_delete=models.CASCADE)
+    group = models.ForeignKey('CourseGroup', related_name='laboratory', on_delete=models.CASCADE, null=True)
+
+    def __str__(self) -> str:
+        return f'Laboratory: {self.title}({self.date})'
+
+
 class LectureMark(models.Model):
-    MARK_CHOICES = (
-        (2.0, 2.0),
-        (3.0, 3.0),
-        (3.5, 3.5),
-        (4.0, 4.0),
-        (4.5, 4.5),
-        (5.0, 5.0),
-    )
-    mark = models.DecimalField(choices=MARK_CHOICES, decimal_places=10, max_digits=11)
+    mark = models.DecimalField(decimal_places=10, max_digits=13, validators=[validators.MinValueValidator(0),
+                                                                             validators.MaxValueValidator(100)])
     date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 

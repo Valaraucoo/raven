@@ -84,7 +84,38 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
+        context['available_labs'] = [lab for lab in self.object.laboratories.all() if lab.is_available]
+        context['student_without_groups_emails'] = [student.email for student in self.object.students_without_groups]
         return context
+
+
+class CourseGroupJoinListView(CoursesDetailView):
+    template_name = 'courses/courses-group-join.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['groups'] = self.object.groups.all()
+        return context
+
+
+def course_group_join_view(request, the_slug, num):
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        return redirect('courses:courses-detail', the_slug=the_slug)
+    course = models.Course.objects.get(slug=the_slug)
+    if course:
+        course_group = course.groups.all()[num]
+        if course_group:
+            student = users_models.Student.objects.get(email=user.email)
+            if student in course.grade.students.all() and student in course.students_without_groups:
+                course_group.students.add(student)
+                course_group.save()
+                messages.info(request, 'Pomyślnie dołączyłeś do grupy.')
+                return redirect('courses:courses-detail', the_slug=the_slug)
+    messages.error(request, 'Spróbuj ponownie.')
+    return redirect('courses:courses')
 
 
 class CourseEditView(CoursesDetailView):
@@ -143,6 +174,12 @@ class LectureDetailView(DetailView):
             if student not in self.get_object().course.grade.students.all():
                 return redirect('courses:courses')
         return super().get(request, *args, **kwargs)
+
+
+class LaboratoryDetailView(LectureDetailView):
+    template_name = 'courses/laboratory-detail.html'
+    model = models.Laboratory
+    context_object_name = 'laboratory'
 
 
 class LectureEditView(DetailView):

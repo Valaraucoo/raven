@@ -26,9 +26,17 @@
           <a href="#" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
             Ogłoszenia
           </a>
+          {% if request.user.email in student_without_groups_emails %}
+          <a href="{% url 'courses:group-join' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
+            Dołącz do grupy
+          </a>
+          {% endif %}
           {% if request.user.is_teacher %}
             <a href="{% url 'courses:courses-edit' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-blue-200 text-gray-800 hover:text-gray-900 hover:bg-blue-300">
               Edytuj kurs
+            </a>
+            <a href="{% url 'courses:courses-edit' course.slug %}" class="ml-2 text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-blue-200 text-gray-800 hover:text-gray-900 hover:bg-blue-300">
+              Zarządzaj grupami
             </a>
           {% endif %}
         </div>
@@ -72,6 +80,40 @@
       </div>
       <div class="px-4 py-4 mx-2">
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Dostępne laboratoria</a></h4>
+        {% if not available_labs %}
+          <p class="text-gray-700 text-sm">
+            Nie znaleziono żadnego dostępnego wykładu.
+          </p>
+        {% endif %}
+        {% for lab in available_labs %}
+          <div class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md {% if lab.was_held %}bg-blue-400{% else %}bg-green-400{% endif %} text-white">
+                {{ forloop.counter }}
+              </div>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                <a style="cursor: pointer;" href="{% url 'courses:laboratory-detail' lab.pk %}">{{ lab.title }}</a>
+              </h4>
+              <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
+                {{ lab.date|date:"d.m.Y (H:i)" }}{% if lab.was_held %}X{% endif %}
+              </p>
+              <p class="text-sm text-gray-600"><span class="font-medium">Szczegóły: </span>
+                {{ lab.description }}
+              </p>
+              <p class="text-sm text-gray-600"><span class="text-bold">Dodatkowe materiały: </span>
+                {% if lab.files.all %}
+                  {% for file in lab.files.all %}
+                    <a class="text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>

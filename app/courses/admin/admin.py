@@ -26,3 +26,13 @@ class LectureAdmin(admin.ModelAdmin):
 @admin.register(models.LectureMark)
 class LectureMarkAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.Laboratory)
+class LaboratoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.CourseGroup)
+class GroupAdmin(admin.ModelAdmin):
+    pass
