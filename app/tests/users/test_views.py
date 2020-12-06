@@ -41,3 +41,36 @@ class TestProfileDetailView:
 
         response = user_client.get(url)
         assert response.status_code == 302
+
+
+@pytest.mark.django_db
+class TestDeleteProfileImageView:
+    def test_delete_image_view(self, user_client):
+        user = users_factories.StudentFactory(first_name='Bob')
+        user_client.force_login(user)
+
+        assert 'defaults/default-picture.png' not in user.image.url
+
+        url = reverse('users:profile-img-delete')
+        response = user_client.get(url)
+
+        user.refresh_from_db()
+
+        assert 'defaults/default-picture.png' in user.image.url
+
+
+@pytest.mark.django_db
+class TestDashboardView:
+    def test_get_context(self, user_client):
+        url = reverse('users:dashboard')
+        response = user_client.get(url)
+        assert response.status_code == 200
+
+        profile = response.context.get('profile')
+        assert profile.full_username == f"{profile.first_name} {profile.last_name} ({profile.email})"
+
+    def test_get_unauthenticated(self, client):
+        url = reverse('users:dashboard')
+        response = client.get(url)
+
+        assert response.status_code == 302

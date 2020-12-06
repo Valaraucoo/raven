@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from django.urls import reverse
 
 from users import models as user_models
 
@@ -33,3 +34,20 @@ class TestUserModel:
 
     def test_string_user_model(self) -> None:
         assert 'John Doe (johndoe@example.com)' == str(self.user)
+
+    def test_get_user_model_url(self):
+        assert "/profile/14" in self.user.get_absolute_url()
+
+    def test_get_user_image_url(self):
+        assert "/defaults/default-picture.png" in self.user.get_image_url()
+
+    def test_save_user_model_image(self):
+        pass
+
+
+@pytest.mark.django_db
+class TestUserStatus:
+
+    @pytest.fixture(autouse=True)
+    def test_user_model_offline_status(self):
+        pass

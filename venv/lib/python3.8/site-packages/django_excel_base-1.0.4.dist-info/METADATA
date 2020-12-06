@@ -1,0 +1,44 @@
+Metadata-Version: 2.1
+Name: django-excel-base
+Version: 1.0.4
+Summary: Django Excel Base
+Home-page: https://github.com/django-xxx/django-excel-base
+Author: Hackathon
+Author-email: kimi.huang@brightcells.com
+License: UNKNOWN
+Keywords: Django Excel Base
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Office/Business :: Financial :: Spreadsheet
+Requires-Dist: xlwt
+Requires-Dist: pytz
+Requires-Dist: screen
+
+=================
+django-excel-base
+=================
+
+Django Excel Base
+
+Installation
+============
+
+::
+
+    pip install django-excel-base
+
+
+Usage
+=====
+
+::
+
+    from django_excel_base import as_xls, as_csv
+
+
+
