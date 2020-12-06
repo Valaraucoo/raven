@@ -1,6 +1,5 @@
-from demo.demos import courses, users
+from demo.demos import users
 
 DEMOS = (
     users.UsersDemo(),
-    courses.CourseDemo(),
 )

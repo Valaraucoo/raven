@@ -9,6 +9,5 @@ Dockerfile.prod
 .idea
 app/celerybeat.pid
 app/celerybeat-schedule
-app/mediafiles/uploads
 app/.coverage
 app/htmlcov
