@@ -154,7 +154,7 @@ class Course(models.Model):
 class CourseGroup(models.Model):
     name = models.CharField(max_length=255)
     course = models.ForeignKey('Course', related_name='groups', on_delete=models.CASCADE)
-    students = models.ManyToManyField('users.Student', related_name='laboratories')
+    students = models.ManyToManyField('users.Student', related_name='laboratories', blank=True)
 
     def __str__(self) -> str:
         return f'CourseGroup: {self.course}'

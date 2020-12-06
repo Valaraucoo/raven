@@ -69,3 +69,10 @@ class LectureFactory(factory.django.DjangoModelFactory):
         start_date=datetime.date.today() - datetime.timedelta(days=100),
         end_date=datetime.date.today() + datetime.timedelta(days=100),
     )
+
+
+class CourseGroupFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.CourseGroup
+    course = factory.SubFactory(CourseFactory)
+    name = fuzzy.FuzzyText(length=16)

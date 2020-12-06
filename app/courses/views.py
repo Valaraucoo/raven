@@ -98,6 +98,50 @@ class CourseGroupJoinListView(CoursesDetailView):
         return context
 
 
+def course_group_create_view(request, the_slug):
+    user = request.user
+    course = models.Course.objects.get(slug=the_slug)
+    if not course:
+        return redirect('courses:courses')
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+
+    form = forms.CourseGroupModelForm(request.POST)
+    form.fields['students'].queryset = course.grade.students.all()
+    if request.method == 'POST':
+        form = forms.CourseGroupModelForm(request.POST)
+        if form.is_valid():
+            group = models.CourseGroup.objects.create(
+                name=form.data.get('name'),
+                course=course)
+            messages.info(request, 'Pomyslnie utworzono nową grupę.')
+            return redirect('courses:group-edit', pk=group.pk)
+        else:
+            messages.error(request, 'Spróbuj ponownie.')
+    return render(request, 'courses/group-create.html', {'form': form, 'course': course})
+
+
+def course_group_delete_view(request, the_slug, num):
+    user = request.user
+    course = models.Course.objects.get(slug=the_slug)
+    group = course.groups.all()[num]
+    if not group or not course:
+        return redirect('courses:courses')
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in group.course.teachers.all():
+            return redirect('courses:courses')
+    group.delete()
+    messages.info(request, 'Pomyślnie usunięto grupe.')
+    return redirect('courses:group', the_slug=the_slug)
+
+
 def course_group_join_view(request, the_slug, num):
     user = request.user
     if not user.is_authenticated:
@@ -153,6 +197,54 @@ class CourseEditView(CoursesDetailView):
             course.save()
             messages.info(request, 'Pomyślnie zaktualizowano kurs!')
 
+        return super().get(request, *args, **kwargs)
+
+
+class CourseGroupEditView(DetailView):
+    template_name = 'courses/group-edit.html'
+    model = models.CourseGroup
+
+    def get_context_data(self, **kwargs):
+        group = self.get_object()
+        form = forms.CourseGroupModelForm(initial={
+            'name': group.name,
+            'students': group.students.all(),
+        })
+        form.fields['students'].queryset = group.course.grade.students.all() | group.course.additional_students.all()
+        context = {
+            'group': group,
+            'form': form
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        group = self.get_object()
+        form = forms.CourseGroupModelForm(request.POST)
+        if form.is_valid():
+            group.name = form.cleaned_data.get('name')
+            for student in form.cleaned_data.get('students'):
+                group.students.add(student)
+            group.save()
+            messages.info(request, 'Pomyslnie zaktualizowano grupę.')
+        else:
+            messages.error(request, 'Spróbuj ponownie.')
         return super().get(request, *args, **kwargs)
 
 

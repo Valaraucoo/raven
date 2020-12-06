@@ -23,6 +23,8 @@ class CourseDemo:
             for _ in range(5):
                 lecture = factories.LectureFactory()
                 course.lectures.add(lecture)
+            for _ in range(3):
+                factories.CourseGroupFactory(course=course)
             course.save()
         grade.save()
 

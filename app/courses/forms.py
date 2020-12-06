@@ -1,5 +1,9 @@
 from django import forms
 
+from courses import models
+from users import models as users_models
+
+
 tailwind_form = 'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4' \
                  ' mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
 
@@ -44,3 +48,13 @@ class CourseFileForm(forms.Form):
     file = forms.FileField(required=True, widget=forms.FileInput(attrs={
         'class': tailwind_form
     }))
+
+
+class CourseGroupModelForm(forms.ModelForm):
+    class Meta:
+        model = models.CourseGroup
+        fields = ('name', 'students',)
+        widgets = {
+            'name': forms.TextInput(attrs={'class': tailwind_form}),
+            'students': forms.CheckboxSelectMultiple(attrs={'class': 'text-sm text-gray-700'})
+        }

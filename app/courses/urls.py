@@ -24,8 +24,11 @@ urlpatterns = [
 
     path('courses/laboratory/<int:pk>/', views.LaboratoryDetailView.as_view(), name='laboratory-detail'),
 
-    path('courses/<slug:the_slug>/group/join/', views.CourseGroupJoinListView.as_view(), name='group-join'),
-    path('courses/<slug:the_slug>/group/join/<int:num>', views.course_group_join_view, name='group-join-group'),
+    path('courses/<slug:the_slug>/groups/', views.CourseGroupJoinListView.as_view(), name='group'),
+    path('courses/<slug:the_slug>/groups/create/', views.course_group_create_view, name='group-create'),
+    path('courses/<slug:the_slug>/groups/join/<int:num>', views.course_group_join_view, name='group-join-group'),
+    path('courses/groups/<int:pk>/', views.CourseGroupEditView.as_view(), name='group-edit'),
+    path('courses/<slug:the_slug>/groups/<int:num>/delete/', views.course_group_delete_view, name='group-delete'),
 
     path('', include(router.urls)),
     path('api/list/courses/', CourseListView.as_view()),
