@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
   <div class="w-full h-full bg-gray-100">
     {% include "dashboard/sidebar.html" %}
-    <div id = "dashboard_content" class="pt-24 md:ml-4 md:pt-6">
+    <div class="pt-24 md:pl-64 md:ml-4 md:pt-6">
       {% block dashboard_content %}
       {% endblock dashboard_content %}
     </div>
@@ -24,6 +25,3 @@ document.addEventListener('click', (e) => {
   }
 });
 {% endblock extrascripts %}
-{% block extraheads %}
-   <link rel="stylesheet" href="{% static "css/sidebar.css" %}">
-{% endblock extraheads %}
