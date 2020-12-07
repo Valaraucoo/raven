@@ -1,1 +1,42 @@
-Twoje konto zostalo aktywowane {{ user.email }}
+{% load static i18n admin_urls %}
+<!DOCTYPE html>
+<html lang="en">
+<!--<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">-->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Twoje konto zostało aktywowane!</title>
+
+   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+
+  </head>
+  <body class="bg-gray-100">
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-12">
+        <div class="w-9/12 mx-auto bg-white py-6 rounded-lg overflow-hidden shadow-lg">
+            <div class="flex flex-col w-3/4 h-auto my-6 p-5 max-w-full mx-auto">
+                <div class="w-full flex justify-center h-auto max-w-full mx-auto pb-8 rounded-lg ">
+                    <img src="./logo.png"/>
+              </div>
+                <h5 class="font-bold flex justify-center text-gray-800 text-lg"> Witaj w Raven! </h5>
+                <hr class="border-2 my-5 bg-gray-500 text-gray-500 h-px">
+
+              <div class="w-full h-auto my-3 p-5 max-w-full mx-auto">
+                  <p class="font-normal  text-sm flex justify-center text-center text-gray-800">Twoja pierwsza próba logowania przebiegła poprawnie.<br>
+                      Teraz możesz w pełni korzystać z platformy Raven. <br> W pierwszym kroku uaktualnij swój profil kilkając przycisk poniżej.</p>
+              </div>
+                <div class="w-full h-auto  flex justify-center p-5 max-w-full mx-auto text-gray-800">
+                    <a class="bg-gray-400 p-5 rounded-lg text-center" href="http://localhost:8080/profile/edit/">
+                        Mój profil
+                    </a>
+                </div>
+                <p class="font-light text-sm mt-10 flex justify-center text-center text-gray-800">Jeśli masz problem lub pytania skontaktuj się z administratorem wysyłając zapytanie przez swoje konto Raven.</p>
+            </div>
+        </div>
+      </div>
+
+  </body>
+</html>
