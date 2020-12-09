@@ -1,8 +1,6 @@
 from django import forms
 
 from courses import models
-from users import models as users_models
-
 
 tailwind_form = 'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4' \
                  ' mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
@@ -33,6 +31,11 @@ class LectureCreateForm(forms.Form):
     }))
     show = forms.BooleanField(required=False)
     meeting = forms.BooleanField(initial=True, required=False)
+
+
+class LaboratoryCreateForm(LectureCreateForm):
+    group = forms.ModelChoiceField(queryset=models.CourseGroup.objects.all(),
+                                           widget=forms.RadioSelect(attrs={'class': 'text-sm text-gray-700'}))
 
 
 class CourseFileForm(forms.Form):

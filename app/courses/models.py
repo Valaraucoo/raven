@@ -157,7 +157,7 @@ class CourseGroup(models.Model):
     students = models.ManyToManyField('users.Student', related_name='laboratories', blank=True)
 
     def __str__(self) -> str:
-        return f'CourseGroup: {self.course}'
+        return self.name
 
     @property
     def students_count(self) -> int:

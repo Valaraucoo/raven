@@ -109,7 +109,7 @@
           </div>
         </div>
       </div>
-      <div class="px-4 py-4 mx-2">
+      <div class="px-4 py-4 mx-2 mb-4 border-b-2 border-gray-200">
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Wykłady</h4>
         {% if not lectures %}
           <p class="text-gray-700 text-sm">
@@ -153,6 +153,52 @@
         {% endfor %}
         <span class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
           <a href="{% url 'courses:lectures-create' course.slug %}">+ Dodaj wykład</a>
+        </span>
+      </div>
+      <div class="px-4 py-4 mx-2 mb-4">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Laboratoria</h4>
+        {% if not lectures %}
+          <p class="text-gray-700 text-sm">
+            Nie ma jeszcze żadnych laboratoriów.
+          </p>
+        {% endif %}
+        {% for lecture in laboratories %}
+          <div class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md {% if lecture.was_held %}bg-blue-400{% else %}bg-green-400{% endif %} text-white">
+                {{ forloop.counter }}
+              </div>
+            </div>
+            <div class="ml-4">
+              <a href="{% url 'courses:laboratory-detail' lecture.pk %}" class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                {{ lecture.title }}
+              </a>
+              <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
+                {{ lecture.date|date:"d.m.Y (H:i)" }}{% if lecture.was_held %}X{% endif %}
+              </p>
+              <p class="text-sm text-gray-600"><span class="font-medium">Szczegóły: </span>
+                {{ lecture.description }}
+              </p>
+              <p class="text-sm text-gray-600"><span class="text-bold">Dodatkowe materiały: </span>
+                {% if lecture.files.all %}
+                  {% for file in lecture.files.all %}
+                    {{ file }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+              <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                <a href="#">Edytuj</a>
+              </button>
+              <button id="delete-lecture-btn" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-red-200 text-gray-800 hover:text-gray-900 hover:bg-red-300">
+                Usuń
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+        <span class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+          <a href="{% url 'courses:laboratory-create' course.slug %}">+ Dodaj labke</a>
         </span>
       </div>
     </div>
