@@ -23,7 +23,11 @@ urlpatterns = [
     path('courses/<slug:the_slug>/lecture/create/', views.LectureCreateView.as_view(), name='lectures-create'),
 
     path('courses/laboratory/<int:pk>/', views.LaboratoryDetailView.as_view(), name='laboratory-detail'),
+    path('courses/laboratory/<int:pk>/edit/', views.LaboratoryEditView.as_view(), name='laboratory-edit'),
     path('courses/<slug:the_slug>/laboratory/create/', views.LaboratoryCreateView.as_view(), name='laboratory-create'),
+    path('courses/laboratory/<int:pk>/file/add/', views.laboratory_add_file, name='laboratory-file-add'),
+    path('courses/laboratory/<int:pk>/file/delete/<int:num>/', views.delete_laboratory_file,
+         name='laboratory-file-delete'),
 
     path('courses/<slug:the_slug>/groups/', views.CourseGroupJoinListView.as_view(), name='group'),
     path('courses/<slug:the_slug>/groups/create/', views.course_group_create_view, name='group-create'),

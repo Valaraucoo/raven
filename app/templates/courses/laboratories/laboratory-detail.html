@@ -11,7 +11,7 @@
         </h4>
         {% if request.user.is_teacher %}
           <div class="mt-4 mb-4">
-            <a class="text-sm font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="#">Edytuj</a>
+            <a class="text-sm font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:laboratory-edit' laboratory.pk %}">Edytuj</a>
           </div>
         {% endif %}
         <p class="text-xl text-gray-800"><span class="text-bold">Tytuł: </span>

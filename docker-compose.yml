@@ -9,7 +9,7 @@ services:
     ports:
       - 8080:8080
     env_file:
-      - ./.env.dev
+      - ./.env.dev-sample
     depends_on:
       - db_psql
       - redis
@@ -18,7 +18,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env.dev
+      - ./.env.dev-sample
   redis:
     image: redis:alpine
   celery:
@@ -27,7 +27,7 @@ services:
     volumes:
       - ./app/:/usr/src/app/
     env_file:
-      - ./.env.dev
+      - ./.env.dev-sample
     depends_on:
       - redis
   celery-beat:
@@ -36,7 +36,7 @@ services:
     volumes:
       - ./app/:/usr/src/app/
     env_file:
-      - ./.env.dev
+      - ./.env.dev-sample
     depends_on:
       - redis
 

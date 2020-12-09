@@ -13,6 +13,5 @@ app/mediafiles/uploads
 app/.coverage
 app/htmlcov
 app/.pytest_cache
-.env.dev-sample
 app/files/mediafiles/*
 !app/files/mediafiles/defaults/
