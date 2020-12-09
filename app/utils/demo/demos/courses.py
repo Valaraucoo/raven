@@ -3,6 +3,8 @@ from users.models import Student, Teacher
 
 
 class CourseDemo:
+    INFO = 'Done. Generated Grades and Courses.'
+
     def generate(self):
         for i in range(3):
             self.generate_course(i)
@@ -27,8 +29,3 @@ class CourseDemo:
                 factories.CourseGroupFactory(course=course)
             course.save()
         grade.save()
-
-    def get_info(self):
-        return [
-            'Done. Generated Grades and Courses.'
-        ]

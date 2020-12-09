@@ -174,6 +174,13 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
 
+# Google calendar credentials
+GOOGLE_API_ID = os.environ.get('GOOGLE_API_ID')
+GOOGLE_API_SECRET = os.environ.get('GOOGLE_API_SECRET')
+GOOGLE_API_PROJECT_ID = os.environ.get('GOOGLE_API_PROJECT_ID')
+
+# GOOGLE_API_CREDENTIALS = pickle.load(open('./token.pkl', 'rb'))
+
 if 'test' in sys.argv:
     try:
         from test_settings import *
@@ -182,10 +189,3 @@ if 'test' in sys.argv:
 
 TEST_RUNNER = 'core.runner.PytestTestRunner'
 DEFAULT_USER_IMAGE = "defaults/default-picture.png"
-
-# Google calendar credentials
-GOOGLE_API_ID = os.environ.get('GOOGLE_API_ID')
-GOOGLE_API_SECRET = os.environ.get('GOOGLE_API_SECRET')
-GOOGLE_API_PROJECT_ID = os.environ.get('GOOGLE_API_PROJECT_ID')
-
-# GOOGLE_API_CREDENTIALS = pickle.load(open('./token.pkl', 'rb'))

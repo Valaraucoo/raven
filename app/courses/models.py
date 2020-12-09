@@ -216,6 +216,10 @@ class Laboratory(Event):
     def __str__(self) -> str:
         return f'Laboratory: {self.title}({self.date})'
 
+    class Meta:
+        verbose_name = _('Laboratory')
+        verbose_name_plural = _('Laboratories')
+
 
 class LectureMark(models.Model):
     mark = models.DecimalField(decimal_places=10, max_digits=13, validators=[validators.MinValueValidator(0),

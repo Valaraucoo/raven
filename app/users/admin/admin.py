@@ -51,9 +51,9 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ('first_name', 'last_name', 'email')
 
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ('first_name', 'last_name', 'email')
