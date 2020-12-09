@@ -5,35 +5,36 @@
   <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
       <div class="px-4 py-4">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Kursy</h4>
         {% if not has_courses %}
           <p class="text-gray-700 text-sm">
             Nie jesteś przypisany do żadnego kursu.
             <a href="#" class="text-blue-400 hover:text-blue-500">Zapisz się teraz</a>
           </p>
         {% else %}
-          <form method="get" class="mb-4 border-b">
+          <div class="mb-4 border-b">
             <div class="mb-2 w-full sm:w-1/2 md:w-1/2">
               <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
                 FILTRUJ SWOJE KURSY
               </label>
-              <input name="name" value="{{ q_name }}" placeholder="Wpisz nazwe kursu" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+              <input v-model="courseName" @blur="filterCourses" name="name" placeholder="Wpisz nazwe kursu" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
             </div>
             <div class="flex flex-wrap -mx-3">
               <div class="mb-2 w-full sm:w-1/2 md:w-1/3 px-3">
                 <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
                   Prowadzący
                 </label>
-                <input name="teacher" value="{{ q_teacher }}" placeholder="Nazwisko prowadzącego" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                <input @blur="filterCourses" name="teacher" v-model="teacherName" placeholder="Nazwisko prowadzącego" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
               </div>
               <div class="mb-2 w-full sm:w-1/2 md:w-1/6 px-3 sm:px-0">
                 <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
                   Egzamin
                 </label>
                 <div class="relative">
-                  <select name="has_exam" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
-                    <option value="0" {% if has_exam == '0' %}selected{% endif %}>-</option>
-                    <option value="1" {% if has_exam == '1' %}selected{% endif %}>TAK</option>
-                    <option value="2" {% if has_exam == '2' %}selected{% endif %}>NIE</option>
+                  <select @blur="filterCourses" v-model="hasExam" name="has_exam" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                    <option value="0">-</option>
+                    <option value="1">TAK</option>
+                    <option value="2">NIE</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -41,48 +42,84 @@
                 </div>
               </div>
             </div>
-            <button class="mt-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" type="submit">
-              Filtruj
-            </button>
-            <a href="{% url 'courses:courses' %}" class="mt-2 ml-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
-              Resetuj
-            </a>
-          </form>
-          {% if courses %}
-            {% for course in courses %}
-              <div class="flex mb-4">
-                <div class="flex-shrink-0">
-                  <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-blue-400 text-white">
-                    <span class="text-xs">ECTS</span>
-                    {{ course.ects }}
+            <div class="flex flex-wrap -mx-3">
+              <div class="mb-2 w-full sm:w-1/2 md:w-1/6 px-3">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
+                  Język
+                </label>
+                <div class="relative">
+                  <select @blur="filterCourses" v-model="language" name="has_exam" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                    <option value="">-</option>
+                    <option value="en">EN</option>
+                    <option value="pl">PL</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                   </div>
                 </div>
-                <div class="ml-4">
-                  <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
-                    <a href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a>
-                  </h4>
-                  <p class="text-sm text-gray-600"><span class="text-bold">Główny prowadzący: </span>
-                    <a href="{% url 'users:profile-detail' course.head_teacher.pk %}" class="text-blue-500 hover:text-blue-400">
-                      {{ course.head_teacher.first_name }} {{ course.head_teacher.last_name }}
-                    </a>
-                  </p>
-                  <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Prowadzący: </span>
-                    {% for teacher in course.teachers.all %}
-                      <a href="{% url 'users:profile-detail' teacher.pk %}" class="text-blue-500 hover:text-blue-400">
-                        {{ teacher.first_name }} {{ teacher.last_name }}{% if not forloop.last %}, {% endif %}
-                      </a>
-                    {% endfor %}
-                  </p>
-                  <p class="text-sm leading-6 text-gray-600">{{ course.description }}</p>
+              </div>
+              <div class="mb-2 w-full sm:w-1/2 md:w-1/6 px-3 sm:px-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
+                  Semestr
+                </label>
+                <div class="relative">
+                  <select @blur="filterCourses" v-model="semester" name="has_exam" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                    <option value="0">-</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="2">3</option>
+                    <option value="2">4</option>
+                    <option value="2">5</option>
+                    <option value="2">6</option>
+                    <option value="2">7</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
                 </div>
               </div>
-            {% endfor %}
-          {% else %}
-            <p class="text-gray-700 text-sm">
-              Nie znaleziono żadnego kursu o podanym kryterium.
-              <a href="{% url 'courses:courses' %}" class="text-blue-400 hover:text-blue-500">Wyświetl moje wszystkie kusy</a>
-            </p>
-          {% endif %}
+            </div>
+            <button @click="filterCourses" class="mt-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Filtruj
+            </button>
+            <button @click="resetFilter" class="mt-2 ml-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Resetuj
+            </a>
+          </div>
+          <div v-for="(course, index) in courses" class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-blue-400 text-white">
+                <span class="text-xs">ECTS</span>
+                [[ course.ects ]]
+              </div>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                <a v-bind:href="'/courses/'+ course.slug">[[ course.name ]]</a>
+              </h4>
+              <p class="text-sm text-gray-600"><span class="text-bold">Główny prowadzący: </span>
+                <a v-bind:href="'/profile/' + course.head_teacher.pk" class="text-blue-500 hover:text-blue-400">
+                  [[ course.head_teacher.first_name ]] [[ course.head_teacher.last_name ]]
+                </a>
+              </p>
+              <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Prowadzący: </span>
+                <span class="mr-1" v-for="(teacher, i) in course.teachers">
+                  [[ teacher.first_name ]] [[teacher.last_name ]]
+                </span>
+              </p>
+              <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Egzamin: </span>
+                <span v-if="course.has_exam">TAK</span>
+                <span v-else>NIE</span>
+              </p>
+              <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Język: [[course.language]]</span>
+              <p class="mt-1 text-sm text-gray-600"><span class="text-bold">Semestr: [[course.semester]]</span>
+              <p class="text-sm leading-6 text-gray-600">[[ course.description ]]</p>
+            </div>
+          </div>
+          <p v-if="!courses.length" class="text-gray-700 text-sm">
+            Nie znaleziono żadnego kursu o podanym kryterium.
+            <span @click="resetFilter" class="text-blue-400 cursor-pointer hover:text-blue-500">Wyświetl moje wszystkie kusy</span>
+          </p>
         {% endif %}
         <div class="mt-8 mb-2">
           <a href="{% url 'users:dashboard' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
@@ -93,3 +130,67 @@
     </div>
   </div>
 {% endblock dashboard_content %}
+
+{% block extraheads %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock extraheads %}
+
+{% block extravue %}
+  <script type="text/javascript">
+    var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#app',
+      data: {
+        courses: [],
+        courseName: '',
+        teacherName: '',
+        hasExam: 0,
+        language: '',
+        semester: 0,
+      },
+      computed: {},
+      created: function() {
+        axios({
+          method: 'get',
+          url: 'http://127.0.0.1:8080/api/list/courses/',
+          xsrfCookieName: 'csrftoken',
+          xsrfHeaderName: 'X-CSRFToken',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(r => this.courses = r.data);
+      },
+      methods: {
+        filterCourses: function() {
+          axios({
+            method: 'get',
+            url: `http://127.0.0.1:8080/api/list/courses/?name=${this.courseName}&teacher=${this.teacherName}&exam=${this.hasExam}&language=${this.language}&semester=${this.semester}`,
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }).then(r => this.courses = r.data);
+        },
+        resetFilter: function () {
+          axios({
+            method: 'get',
+            url: 'http://127.0.0.1:8080/api/list/courses/',
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }).then(r => this.courses = r.data);
+          this.courseName = '';
+          this.teacherName = '';
+          this.hasExam = 0;
+          this.language = '';
+          this.semester = 0;
+        }
+      }
+    });
+  </script>
+{% endblock extravue %}

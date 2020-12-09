@@ -1,10 +1,14 @@
 import datetime
 
-from users import models as user_models
 from tests.users import factories as user_factories
+from users import models as user_models
 
 
 class UsersDemo:
+    INFO = 'Done. Superuser: email=admin@admin.com pass=admin \n' \
+           '10 Teachers: email=teacherN@raven.test pass=teacher \n' \
+           '30 Students: email=student@raven.test pass=student\n'
+
     def generate(self):
         self.generate_admin()
 
@@ -34,10 +38,3 @@ class UsersDemo:
             student.email = f"student{i}@raven.test"
             student.set_passowrd("student")
             student.save()
-
-    def get_info(self):
-        return [
-            'Done. Superuser: email=admin@admin.com pass=admin',
-            '\t 10 Teachers: email=teacherN@raven.test pass=teacher',
-            '\t 30 Students: email=student@raven.test pass=student'
-        ]

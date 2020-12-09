@@ -12,4 +12,6 @@ app/celerybeat-schedule
 app/mediafiles/uploads
 app/.coverage
 app/htmlcov
-app/files/mediafiles
+app/.pytest_cache
+app/files/mediafiles/*
+!app/files/mediafiles/defaults/

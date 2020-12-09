@@ -1,11 +1,13 @@
+import datetime
 from typing import List
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 from django.views.generic.detail import DetailView
 
-from courses import models
+from courses import forms, models
 from users import models as users_models
 
 
@@ -13,26 +15,12 @@ class CoursesGuardianPermissionMixin(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         user = request.user
         if user.is_student:
-            student = users_models.Student.objects.get(pk=user.pk)
+            student = users_models.Student.objects.get(email=user.email)
             if student not in self.get_object().grade.students.all():
                 return redirect('courses:courses')
         if user.is_teacher:
-            teacher = users_models.Teacher.objects.get(pk=user.pk)
+            teacher = users_models.Teacher.objects.get(email=user.email)
             if teacher not in self.get_object().teachers.all():
-                return redirect('courses:courses')
-        return super().get(self, request, *args, **kwargs)
-
-
-class CoursesEditPermissionMixin(LoginRequiredMixin, DetailView):
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if user.is_student:
-            student = users_models.Student.objects.get(pk=user.pk)
-            if student not in self.get_object().grade.students.all():
-                return redirect('courses:courses')
-        if user.is_teacher:
-            teacher = users_models.Teacher.objects.get(pk=user.pk)
-            if teacher not in self.get_object().teachers.all() or teacher != self.get_object().head_teacher:
                 return redirect('courses:courses')
         return super().get(self, request, *args, **kwargs)
 
@@ -92,3 +80,711 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     slug_field = 'slug'
     slug_url_kwarg = 'the_slug'
     context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
+        context['available_labs'] = [lab for lab in self.object.laboratories.all() if lab.is_available]
+        context['student_without_groups_emails'] = [student.email for student in self.object.students_without_groups]
+        return context
+
+
+class CourseGroupJoinListView(CoursesDetailView):
+    template_name = 'courses/courses-group-join.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['groups'] = self.object.groups.all()
+        return context
+
+
+def course_group_create_view(request, the_slug):
+    user = request.user
+    course = models.Course.objects.get(slug=the_slug)
+    if not course:
+        return redirect('courses:courses')
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+
+    form = forms.CourseGroupModelForm(request.POST)
+    form.fields['students'].queryset = course.grade.students.all()
+    if request.method == 'POST':
+        form = forms.CourseGroupModelForm(request.POST)
+        if form.is_valid():
+            group = models.CourseGroup.objects.create(
+                name=form.data.get('name'),
+                course=course)
+            messages.info(request, 'Pomyslnie utworzono nową grupę.')
+            return redirect('courses:group-edit', pk=group.pk)
+        else:
+            messages.error(request, 'Spróbuj ponownie.')
+    return render(request, 'courses/groups/group-create.html', {'form': form, 'course': course})
+
+
+def course_group_delete_view(request, the_slug, num):
+    user = request.user
+    course = models.Course.objects.get(slug=the_slug)
+    group = course.groups.all()[num]
+    if not group or not course:
+        return redirect('courses:courses')
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in group.course.teachers.all():
+            return redirect('courses:courses')
+    group.delete()
+    messages.info(request, 'Pomyślnie usunięto grupe.')
+    return redirect('courses:group', the_slug=the_slug)
+
+
+def course_group_join_view(request, the_slug, num):
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        return redirect('courses:courses-detail', the_slug=the_slug)
+    course = models.Course.objects.get(slug=the_slug)
+    if course:
+        course_group = course.groups.all()[num]
+        if course_group:
+            student = users_models.Student.objects.get(email=user.email)
+            if student in course.grade.students.all() and student in course.students_without_groups:
+                course_group.students.add(student)
+                course_group.save()
+                messages.info(request, 'Pomyślnie dołączyłeś do grupy.')
+                return redirect('courses:courses-detail', the_slug=the_slug)
+    messages.error(request, 'Spróbuj ponownie.')
+    return redirect('courses:courses')
+
+
+class CourseEditView(CoursesDetailView):
+    template_name = 'courses/courses-detail-edit.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lectures'] = self.object.lectures.all()
+        context['laboratories'] = self.object.laboratories.all()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        course = models.Course.objects.get(slug=kwargs.get('the_slug'))
+        data = request.POST
+        if data:
+            course_name = data.get('name')
+            course_description = data.get('description')
+            if course_name:
+                course.name = course_name
+            if course_description:
+                course.description = course_description
+            course.save()
+            messages.info(request, 'Pomyślnie zaktualizowano kurs!')
+
+        return super().get(request, *args, **kwargs)
+
+
+class CourseGroupEditView(DetailView):
+    template_name = 'courses/groups/group-edit.html'
+    model = models.CourseGroup
+
+    def get_context_data(self, **kwargs):
+        group = self.get_object()
+        form = forms.CourseGroupModelForm(initial={
+            'name': group.name,
+            'students': group.students.all(),
+        })
+        form.fields['students'].queryset = group.course.grade.students.all() | group.course.additional_students.all()
+        context = {
+            'group': group,
+            'form': form
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        group = self.get_object()
+        form = forms.CourseGroupModelForm(request.POST)
+        if form.is_valid():
+            group.name = form.cleaned_data.get('name')
+            for student in form.cleaned_data.get('students'):
+                group.students.add(student)
+            group.save()
+            messages.info(request, 'Pomyslnie zaktualizowano grupę.')
+        else:
+            messages.error(request, 'Spróbuj ponownie.')
+        return super().get(request, *args, **kwargs)
+
+
+class LectureDetailView(DetailView):
+    template_name = 'courses/lectures/lecture-detail.html'
+    model = models.Lecture
+    context_object_name = 'lecture'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().course.grade.students.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+
+class LaboratoryDetailView(LectureDetailView):
+    template_name = 'courses/laboratories/laboratory-detail.html'
+    model = models.Laboratory
+    context_object_name = 'laboratory'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().group.students.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+
+class LaboratoryEditView(DetailView):
+    template_name = 'courses/laboratories/laboratory-edit.html'
+    model = models.Laboratory
+    context_object_name = 'laboratory'
+
+    def get_context_data(self, **kwargs):
+        laboratory = self.get_object()
+        form = forms.LaboratoryCreateForm(initial={
+            'title': laboratory.title,
+            'date': laboratory.date.strftime('%d.%m.%Y'),
+            'time': laboratory.date.strftime('%H:%M'),
+            'duration': laboratory.duration.seconds // 60,
+            'description': laboratory.description,
+            'show': laboratory.show,
+            'meeting': laboratory.create_event,
+            'group': laboratory.group,
+        })
+        form.fields['group'].queryset = models.CourseGroup.objects.filter(course=laboratory.course)
+        context = {
+            'laboratory': laboratory,
+            'form': form
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        context = self.get_context_data(**kwargs)
+        form = forms.LaboratoryCreateForm(request.POST)
+
+        if form.is_valid():
+            title = form.data.get('title')
+            date = form.data.get('date')
+            time = form.data.get('time')
+            duration = form.data.get('duration')
+            localization = request.POST.get('localization', 'Remote')
+            description = form.data.get('description', '')
+            show = form.data.get('show', False)
+            meeting = form.data.get('meeting', False)
+            group_pk = form.data.get('group')
+
+            if not group_pk:
+                messages.error(request, 'Wybierz grupę!')
+                return render(request, self.template_name, self.get_context_data(**kwargs))
+            group = get_object_or_404(models.CourseGroup, pk=group_pk)
+
+            try:
+                date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
+            except Exception:
+                date_parsed = None
+
+            try:
+                time_parsed = datetime.datetime.strptime(time, '%H:%M')
+            except Exception:
+                time_parsed = None
+
+            try:
+                minutes = int(duration)
+                duration = datetime.timedelta(minutes=minutes)
+            except Exception:
+                duration = None
+
+            if title and date_parsed and time_parsed and duration and localization and group:
+                laboratory = context['laboratory']
+                laboratory.title = title
+                laboratory.date = date_parsed + datetime.timedelta(hours=time_parsed.hour, minutes=time_parsed.minute)
+                laboratory.duration = duration
+                laboratory.location = localization
+                laboratory.description = description
+                laboratory.show = show == 'on'
+                laboratory.create_event = meeting == 'on'
+                laboratory.group = group
+
+                #TODO: tworzenie wydarzenia w Google Calendar
+                #TODO: powiadomienie (?) do prowadzącego, że utworzył labke
+                messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
+                return redirect('courses:laboratory-edit', pk=laboratory.pk)
+            else:
+                messages.error(request, 'Uzupełnij poprawnie formularz!')
+        else:
+            messages.error(request, 'Uzupełnij poprawnie formularz!')
+        return render(request, self.template_name, context)
+
+
+class LectureEditView(DetailView):
+    template_name = 'courses/lectures/lecture-edit.html'
+    model = models.Lecture
+    context_object_name = 'lecture'
+
+    def get_context_data(self, **kwargs):
+        lecture = self.get_object()
+        context = {
+            'lecture': lecture,
+            'form': forms.LectureCreateForm(initial={
+                'title': lecture.title,
+                'date': lecture.date.strftime('%d.%m.%Y'),
+                'time': lecture.date.strftime('%H:%M'),
+                'duration': lecture.duration.seconds // 60,
+                'description': lecture.description,
+                'show': lecture.show,
+                'meeting': lecture.create_event
+            })
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+
+        context = self.get_context_data(**kwargs)
+        form = forms.LectureCreateForm(request.POST)
+
+        if form.is_valid():
+            title = form.data.get('title')
+            date = form.data.get('date')
+            time = form.data.get('time')
+            duration = form.data.get('duration')
+            localization = request.POST.get('localization', 'Remote')
+            description = form.data.get('description', '')
+            show = form.data.get('show', False)
+            meeting = form.data.get('meeting', False)
+
+            try:
+                date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
+            except Exception:
+                date_parsed = None
+
+            try:
+                time_parsed = datetime.datetime.strptime(time, '%H:%M')
+            except Exception:
+                time_parsed = None
+
+            try:
+                minutes = int(duration)
+                duration = datetime.timedelta(minutes=minutes)
+            except Exception:
+                duration = None
+
+            if title and date_parsed and time_parsed and duration and localization:
+                lecture = context['lecture']
+                lecture.title = title
+                lecture.date = date_parsed + datetime.timedelta(hours=time_parsed.hour, minutes=time_parsed.minute)
+                lecture.duration = duration
+                lecture.location = localization
+                lecture.description = description
+                lecture.show = show == 'on'
+                lecture.create_event = meeting == 'on'
+
+                #TODO: update wydarzenia w Google Calendar
+                #TODO: powiadomienie (?) do prowadzącego, że utworzył wykład
+                lecture.save()
+                messages.info(request, 'Pomyślnie zaktualizowano wykład!')
+                return redirect('courses:lectures-edit', pk=lecture.pk)
+            else:
+                messages.error(request, 'Uzupełnij poprawnie formularz!')
+        else:
+            messages.error(request, 'Uzupełnij poprawnie formularz!')
+        return render(request, self.template_name, context)
+
+
+class LaboratoryCreateView(DetailView):
+    template_name = 'courses/laboratories/laboratory-create.html'
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        course = self.get_object()
+
+        form = forms.LaboratoryCreateForm()
+        form.fields['group'].queryset = models.CourseGroup.objects.filter(course=course)
+
+        return {
+            'course': course,
+            'form': form
+        }
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        form = forms.LaboratoryCreateForm(request.POST)
+
+        if form.is_valid():
+            title = form.data.get('title')
+            date = form.data.get('date')
+            time = form.data.get('time')
+            duration = form.data.get('duration')
+            localization = request.POST.get('localization', 'Remote')
+            description = form.data.get('description', '')
+            show = form.data.get('show', False)
+            meeting = form.data.get('meeting', False)
+            group_pk = form.data.get('group')
+
+            if not group_pk:
+                messages.error(request, 'Wybierz grupę!')
+                return render(request, self.template_name, self.get_context_data(**kwargs))
+            group = get_object_or_404(models.CourseGroup, pk=group_pk)
+
+            try:
+                date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
+            except Exception:
+                date_parsed = None
+
+            try:
+                time_parsed = datetime.datetime.strptime(time, '%H:%M')
+            except Exception:
+                time_parsed = None
+
+            try:
+                minutes = int(duration)
+                duration = datetime.timedelta(minutes=minutes)
+            except Exception:
+                duration = None
+
+            if title and date_parsed and time_parsed and duration and localization and group:
+                laboratory = models.Laboratory.objects.create(
+                    course=self.get_object(),
+                    group=group,
+                    title=title,
+                    location=localization,
+                    description=description,
+                    date=date_parsed + datetime.timedelta(hours=time_parsed.hour, minutes=time_parsed.minute),
+                    duration=duration,
+                    show=show == 'on',
+                    create_event=meeting == 'on',
+                )
+                #TODO: tworzenie wydarzenia w Google Calendar
+                #TODO: powiadomienie (?) do prowadzącego, że utworzył labke
+                messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
+                return redirect('courses:laboratory-detail', pk=laboratory.pk)
+            else:
+                messages.error(request, 'Uzupełnij poprawnie formularz!')
+        else:
+            messages.error(request, 'Uzupełnij poprawnie formularz!')
+        return render(request, self.template_name, self.get_context_data(**kwargs))
+
+
+class LectureCreateView(DetailView):
+    template_name = 'courses/lectures/lecture-create.html'
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        return {
+            'course': self.get_object(),
+            'form': forms.LectureCreateForm
+        }
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        form = forms.LectureCreateForm(request.POST)
+
+        if form.is_valid():
+            title = form.data.get('title')
+            date = form.data.get('date')
+            time = form.data.get('time')
+            duration = form.data.get('duration')
+            localization = request.POST.get('localization', 'Remote')
+            description = form.data.get('description', '')
+            show = form.data.get('show', False)
+            meeting = form.data.get('meeting', False)
+
+            try:
+                date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
+            except Exception:
+                date_parsed = None
+
+            try:
+                time_parsed = datetime.datetime.strptime(time, '%H:%M')
+            except Exception:
+                time_parsed = None
+
+            try:
+                minutes = int(duration)
+                duration = datetime.timedelta(minutes=minutes)
+            except Exception:
+                duration = None
+
+            if title and date_parsed and time_parsed and duration and localization:
+                lecture = models.Lecture.objects.create(
+                    course=self.get_object(),
+                    title=title,
+                    location=localization,
+                    description=description,
+                    date=date_parsed + datetime.timedelta(hours=time_parsed.hour, minutes=time_parsed.minute),
+                    duration=duration,
+                    show=show == 'on',
+                    create_event=meeting == 'on',
+                )
+                #TODO: tworzenie wydarzenia w Google Calendar
+                #TODO: powiadomienie (?) do prowadzącego, że utworzył wykład
+                messages.info(request, 'Pomyślnie utworzono nowy wykład!')
+                return redirect('courses:lectures-detail', pk=lecture.pk)
+            else:
+                messages.error(request, 'Uzupełnij poprawnie formularz!')
+        else:
+            messages.error(request, 'Uzupełnij poprawnie formularz!')
+        return render(request, self.template_name, self.get_context_data(**kwargs))
+
+
+def delete_lecture_view(request, the_slug, num):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    course = models.Course.objects.get(slug=the_slug)
+    if course:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+        lecture = course.lectures.all()[num]
+        lecture.delete()
+        #TODO: usuwanie spotkania
+        messages.info(request, 'Pomyślnie usunięto wykład!')
+    return redirect('courses:courses-edit', the_slug=course.slug)
+
+
+def lecture_add_file(request, pk):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    lecture = models.Lecture.objects.get(pk=pk)
+    if lecture:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in lecture.course.teachers.all():
+            return redirect('courses:courses')
+
+        if request.method == 'GET':
+            return render(request, 'courses/lectures/lecture-file.html', {'lecture': lecture,
+                                                                       'form': forms.CourseFileForm})
+
+        form = forms.CourseFileForm(request.POST, request.FILES)
+
+        name = form.data.get('filename')
+        description = form.data.get('description')
+        file = request.FILES.get('file')
+
+        if name and file:
+            course_file = models.CourseFile.objects.create(
+                name=name, file=file, description=description
+            )
+            lecture.files.add(course_file)
+            lecture.save()
+            messages.info(request, 'Pomyślnie dodano plik!')
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+            return render(request, 'courses/lectures/lecture-file.html', {'lecture': lecture, 'form': forms.CourseFileForm})
+    return redirect('courses:lectures-edit', pk=lecture.pk)
+
+
+def laboratory_add_file(request, pk):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    laboratory = models.Laboratory.objects.get(pk=pk)
+    if laboratory:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in laboratory.course.teachers.all():
+            return redirect('courses:courses')
+
+        if request.method == 'GET':
+            return render(request, 'courses/laboratories/laboratory-file.html',
+                          {'laboratory': laboratory, 'form': forms.CourseFileForm})
+
+        form = forms.CourseFileForm(request.POST, request.FILES)
+
+        name = form.data.get('filename')
+        description = form.data.get('description')
+        file = request.FILES.get('file')
+
+        if name and file:
+            course_file = models.CourseFile.objects.create(
+                name=name, file=file, description=description
+            )
+            laboratory.files.add(course_file)
+            laboratory.save()
+            messages.info(request, 'Pomyślnie dodano plik!')
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+            return render(request, 'courses/lectures/lecture-file.html',
+                          {'laboratory': laboratory, 'form': forms.CourseFileForm})
+    return redirect('courses:laboratory-edit', pk=laboratory.pk)
+
+
+def delete_lecture_file(request, pk, num):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    lecture = models.Lecture.objects.get(pk=pk)
+    if lecture:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in lecture.course.teachers.all():
+            return redirect('courses:courses')
+
+        file = lecture.files.all()[num]
+        file.delete()
+        lecture.save()
+        messages.info(request, 'Pomyślnie usunięto plik!')
+    return redirect('courses:lectures-edit', pk=lecture.pk)
+
+
+def delete_laboratory_file(request, pk, num):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+    laboratory = models.Laboratory.objects.get(pk=pk)
+    if laboratory:
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+        else:
+            redirect('courses:courses')
+        if teacher not in laboratory.course.teachers.all():
+            return redirect('courses:courses')
+
+        file = laboratory.files.all()[num]
+        file.delete()
+        laboratory.save()
+        messages.info(request, 'Pomyślnie usunięto plik!')
+    return redirect('courses:laboratory-edit', pk=laboratory.pk)

@@ -1,9 +1,10 @@
 from tests.courses import factories
-
 from users.models import Student, Teacher
 
 
 class CourseDemo:
+    INFO = 'Done. Generated Grades and Courses.'
+
     def generate(self):
         for i in range(3):
             self.generate_course(i)
@@ -21,10 +22,10 @@ class CourseDemo:
             course = factories.CourseFactory(grade=grade, teachers=[])
             for teacher in teachers:
                 course.teachers.add(teacher)
+            for _ in range(5):
+                lecture = factories.LectureFactory()
+                course.lectures.add(lecture)
+            for _ in range(3):
+                factories.CourseGroupFactory(course=course)
             course.save()
         grade.save()
-
-    def get_info(self):
-        return [
-            'Done. Generated Grades and Courses.'
-        ]

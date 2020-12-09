@@ -1,0 +1,106 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a> /
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a> /
+          Dołącz do grupy
+        </h4>
+        <div class="px-4 py-4 mx-2">
+          <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Dostępne grupy laboratoryjne</a></h4>
+          {% if not groups %}
+            <p class="text-gray-700 text-sm">
+              Nie znaleziono żadnej grupy laboratoryjnej.
+            </p>
+          {% endif %}
+          {% for group in groups %}
+            <div class="flex mb-4">
+              <div class="flex-shrink-0">
+                <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-blue-400 text-white">
+                  {{ forloop.counter }}
+                </div>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200">
+                  {{ group.name }}
+                </h4>
+                <p class="text-xs">Ilość studentów: {{ group.students_count }}</p>
+                <div class="mt-2">
+                  {% if request.user.is_student %}
+                  <span @click="joinGroup({{ forloop.counter0 }})" class="cursor-pointer text-xs font-bold px-1 transition-all duration-200 py-1 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                    Dołącz
+                  </span>
+                  {% else %}
+                    <a href="{% url 'courses:group-edit' group.pk %}" class="cursor-pointer text-xs font-bold px-1 transition-all duration-200 py-1 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                      Edytuj
+                    </a>
+                    <span @click="deleteGroup({{ forloop.counter0 }})" class="ml-2 cursor-pointer text-xs font-bold px-1 transition-all duration-200 py-1 px-2 rounded-lg bg-red-200 text-gray-800 hover:text-gray-900 hover:bg-red-300">
+                      USUN
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if request.user.is_teacher %}
+          <a href="{% url 'courses:group-create' course.slug %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+            Dodaj grupę
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+
+{% block extraheads %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock extraheads %}
+
+{% block extravue %}
+  <script type="text/javascript">
+    var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#app',
+      data: {},
+      methods: {
+        joinGroup: function(num) {
+          Swal.fire({
+            text: "Czy na pewno chcesz dołączyć do tej grupy?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Tak!',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const slug = "{{ course.slug }}"
+              window.location.href = `/courses/${slug}/groups/join/${num}`
+            }
+          })
+        },
+        deleteGroup: function (num) {
+          Swal.fire({
+            text: "Czy na pewno chcesz usunąć tę grupę?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Tak!',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const slug = "{{ course.slug }}"
+              window.location.href = `/courses/${slug}/groups/${num}/delete/`
+            }
+          })
+        }
+      }
+    });
+  </script>
+{% endblock extravue %}

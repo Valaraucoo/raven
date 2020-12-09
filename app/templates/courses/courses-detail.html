@@ -4,15 +4,8 @@
 {% block dashboard_content %}
   <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
-      <div class="px-4 py-4">
-        <div class="mb-8 mt-2">
-          <a href="{% url 'courses:courses' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
-            Wroc do moich kursow
-          </a>
-        </div>
-        <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
-          <a href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a>
-        </h4>
+      <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2"><a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a> / {{ course.name }}</a></h4>
         <p class="text-sm text-gray-600"><span class="text-bold">Główny prowadzący: </span>
           <a href="{% url 'users:profile-detail' course.head_teacher.pk %}" class="text-blue-500 hover:text-blue-400">
             {{ course.head_teacher.first_name }} {{ course.head_teacher.last_name }}
@@ -25,19 +18,102 @@
             </a>
           {% endfor %}
         </p>
-        <p class="text-sm leading-6 text-gray-600">{{ course.description }}</p>
-
-        <button id="details-btn" class="text-sm flex flex-row items-center px-4 py-2 mt-2 font-semibold text-left bg-transparent bg-gray-200 rounded-lg dark-mode:bg-transparent dark-mode:focus:text-white dark-mode:hover:text-white dark-mode:focus:bg-gray-600 dark-mode:hover:bg-gray-600 md:block hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-          <span class="">Szczegoly</span>
-          <svg id="indicator" fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-        </button>
-        <div class="course__details mt-2">
-          <div class="text-sm text-gray-600">
-            <p class="font-bold">Opis kursu:</p>
-            <p>{% if course.description %}{{ course.description }}{% else %}-{% endif %}</p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus adipisci delectus, dicta labore magni nihil nostrum omnis praesentium quasi sit ullam ut. Adipisci alias assumenda dicta illo. Ad autem blanditiis dolorem dolores facere fugiat incidunt ipsum iure magnam modi, nemo nihil nobis perspiciatis provident qui quo repellat rerum saepe ut.
-          </div>
+        <div class="text-sm text-gray-600">
+          <p class="font-bold">Opis kursu:</p>
+          <p>{% if course.description %}{{ course.description }}{% else %}-{% endif %}</p>
         </div>
+        <div class="flex mt-4 mb-4">
+          <a href="#" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
+            Ogłoszenia
+          </a>
+          {% if request.user.email in student_without_groups_emails %}
+          <a href="{% url 'courses:group' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
+            Dołącz do grupy
+          </a>
+          {% endif %}
+          {% if request.user.is_teacher %}
+            <a href="{% url 'courses:courses-edit' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-blue-200 text-gray-800 hover:text-gray-900 hover:bg-blue-300">
+              Edytuj kurs
+            </a>
+            <a href="{% url 'courses:group' course.slug %}" class="ml-2 text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-blue-200 text-gray-800 hover:text-gray-900 hover:bg-blue-300">
+              Zarządzaj grupami
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="px-4 py-4 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Dostępne wykłady</a></h4>
+        {% if not available_lectures %}
+        <p class="text-gray-700 text-sm">
+          Nie znaleziono żadnego dostępnego wykładu.
+        </p>
+        {% endif %}
+        {% for lecture in available_lectures %}
+          <div class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md {% if lecture.was_held %}bg-blue-400{% else %}bg-green-400{% endif %} text-white">
+                {{ forloop.counter }}
+              </div>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                <a style="cursor: pointer;" href="{% url 'courses:lectures-detail' lecture.pk %}">{{ lecture.title }}</a>
+              </h4>
+              <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
+                {{ lecture.date|date:"d.m.Y (H:i)" }}{% if lecture.was_held %}X{% endif %}
+              </p>
+              <p class="text-sm text-gray-600"><span class="font-medium">Szczegóły: </span>
+                {{ lecture.description }}
+              </p>
+              <p class="text-sm text-gray-600"><span class="text-bold">Dodatkowe materiały: </span>
+                {% if lecture.files.all %}
+                  {% for file in lecture.files.all %}
+                    <a class="text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="px-4 py-4 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Dostępne laboratoria</a></h4>
+        {% if not available_labs %}
+          <p class="text-gray-700 text-sm">
+            Nie znaleziono żadnego dostępnego wykładu.
+          </p>
+        {% endif %}
+        {% for lab in available_labs %}
+          <div class="flex mb-4">
+            <div class="flex-shrink-0">
+              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md {% if lab.was_held %}bg-blue-400{% else %}bg-green-400{% endif %} text-white">
+                {{ forloop.counter }}
+              </div>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 hover:text-gray-600">
+                <a style="cursor: pointer;" href="{% url 'courses:laboratory-detail' lab.pk %}">{{ lab.title }}</a>
+              </h4>
+              <p class="text-sm text-gray-600"><span class="font-medium">Data wydarzenia: </span>
+                {{ lab.date|date:"d.m.Y (H:i)" }}{% if lab.was_held %}X{% endif %}
+              </p>
+              <p class="text-sm text-gray-600"><span class="font-medium">Szczegóły: </span>
+                {{ lab.description }}
+              </p>
+              <p class="text-sm text-gray-600"><span class="text-bold">Dodatkowe materiały: </span>
+                {% if lab.files.all %}
+                  {% for file in lab.files.all %}
+                    <a class="text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>

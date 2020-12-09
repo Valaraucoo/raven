@@ -1,0 +1,51 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
+          / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' laboratory.course.slug %}">{{ laboratory.course.name }}</a> /
+          <a href="{% url 'courses:laboratory-detail' laboratory.pk %}" class="text-gray-700 transition-all duration-200 hover:text-gray-600">{{ laboratory.title }}</a> / Dodaj plik
+          </a>
+        </h4>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                Nazwa pliku
+              </label>
+              {{ form.filename }}
+            </div>
+          </div>
+          <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                Opis
+              </label>
+              {{ form.description }}
+            </div>
+          </div>
+          <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                Plik
+              </label>
+              {{ form.file }}
+            </div>
+          </div>
+          <div class="flex flex-wrap -mx-3 mb-6 px-3">
+            <button type="submit" class="text-sm font-bold mt-2 mb-4 px-3 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Dodaj plik
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+

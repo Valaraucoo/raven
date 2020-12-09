@@ -23,7 +23,7 @@
           <div class="py-1 rounded-md bg-white shadow-xs" role="menu" aria-orientation="vertical" aria-labelledby="user-menu">
             <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Mój profil</a>
 
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Settings</a>
+            <a href="{% url 'users:profile-edit' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edytuj profil</a>
 
             <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Wyloguj</a>
           </div>
