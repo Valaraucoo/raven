@@ -84,7 +84,20 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
-        context['available_labs'] = [lab for lab in self.object.laboratories.all() if lab.is_available]
+        labs = self.object.laboratories.all()
+        if self.request.user.is_teacher:
+            context['available_labs'] = [lab for lab in labs if lab.is_available]
+        else:
+            user = self.request.user
+            student = users_models.Student.objects.get(pk=user.pk)
+            course = self.get_object()
+            if student in course.students_without_groups:
+                context['available_labs'] = []
+            else:
+                student_group = models.CourseGroup.objects.filter(
+                    course=course, students__email__contains=student.email
+                ).first()
+                context['available_labs'] = [lab for lab in labs if (lab.is_available and student_group == lab.group)]
         context['student_without_groups_emails'] = [student.email for student in self.object.students_without_groups]
         return context
 

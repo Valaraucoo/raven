@@ -7,24 +7,24 @@ class CourseDemo:
 
     def generate(self):
         for i in range(3):
-            self.generate_course(i)
+            self.generate_course()
 
     @staticmethod
-    def generate_course(i) -> None:
+    def generate_course() -> None:
         grade = factories.GradeFactory()
-        students = Student.objects.all()[i*10:i*10+9]
-        for student in students:
-            grade.students.add(student)
-
-        teachers = Teacher.objects.all()[i:i+3]
 
         for _ in range(3):
             course = factories.CourseFactory(grade=grade, teachers=[])
-            for teacher in teachers:
+            group = factories.GroupFactory(course=course)
+
+            for teacher in course.teachers.all():
                 course.teachers.add(teacher)
             for _ in range(5):
-                lecture = factories.LectureFactory()
+                lecture = factories.LectureFactory(course=course)
                 course.lectures.add(lecture)
+            for _ in range(5):
+                lab = factories.LabFactory(course=course, group=group)
+                course.laboratories.add(lab)
             for _ in range(3):
                 factories.CourseGroupFactory(course=course)
             course.save()

@@ -1,4 +1,5 @@
 import datetime
+import random
 
 import factory
 import factory.fuzzy as fuzzy
@@ -6,6 +7,8 @@ import factory.fuzzy as fuzzy
 from courses import models
 from courses.models import LANGUAGE_CHOICES, PROFILE_CHOICES
 from tests.users import factories as users_factories
+
+from users import models as users_models
 
 PROFILE_CHOICES = [x[0] for x in PROFILE_CHOICES]
 LANGUAGE_CHOICES = [x[0] for x in LANGUAGE_CHOICES]
@@ -28,8 +31,9 @@ class GradeFactory(factory.django.DjangoModelFactory):
             for student in extracted:
                 self.students.add(student)
         else:
-            for _ in range(10):
-                self.students.add(users_factories.StudentFactory())
+            random_students = random.choices(users_models.Student.objects.all(), k=10)
+            for student in random_students:
+                self.students.add(student)
 
 
 class CourseFactory(factory.django.DjangoModelFactory):
@@ -55,14 +59,41 @@ class CourseFactory(factory.django.DjangoModelFactory):
             for teacher in extracted:
                 self.teachers.add(teacher)
         else:
-            for _ in range(3):
-                self.teachers.add(users_factories.TeacherFactory())
+            random_teachers = random.choices(users_models.Teacher.objects.all(), k=5)
+            for teacher in random_teachers:
+                self.teachers.add(teacher)
 
 
 class LectureFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Lecture
     course = factory.SubFactory(CourseFactory)
+    title = fuzzy.FuzzyText(length=16)
+    description = factory.Faker('text')
+    date = fuzzy.FuzzyDate(
+        start_date=datetime.date.today() - datetime.timedelta(days=100),
+        end_date=datetime.date.today() + datetime.timedelta(days=100),
+    )
+
+
+class GroupFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.CourseGroup
+    name = fuzzy.FuzzyText(length=16)
+    @factory.post_generation
+    def students(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for student in extracted:
+                self.students.add(student)
+
+
+class LabFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Laboratory
+    course = factory.SubFactory(CourseFactory)
+    group = factory.SubFactory(GroupFactory)
     title = fuzzy.FuzzyText(length=16)
     description = factory.Faker('text')
     date = fuzzy.FuzzyDate(
