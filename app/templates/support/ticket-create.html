@@ -1,0 +1,44 @@
+{% extends "users/login.html" %}
+{% load static %}
+
+{% block form %}
+  <div class="header">
+    <img class="mx-auto w-auto" src="{% static 'images/logo.png' %}" alt="Workflow">
+    <h2 class="animation a1" >Witamy w supporcie!</h2>
+    <h4 class="animation a2">W razie problemów kontaktuj się z nami!</h4>
+  </div>
+  <div class="form">
+  <form class="mt-8" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="remember" value="true">
+    <div>
+      <div class="relative mb-2">
+        <select name="category" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+          <option value="0">Inny problem</option>
+          <option value="1">Problem z logowaniem</option>
+          <option value="2">Problem z komunikacją</option>
+          <option value="3">Zapomniane hasło</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        </div>
+      </div>
+      {% if not request.user.is_authenticated %}
+      <div>
+        {{ form.email }}
+      </div>
+      <div>
+        {{ form.fullname }}
+      </div>
+      {% endif %}
+      <div>
+        {{ form.description }}
+      </div>
+    </div>
+    <div class="login-button">
+      <button type="submit" class="group">
+        Wyślij
+      </button>
+    </div>
+  </form>
+{% endblock form %}
