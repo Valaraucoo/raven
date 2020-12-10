@@ -5,6 +5,7 @@
 
 <div class="container">
   <div class="left">
+    {% block form %}
     <div class="header">
       <img class="mx-auto w-auto" src="{% static 'images/logo.png' %}" alt="Workflow">
       <h2 class="animation a1" >Witaj ponownie!</h2>
@@ -91,6 +92,7 @@
         </div>
       </div>
     </div>
+    {% endblock form %}
   </div>
   </div>
   <div class="right"></div>

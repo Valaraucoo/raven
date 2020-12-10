@@ -17,6 +17,7 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 APPS = [
     'users',
     'courses',
+    'support',
     'utils',
 ]
 
