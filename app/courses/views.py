@@ -342,7 +342,7 @@ class LaboratoryEditView(DetailView):
             return redirect('courses:courses')
         if user.is_teacher:
             teacher = users_models.Teacher.objects.get(email=user.email)
-            if teacher not in self.get_object().teachers.all():
+            if teacher not in self.get_object().course.teachers.all():
                 return redirect('courses:courses')
 
         context = self.get_context_data(**kwargs)
