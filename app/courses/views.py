@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 from django.views.generic.detail import DetailView
 
-from courses import forms, models
+from courses import forms, models, tasks
 from users import models as users_models
 
 
@@ -801,3 +801,65 @@ def delete_laboratory_file(request, pk, num):
         laboratory.save()
         messages.info(request, 'Pomyślnie usunięto plik!')
     return redirect('courses:laboratory-edit', pk=laboratory.pk)
+
+
+class CourseNoticeView(DetailView):
+    template_name = "courses/notices/notices.html"
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+    form_class = forms.CourseNoticeModelForm
+
+    def get_context_data(self, **kwargs):
+        course = self.get_object()
+        notices = course.notices.all()
+        return {
+            'course': course,
+            'notices': notices,
+            'form': self.get_form_class()
+        }
+
+    def get_form_class(self, **kwargs):
+        return self.form_class(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().grade.students.all():
+                return redirect('courses:courses')
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        if user.is_student:
+            return super().get(request, *args, **kwargs)
+
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            notice = form.save(commit=False)
+            notice.sender = users_models.Teacher.objects.get(email=user.email)
+            notice.course = self.get_object()
+            notice.save()
+            messages.info(request, 'Pomyślnie utworzono nowe ogłoszenie!')
+
+            students_emails = [student.email for student in notice.course.grade.students.all()]
+            tasks.send_new_notice_notification_email(notice, bcc=[], email_to=students_emails)
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+        return super().get(request, *args, **kwargs)

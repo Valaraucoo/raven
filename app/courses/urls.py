@@ -35,6 +35,8 @@ urlpatterns = [
     path('courses/groups/<int:pk>/', views.CourseGroupEditView.as_view(), name='group-edit'),
     path('courses/<slug:the_slug>/groups/<int:num>/delete/', views.course_group_delete_view, name='group-delete'),
 
+    path('courses/<slug:the_slug>/notices/', views.CourseNoticeView.as_view(), name='notices'),
+
     path('', include(router.urls)),
     path('api/list/courses/', CourseListView.as_view()),
     path('api/courses/<slug:the_slug>/additional-student/', additional_course_student),

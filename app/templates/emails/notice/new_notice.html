@@ -1,0 +1,4 @@
+<b>Data:</b> {{ notice.created_at|date:"y.m.Y" }} <br>
+<b>Od:</b> {{ notice.sender.first_name }} {{ notice.sender.last_name }} <br>
+<b>Kurs: </b> {{ notice.course.name }} <br>
+{{ notice.content }}

@@ -48,3 +48,8 @@ class LaboratoryAdmin(admin.ModelAdmin):
 @admin.register(models.CourseGroup)
 class GroupAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.CourseNotice)
+class CourseNoticeAdmin(admin.ModelAdmin):
+    pass

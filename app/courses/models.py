@@ -241,3 +241,20 @@ class LectureMark(models.Model):
         super().clean()
         if self.student not in self.lecture.course.grade.students.all():
             raise ValidationError('Student must be one of the course students.')
+
+
+class CourseNotice(models.Model):
+    course = models.ForeignKey('Course', related_name='notices', on_delete=models.CASCADE)
+    sender = models.ForeignKey('users.Teacher', related_name='notices', on_delete=models.CASCADE)
+    # NOTE: take care about sender Teacher must be one of the teachers at specified course
+
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Course Notice: {self.course}, {self.title}'
+
+    class Meta:
+        ordering = ('-created_at', 'title',)
