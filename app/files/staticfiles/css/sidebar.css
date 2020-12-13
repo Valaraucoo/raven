@@ -41,7 +41,7 @@
 }
 @media screen and (max-height: 450px) {
   .sidebar {padding-top: 10px;}
-  .sidebar a, .dropdown-btn {font-size: 15px;}
+  .sidebar a, .dropdown-btn {font-size: 12px;}
 }
 #logo_background{
     width: 145px;
