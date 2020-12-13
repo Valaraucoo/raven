@@ -9,21 +9,7 @@
     </div>
   </div>
 {% endblock content %}
-
-{% block extrascripts %}
-const profileInfo = document.querySelector('#profile-info');
-const profileImg = document.querySelector('#profile-img');
-
-document.addEventListener('click', (e) => {
-  let isInfoClicked = profileInfo.contains(event.target);
-  let isImgClicked = profileImg.contains(event.target);
-  if (isImgClicked) {
-    profileInfo.classList.toggle('hidden');
-  } else if (! isInfoClicked) {
-    profileInfo.classList.add('hidden');
-  }
-});
-{% endblock extrascripts %}
+{% block extrascripts %}{% endblock extrascripts %}
 {% block extraheads %}
    <link rel="stylesheet" href="{% static "css/sidebar.css" %}">
 {% endblock extraheads %}

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block dashboard_content %}
-  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+  <div id="groups" class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
       <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
@@ -59,7 +59,6 @@
 
 {% block extraheads %}
   {{ block.super }}
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 {% endblock extraheads %}
 
@@ -67,7 +66,7 @@
   <script type="text/javascript">
     var app = new Vue({
       delimiters: ['[[', ']]'],
-      el: '#app',
+      el: '#groups',
       data: {},
       methods: {
         joinGroup: function(num) {

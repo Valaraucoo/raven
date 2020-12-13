@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block dashboard_content %}
-  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
-  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+  <div id="lecture" class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
       <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
@@ -128,7 +127,7 @@
   <script type="text/javascript">
     var app = new Vue({
       delimiters: ['[[', ']]'],
-      el: '#app',
+      el: '#lecture',
       data: {},
       methods: {
         deleteFile: function(num) {
