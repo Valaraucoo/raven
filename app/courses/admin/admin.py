@@ -52,4 +52,6 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.CourseNotice)
 class CourseNoticeAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ('course', 'sender')
+    filter_horizontal = ('not_viewed',)
+    list_display = ('course', 'title', 'sender', 'created_at',)

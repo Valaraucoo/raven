@@ -197,6 +197,10 @@ class Event(models.Model):
     def was_held(self) -> bool:
         return self.date < timezone.now()
 
+    @property
+    def end_date(self) -> datetime.datetime:
+        return self.date + self.duration
+
 
 class Lecture(Event):
     course = models.ForeignKey('Course', related_name='lectures', on_delete=models.CASCADE)
@@ -247,6 +251,8 @@ class CourseNotice(models.Model):
     course = models.ForeignKey('Course', related_name='notices', on_delete=models.CASCADE)
     sender = models.ForeignKey('users.Teacher', related_name='notices', on_delete=models.CASCADE)
     # NOTE: take care about sender Teacher must be one of the teachers at specified course
+
+    not_viewed = models.ManyToManyField('users.Student', related_name='not_viewed_notices', blank=True)
 
     title = models.CharField(max_length=255)
     content = models.TextField()

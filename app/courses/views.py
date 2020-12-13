@@ -253,6 +253,8 @@ class CourseGroupEditView(DetailView):
         form = forms.CourseGroupModelForm(request.POST)
         if form.is_valid():
             group.name = form.cleaned_data.get('name')
+            for student in group.students.all():
+                group.students.remove(student)
             for student in form.cleaned_data.get('students'):
                 group.students.add(student)
             group.save()
@@ -390,6 +392,7 @@ class LaboratoryEditView(DetailView):
                 laboratory.show = show == 'on'
                 laboratory.create_event = meeting == 'on'
                 laboratory.group = group
+                laboratory.save()
 
                 #TODO: tworzenie wydarzenia w Google Calendar
                 #TODO: powiadomienie (?) do prowadzącego, że utworzył labke
@@ -855,6 +858,11 @@ class CourseNoticeView(DetailView):
             notice = form.save(commit=False)
             notice.sender = users_models.Teacher.objects.get(email=user.email)
             notice.course = self.get_object()
+            notice.save()
+            for student in notice.not_viewed.all():
+                notice.not_viewed.remove(student)
+            for student in self.get_object().grade.students.all():
+                notice.not_viewed.add(student)
             notice.save()
             messages.info(request, 'Pomyślnie utworzono nowe ogłoszenie!')
 

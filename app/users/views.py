@@ -1,13 +1,19 @@
+import datetime
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import DetailView
 
 from core import settings
-from users import forms, tasks
+from users import forms, tasks, models
+
+from courses import models as courses_models
 
 
 def delete_profile_image(request):
@@ -105,17 +111,135 @@ class ProfileEditView(ProfileView):
 
 
 class DashboardView(generic.View, LoginRequiredMixin):
-    template_name = 'dashboard/dashboard.html'
+    template_name = 'dashboard/main-page.html'
 
     def get_context_data(self, *args, **kwargs):
+        courses = courses_models.Course.objects.none()
+        if self.request.user.is_teacher:
+            teacher = models.Teacher.objects.get(email=self.request.user.email)
+            courses = teacher.courses_teaching.all()
+        else:
+            student = models.Student.objects.get(email=self.request.user.email)
+            for grade in student.grades.all():
+                courses |= grade.courses.all()
+        notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')[:3]
+        lectures = courses_models.Lecture.objects.filter(course__in=courses,
+                                                         date__gte=timezone.now(),
+                                                         date__lte=timezone.now()+timedelta(days=14)
+                                                         ).order_by('date')[:3]
+        laboratories = courses_models.Laboratory.objects.filter(course__in=courses,
+                                                                date__gte=timezone.now(),
+                                                                date__lte=timezone.now()+timedelta(days=14),
+                                                                ).order_by('date')
+        if self.request.user.is_student:
+            laboratories = laboratories.filter(group__students__email__contains=self.request.user.email)
+        laboratories = laboratories[:3]
+
+        not_viewed_notices = courses_models.CourseNotice.objects.filter(
+            course__in=courses,
+            not_viewed__email=self.request.user.email
+        ).order_by('-created_at')
+
         return {
             'user': self.request.user,
+            'courses': courses,
+            'courses_count': len(courses),
+            'notices': notices,
+            'now': timezone.now(),
+            'lectures': lectures,
+            'laboratories': laboratories,
+            'not_viewed_notices': not_viewed_notices.count()
         }
 
     def get(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated:
             return redirect(settings.LOGIN_URL)
         context = self.get_context_data(*args, **kwargs)
+        return render(request, self.template_name, context)
+
+
+class ScheduleView(LoginRequiredMixin, generic.View):
+    template_name = 'dashboard/schedule.html'
+
+    def get_context_data(self, *args, **kwargs):
+        courses = courses_models.Course.objects.none()
+
+        if self.request.user.is_teacher:
+            teacher = models.Teacher.objects.get(email=self.request.user.email)
+            courses = teacher.courses_teaching.all()
+        else:
+            student = models.Student.objects.get(email=self.request.user.email)
+            for grade in student.grades.all():
+                courses |= grade.courses.all()
+        lectures = courses_models.Lecture.objects.filter(course__in=courses,
+                                                         date__gte=timezone.now(),
+                                                         date__lte=timezone.now()+timedelta(days=5)
+                                                         ).order_by('date')
+        laboratories = courses_models.Laboratory.objects.filter(course__in=courses,
+                                                                date__gte=timezone.now(),
+                                                                date__lte=timezone.now()+timedelta(days=5),
+                                                                ).order_by('date')
+        if self.request.user.is_student:
+            laboratories = laboratories.filter(group__students__email__contains=self.request.user.email)
+
+        today = datetime.date.today()
+        schedule = []
+        for i in range(5):
+            date = today + timedelta(days=i)
+            schedule.append({
+                'date': date,
+                'labs': laboratories.filter(date__day=date.day, date__month=date.month, date__year=date.year),
+                'lectures': lectures.filter(date__day=date.day, date__month=date.month, date__year=date.year),
+                'is_weekend': date.weekday() >= 5
+            })
+        return {
+            'user': self.request.user,
+            'schedule': schedule
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        context = self.get_context_data(*args, **kwargs)
+        return render(request, self.template_name, context)
+
+
+class NoticeView(LoginRequiredMixin, generic.View):
+    template_name = 'dashboard/notice.html'
+
+    def get_context_data(self, *args, **kwargs):
+        courses = courses_models.Course.objects.none()
+
+        if self.request.user.is_teacher:
+            teacher = models.Teacher.objects.get(email=self.request.user.email)
+            courses = teacher.courses_teaching.all()
+        else:
+            student = models.Student.objects.get(email=self.request.user.email)
+            for grade in student.grades.all():
+                courses |= grade.courses.all()
+        notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')
+        notices_obj = []
+        for notice in notices:
+            notices_obj.append({
+                'notice': notice,
+                'is_new': self.request.user in notice.not_viewed.all()
+            })
+        return {
+            'user': self.request.user,
+            'notices': notices_obj
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        context = self.get_context_data(*args, **kwargs)
+        notices = context.get('notices')
+
+        if self.request.user.is_student:
+            student = models.Student.objects.get(email=self.request.user.email)
+            for notice in notices:
+                if student in notice['notice'].not_viewed.all():
+                    notice['notice'].not_viewed.remove(student)
         return render(request, self.template_name, context)
 
 
@@ -187,7 +311,7 @@ class LoginView(generic.View):
 class LogoutView(LoginRequiredMixin, generic.View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            messages.info(request, 'See you soon!')
+            messages.info(request, 'Do zobaczenia ponownie!')
             logout(request)
             request.session['email'] = None
             request.session['password'] = None
