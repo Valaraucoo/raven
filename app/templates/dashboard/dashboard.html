@@ -25,5 +25,27 @@ document.addEventListener('click', (e) => {
 });
 {% endblock extrascripts %}
 {% block extraheads %}
-   <link rel="stylesheet" href="{% static "css/sidebar.css" %}">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+    <link rel="stylesheet" href="{% static "css/sidebar.css" %}">
 {% endblock extraheads %}
+{% block extravue %}
+  <script type="text/javascript">
+    var sidebar= new Vue({
+        el: '#main',
+        data () {
+        return {
+            isHidden: true,
+            isHidden2: true,
+            }
+        },
+    })
+    var dropdown_container = new Vue({
+        el: '#dropdown-container',
+        data () {
+        return {
+            isHidden2: true
+            }
+        },
+    })
+  </script>
+{% endblock extravue %}

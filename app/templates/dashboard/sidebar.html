@@ -32,13 +32,15 @@
     </div>
   </header>
 </div>
-<div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-  <div id = "logo_background">
-    <a href="{% url 'users:dashboard' %}">
+
+<div id="main">
+  <button id="openbtn" class="openbtn" @click="isHidden = !isHidden" :style="{marginLeft: isHidden ? '0px' : '200px'}">☰</button>
+    <transition name="list">
+    <div v-if="!isHidden" id="mySidebar" class="sidebar">
+            <div>
+    <a id = "logo_background" href="{% url 'users:dashboard' %}">
         <img src="{% static 'images/logo-removebg-preview.png' %}" class="h-12">
     </a>
-  </div>
   <a href="{% url "users:dashboard" %}">
         <span>
           <i class="fas fa-home"></i>
@@ -69,45 +71,19 @@
         </span>
         <span>Oceny</span>
   </a>
-        <button onclick="myAccount()" class="dropdown-btn">
+       <div id="dropdown-container" class="dropdown-container">
+        <button @click="isHidden2 = !isHidden2" class="dropdown-btn">
           <span><i class="fas fa-user-circle"></i></span>
           <span>Moje konto</span>
           <span><i class="fa fa-caret-down"></i></span>
         </button>
-          <div class="dropdown-container">
+           <div v-if="!isHidden2" >
             <a href="{% url 'users:profile' %}">Mój profil</a>
             <a href="#">Link #2</a>
             <a href="{% url 'users:logout' %}">Wyloguj</a>
+               </div>
           </div>
 </div>
-
-<div id="main">
-  <button class="openbtn" onclick="openNav()">☰</button>
 </div>
-
-<script>
-function openNav() {
-  document.getElementById("mySidebar").style.width = "250px";
-  document.getElementById("main").style.marginLeft = "250px";
-}
-
-function closeNav() {
-  document.getElementById("mySidebar").style.width = "0";
-  document.getElementById("main").style.marginLeft= "0";
-}
-
-var dropdown = document.getElementsByClassName("dropdown-btn");
-var i;
-
-for (i = 0; i < dropdown.length; i++) {
-  dropdown[i].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var dropdownContent = this.nextElementSibling;
-  if (dropdownContent.style.display === "block") {
-  dropdownContent.style.display = "none";
-  } else {
-  dropdownContent.style.display = "block";
-  }
-  });
-}
-</script>
+</transition>
+</div>
