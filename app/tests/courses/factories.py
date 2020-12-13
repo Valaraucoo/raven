@@ -7,7 +7,6 @@ import factory.fuzzy as fuzzy
 from courses import models
 from courses.models import LANGUAGE_CHOICES, PROFILE_CHOICES
 from tests.users import factories as users_factories
-
 from users import models as users_models
 
 PROFILE_CHOICES = [x[0] for x in PROFILE_CHOICES]
@@ -107,3 +106,4 @@ class CourseGroupFactory(factory.django.DjangoModelFactory):
         model = models.CourseGroup
     course = factory.SubFactory(CourseFactory)
     name = fuzzy.FuzzyText(length=16)
+

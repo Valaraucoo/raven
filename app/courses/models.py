@@ -1,3 +1,4 @@
+
 import datetime
 import os
 import uuid
@@ -189,13 +190,13 @@ class Event(models.Model):
         if self.show:
             return True
         if self.time_delta:
-            today = timezone.now()
+            today = timezone.now().date()
             return (self.date - today) < self.time_delta
         return False
 
     @property
     def was_held(self) -> bool:
-        return self.date < timezone.now()
+        return self.date < timezone.now().date()
 
 
 class Lecture(Event):
