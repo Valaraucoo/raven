@@ -1,0 +1,102 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <div class="flex justify-center p-4 px-0 md:px-24 pt-4 bg-gray-100">
+    <div class="bg-white rounded-lg w-full m-4 p-4 md:w-5/6 shadow">
+      <h4 class="pt-2 text-lg leading-6 font-medium text-gray-900 mb-2">Plan zajęć na najbliższe dni</h4>
+      {% for day in schedule %}
+      <div>
+        <span class="text-gray-900 relative inline-block date mt-2 uppercase font-medium tracking-widest">{{ day.date }}</span>
+        <span class="w-full md:w-2/3 border-b-2 mb-2 border-gray-200 block"></span>
+        {% if day.is_weekend %}
+          <div class="flex mb-2">
+            <div class="w-3/12">
+              <span class="text-sm text-gray-600 block">Weekend</span>
+            </div>
+          </div>
+        {% elif not day.labs %}
+          <div class="flex mb-2">
+            <div class="w-2/12">
+              <span class="text-sm text-gray-600 block">Laboratoria:</span>
+            </div>
+            <div class="w-1/12">
+              <span class="h-2 w-2 rounded-full block mt-2"></span>
+            </div>
+            <div class="w-9/12">
+              <span class="text-sm block">Brak</span>
+            </div>
+          </div>
+        {% else %}
+          <div class="flex mb-2">
+            <div class="w-2/12">
+              <span class="text-sm text-gray-600 block">Laboratoria:</span>
+            </div>
+            <div class="w-1/12">
+              <span class="h-2 w-2 rounded-full block mt-2"></span>
+            </div>
+          </div>
+          {% for lab in day.labs.all %}
+          <div class="flex mb-2">
+            <div class="w-2/12">
+              <span class="text-sm text-gray-500 block">{{ lab.date|date:"H:i" }}</span>
+              <span class="text-sm text-gray-500 block">{{ lab.end_date|date:"H:i" }}</span>
+            </div>
+            <div class="w-1/12">
+              <span class="h-2 w-2 rounded-full block mt-2"></span>
+            </div>
+            <div class="w-9/12">
+              <a href="{% url 'courses:laboratory-detail' lab.pk %}" class="duration-300 hover:text-gray-600 text-sm font-semibold block">{{ lab.title }}</a>
+              <a href="{% url 'courses:courses-detail' lab.course.slug %}" class="duration-300	text-sm text-blue-400 hover:text-blue-500">{{ lab.course.name }}</a>
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% if day.is_weekend %}
+        {% elif not day.lectures %}
+          <div class="flex mb-2">
+            <div class="w-2/12">
+              <span class="text-sm text-gray-600 block">Wykłady:</span>
+            </div>
+            <div class="w-1/12">
+              <span class="h-2 w-2 rounded-full block mt-2"></span>
+            </div>
+            <div class="w-9/12">
+              <span class="text-sm block">Brak</span>
+            </div>
+          </div>
+        {% else %}
+          <div class="flex mb-2">
+            <div class="w-2/12">
+              <span class="text-sm text-gray-600 block">Wykłady:</span>
+            </div>
+            <div class="w-1/12">
+              <span class="h-2 w-2 rounded-full block mt-2"></span>
+            </div>
+          </div>
+          {% for lecture in day.lectures.all %}
+            <div class="flex mb-2">
+              <div class="w-2/12">
+                <span class="text-sm text-gray-500 block">{{ lecture.date|date:"H:i" }}</span>
+                <span class="text-sm text-gray-500 block">{{ lecture.end_date|date:"H:i" }}</span>
+              </div>
+              <div class="w-1/12">
+                <span class="h-2 w-2 rounded-full block mt-2"></span>
+              </div>
+              <div class="w-9/12">
+                <a href="{% url 'courses:lectures-detail' lecture.pk %}" class="duration-300 hover:text-gray-600 text-sm font-semibold block">{{ lecture.title }}</a>
+                <a href="{% url 'courses:courses-detail' lecture.course.slug %}" class="duration-300	text-sm text-blue-400 hover:text-blue-500">{{ lecture.course.name }}</a>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="mt-8 mb-2">
+        <a href="{% url 'users:dashboard' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+          Powrót do strony głównej
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}

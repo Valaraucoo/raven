@@ -61,3 +61,17 @@ class CourseGroupModelForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': tailwind_form}),
             'students': forms.CheckboxSelectMultiple(attrs={'class': 'text-sm text-gray-700'})
         }
+
+
+class CourseNoticeModelForm(forms.ModelForm):
+    class Meta:
+        model = models.CourseNotice
+        fields = ('title', 'content',)
+        widgets = {
+            'title': forms.TextInput(attrs={'class': tailwind_form}),
+            'content': forms.Textarea(attrs={
+                'class': tailwind_form,
+                'cols': 30,
+                'rows': 5
+            })
+        }

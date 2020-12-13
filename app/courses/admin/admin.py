@@ -48,3 +48,10 @@ class LaboratoryAdmin(admin.ModelAdmin):
 @admin.register(models.CourseGroup)
 class GroupAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.CourseNotice)
+class CourseNoticeAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('course', 'sender')
+    filter_horizontal = ('not_viewed',)
+    list_display = ('course', 'title', 'sender', 'created_at',)
