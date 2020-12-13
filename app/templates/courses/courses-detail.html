@@ -135,16 +135,3 @@
   }
   </style>
 {% endblock extraheads %}
-
-{% block extrascripts %}
-  {{ block.super }}
-  const button = document.querySelector('#details-btn');
-  const detailsContent = button.nextElementSibling;
-  const indicator = document.querySelector('#indicator');
-
-  button.addEventListener('click', () => {
-    button.classList.toggle('button-active');
-    indicator.classList.toggle('indicator-active');
-    detailsContent.classList.toggle('course__details--active');
-  });
-{% endblock extrascripts %}

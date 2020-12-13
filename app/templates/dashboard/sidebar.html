@@ -1,7 +1,6 @@
 {% load static %}
 
-<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-<div class="hidden md:block">
+<div id="header" class="hidden md:block">
   <header class="flex justify-end items-center bg-white w-full py-2 px-4">
     <div class="ml-4 flex items-center md:ml-6">
       <button class="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-gray-600 focus:outline-none focus:text-white focus:bg-gray-700">
@@ -15,16 +14,14 @@
       </button>
       <div class="ml-3 relative">
         <div>
-          <button id="profile-img" class="max-w-xs flex items-center text-sm rounded-full text-white focus:outline-none focus:bg-gray-700 focus:shadow-solid" id="user-menu" aria-label="User menu" aria-haspopup="true">
+          <button @click="openMenu()" id="profile-img" class="max-w-xs flex items-center text-sm rounded-full text-white focus:outline-none focus:bg-gray-700 focus:shadow-solid" id="user-menu" aria-label="User menu" aria-haspopup="true">
             <img class="h-8 w-8 rounded-full" src="{{ request.user.image.url }}" alt="">
           </button>
         </div>
-        <div id="profile-info" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg hidden">
+        <div id="profile-info" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg hidden" v-bind:class="getClass">
           <div class="py-1 rounded-md bg-white shadow-xs" role="menu" aria-orientation="vertical" aria-labelledby="user-menu">
             <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Mój profil</a>
-
             <a href="{% url 'users:profile-edit' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edytuj profil</a>
-
             <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Wyloguj</a>
           </div>
         </div>
@@ -32,82 +29,164 @@
     </div>
   </header>
 </div>
-<div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-  <div id = "logo_background">
-    <a href="{% url 'users:dashboard' %}">
-        <img src="{% static 'images/logo-removebg-preview.png' %}" class="h-12">
-    </a>
-  </div>
-  <a href="{% url "users:dashboard" %}">
+<div id="main">
+  <button id="openbtn" class="openbtn" @click="isHidden = !isHidden" :style="{marginLeft: isHidden ? '0px' : '200px'}">☰</button>
+  <transition name="list">
+    <div v-if="!isHidden" id="mySidebar" class="sidebar">
+      <div>
+        <a id = "logo_background" href="{% url 'users:dashboard' %}">
+          <img src="{% static 'images/logo-removebg-preview.png' %}" class="h-12">
+        </a>
+        <a href="{% url "users:dashboard" %}">
         <span>
           <i class="fas fa-home"></i>
         </span>
-        <span>Strona Główna</span>
-  </a>
-  <a href="#">
+          <span>Strona Główna</span>
+        </a>
+        <a href="{% url 'users:schedule' %}">
         <span>
           <i class="fas fa-calendar-minus"></i>
         </span>
-        <span>Plan zajęć</span>
-  </a>
-  <a href="{% url "courses:courses" %}">
+          <span>Plan zajęć</span>
+        </a>
+        <a href="{% url "courses:courses" %}">
         <span>
           <i class="fas fa-home"></i>
         </span>
-        <span>Kursy</span>
-  </a>
-  <a href="#">
-        <span>
-          <i class="fas fa-calendar"></i>
-        </span>
-        <span>Kalendarz</span>
-  </a>
-  <a href="#">
+          <span>Kursy</span>
+        </a>
+        <a href="{% url 'users:notices' %}">
+          <span>
+            <i class="fas fa-calendar"></i>
+          </span>
+          <span>Ogłoszenia</span>
+        </a>
+        <a href="#">
         <span>
           <i class="fas fa-graduation-cap"></i>
         </span>
-        <span>Oceny</span>
-  </a>
-        <button onclick="myAccount()" class="dropdown-btn">
-          <span><i class="fas fa-user-circle"></i></span>
-          <span>Moje konto</span>
-          <span><i class="fa fa-caret-down"></i></span>
-        </button>
-          <div class="dropdown-container">
+          <span>Oceny</span>
+        </a>
+        <div>
+          <button @click="isHidden3 = !isHidden3" class="dropdown-btn">
+            <span><i class="fas fa-user-circle"></i></span>
+            <span>Moje konto</span>
+            <span><i class="fa fa-caret-down"></i></span>
+          </button>
+          <div v-if="!isHidden3">
             <a href="{% url 'users:profile' %}">Mój profil</a>
-            <a href="#">Link #2</a>
             <a href="{% url 'users:logout' %}">Wyloguj</a>
           </div>
+        </div>
+      </div>
+    </div>
+  </transition>
 </div>
 
-<div id="main">
-  <button class="openbtn" onclick="openNav()">☰</button>
-</div>
-
-<script>
-function openNav() {
-  document.getElementById("mySidebar").style.width = "250px";
-  document.getElementById("main").style.marginLeft = "250px";
-}
-
-function closeNav() {
-  document.getElementById("mySidebar").style.width = "0";
-  document.getElementById("main").style.marginLeft= "0";
-}
-
-var dropdown = document.getElementsByClassName("dropdown-btn");
-var i;
-
-for (i = 0; i < dropdown.length; i++) {
-  dropdown[i].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var dropdownContent = this.nextElementSibling;
-  if (dropdownContent.style.display === "block") {
-  dropdownContent.style.display = "none";
-  } else {
-  dropdownContent.style.display = "block";
-  }
+<script type="application/javascript">
+  var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#header',
+    data: {
+      isMenuOpen: false,
+    },
+    computed: {
+      getClass: function() {
+        return this.isMenuOpen ? 'showMenu' : '';
+      },
+    },
+    methods: {
+      openMenu() {
+        this.isMenuOpen = !this.isMenuOpen;
+      },
+    }
   });
-}
 </script>
+<script type="application/javascript">
+  var sidebar= new Vue({
+    el: '#main',
+    delimiters: ['[[', ']]'],
+    data () {
+      return {
+        isHidden: true,
+        isHidden2: true,
+        isHidden3: true,
+      }
+    },
+  });
+</script>
+<style>
+  .showMenu {
+    display: block;
+  }
+  *:focus {
+    outline: none;
+  }
+  #mySidebar{
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #f1f1f1;
+    padding-top: 60px;
+    white-space: nowrap;
+  }
+
+  .openbtn {
+    border-radius: .5em;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #60a5fa;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    transition: 0.3s;
+  }
+  .sidebar a:hover, .dropdown-btn:hover {
+    color: #A9A9A9;
+  }
+  .openbtn:hover {
+    background-color: #444;
+  }
+
+  #main {
+    padding: 16px;
+    width: fit-content;
+  }
+  .sidebar a, .dropdown-btn {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 17px;
+    color: #111;
+    display: block;
+    white-space: nowrap;
+    overflow-x: hidden;
+  }
+  @media screen and (max-height: 450px) {
+    .sidebar {padding-top: 10px;}
+    .sidebar a, .dropdown-btn {font-size: 12px;}
+  }
+  #logo_background{
+    width: 145px;
+    height: 70px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .list-enter,
+  .list-leave-to {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+  }
+
+  .list-enter-active,
+  .list-leave-active {
+    transition: opacity .5s;
+  }
+</style>
