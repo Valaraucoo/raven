@@ -393,3 +393,118 @@ class TestLaboratoryEditView:
         response = client.post(url)
         assert response.status_code == 200
 
+class TestLectureCreateView:
+    student = None
+    teacher = None
+    course = None
+    lecture = None
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self,db):
+        student = users_factories.StudentFactory()
+        teacher = users_factories.TeacherFactory()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade)
+        course.save()
+        lecture = course_factories.LectureFactory(course=course)
+
+        self.student = student
+        self.course = course
+        self.teacher = teacher
+        self.lecture = lecture
+
+    def test_get_lecture_create(self, client):
+        url = reverse('courses:lectures-create', args=(self.course.slug,))
+
+        client.force_login(self.student)
+        response = client.get(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 302
+
+        client.force_login(self.teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+    def test_post_lecture_edit(self, client):
+        url = reverse('courses:lectures-create', args=(self.course.slug,))
+
+        client.force_login(self.student)
+        response = client.post(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.post(url)
+        assert response.status_code == 302
+
+        client.force_login(self.teacher)
+        response = client.post(url)
+        assert response.status_code == 200
+
+
+class TestLaboratoryCreateView:
+    student = None
+    teacher = None
+    course = None
+    group = None
+    laboratory = None
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self,db):
+        student = users_factories.StudentFactory()
+        teacher = users_factories.TeacherFactory()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade)
+        course.save()
+        group = course_factories.GroupFactory(course=course)
+        group.save()
+        lab = course_factories.LabFactory(group=group)
+
+        self.student = student
+        self.course = course
+        self.teacher = teacher
+        self.group = group
+        self.laboratory = lab
+
+    def test_get_laboratory_create(self, client):
+        url = reverse('courses:laboratory-create', args=(self.course.slug,))
+
+        client.force_login(self.student)
+        response = client.get(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 302
+
+        client.force_login(self.teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+    def test_post_laboratory_create(self, client):
+        url = reverse('courses:laboratory-create', args=(self.course.slug,))
+
+        client.force_login(self.student)
+        response = client.post(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.post(url)
+        assert response.status_code == 302
+
+        client.force_login(self.teacher)
+        response = client.post(url)
+        assert response.status_code == 200
+        #form = response.context.get('form')
+        #assert form.is_valid()
+
