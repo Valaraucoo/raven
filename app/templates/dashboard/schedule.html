@@ -7,7 +7,7 @@
       <h4 class="pt-2 text-lg leading-6 font-medium text-gray-900 mb-2">Plan zajęć na najbliższe dni</h4>
       {% for day in schedule %}
       <div>
-        <span class="text-gray-900 relative inline-block date mt-2 uppercase font-medium tracking-widest">{{ day.date }}</span>
+        <span class="text-gray-900 inline-block date mt-2 uppercase font-medium" style="z-index: 0;">{{ day.date }}</span>
         <span class="w-full md:w-2/3 border-b-2 mb-2 border-gray-200 block"></span>
         {% if day.is_weekend %}
           <div class="flex mb-2">
