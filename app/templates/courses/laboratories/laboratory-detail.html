@@ -4,16 +4,11 @@
 {% block dashboard_content %}
   <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
-      <div class="px-4 py-4 border-b-2 border-gray-200 mx-2">
+      <div class="px-4 py-4 border-b border-gray-200 mx-2">
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
           <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
           / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' laboratory.course.slug %}">{{ laboratory.course.name }}</a> / Laboratorium
         </h4>
-        {% if request.user.is_teacher %}
-          <div class="mt-4 mb-4">
-            <a class="text-sm font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:laboratory-edit' laboratory.pk %}">Edytuj</a>
-          </div>
-        {% endif %}
         <p class="text-xl text-gray-800"><span class="text-bold">Tytuł: </span>
           {{ laboratory.title }}
         </p>
@@ -23,22 +18,13 @@
         <p class="text-sm text-gray-600">
           <span class="font-bold">Opis:</span> {% if laboratory.description %}{{ laboratory.description }}{% else %}-{% endif %}
         </p>
-        <div class="flex flex-wrap -mx-3 mb-6">
-          <div class="w-full sm:w-1/2 md:w-2/3 px-3 mb-6 md:mb-0">
-            <label class="flex items-center">
-              <span class="block uppercase tracking-wide text-gray-700 text-xs font-bold ml-2">PLIKI</span>
-            </label>
-            {% if not laboratory.files.all %}
-              <p class="pl-4 mt-1 text-sm text-gray-700">
-                Nie dodano jeszcze żadnych plików
-              </p>
-            {% endif %}
-            {% for file in laboratory.files.all %}
-              <p class="pl-4 mt-1 text-sm text-gray-700">
-                <a class="text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>
-              </p>
-            {% endfor %}
-          </div>
+      </div>
+      <div class="px-4 py-4 mx-2">
+        <div class="mt-4 mb-4">
+          <a class="text-sm font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:courses-detail' laboratory.course.slug %}">Powrót do kursu</a>
+          {% if request.user.is_teacher %}
+            <a class="text-sm ml-2 font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:laboratory-edit' laboratory.pk %}">Edytuj</a>
+          {% endif %}
         </div>
       </div>
     </div>

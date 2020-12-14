@@ -1,7 +1,7 @@
 {% load static %}
 
 <div id="header" class="hidden md:block">
-  <header class="flex justify-end items-center bg-white w-full py-2 px-4">
+  <header class="flex fixed shadow-sm justify-end items-center bg-white w-full py-2 px-4">
     <div class="ml-4 flex items-center md:ml-6">
       <button class="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-gray-600 focus:outline-none focus:text-white focus:bg-gray-700">
         <i class="far fa-envelope"></i>
@@ -30,44 +30,45 @@
   </header>
 </div>
 <div id="main">
-  <button id="openbtn" class="openbtn" @click="isHidden = !isHidden" :style="{marginLeft: isHidden ? '0px' : '200px'}">☰</button>
+  <button id="openbtn"
+          class="openbtn"
+          @click="isHidden = !isHidden"
+          :style="{marginLeft: isHidden ? '15px' : '300px'}"
+  >☰</button>
   <transition name="list">
-    <div v-if="!isHidden" id="mySidebar" class="sidebar">
+    <div v-if="!isHidden" id="mySidebar" class="sidebar bg-white shadow-md">
       <div>
-        <a id = "logo_background" href="{% url 'users:dashboard' %}">
-          <img src="{% static 'images/logo-removebg-preview.png' %}" class="h-12">
-        </a>
-        <a href="{% url "users:dashboard" %}">
-        <span>
-          <i class="fas fa-home"></i>
-        </span>
+        <a href="{% url "users:dashboard" %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+          <span>
+            <i class="fas fa-home"></i>
+          </span>
           <span>Strona Główna</span>
         </a>
-        <a href="{% url 'users:schedule' %}">
+        <a href="{% url 'users:schedule' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-calendar-minus"></i>
         </span>
           <span>Plan zajęć</span>
         </a>
-        <a href="{% url "courses:courses" %}">
+        <a href="{% url "courses:courses" %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-home"></i>
         </span>
           <span>Kursy</span>
         </a>
-        <a href="{% url 'users:notices' %}">
+        <a href="{% url 'users:notices' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <span>
             <i class="fas fa-calendar"></i>
           </span>
           <span>Ogłoszenia</span>
         </a>
-        <a href="#">
+        <a href="#" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-graduation-cap"></i>
         </span>
           <span>Oceny</span>
         </a>
-        <div>
+        <div class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <button @click="isHidden3 = !isHidden3" class="dropdown-btn">
             <span><i class="fas fa-user-circle"></i></span>
             <span>Moje konto</span>
@@ -124,17 +125,19 @@
   }
   #mySidebar{
     height: 100%;
-    width: 200px;
+    width: 300px;
     position: fixed;
-    z-index: 1;
+    z-index: 0;
     top: 0;
     left: 0;
-    background-color: #f1f1f1;
     padding-top: 60px;
     white-space: nowrap;
   }
 
   .openbtn {
+    z-index: 0;
+    position: relative;
+    margin-top: 50px;
     border-radius: .5em;
     font-size: 20px;
     cursor: pointer;
@@ -145,7 +148,7 @@
     transition: 0.3s;
   }
   .sidebar a:hover, .dropdown-btn:hover {
-    color: #A9A9A9;
+    color: #5a5a5a;
   }
   .openbtn:hover {
     background-color: #444;
@@ -155,12 +158,20 @@
     padding: 16px;
     width: fit-content;
   }
-  .sidebar a, .dropdown-btn {
+  .sidebar a {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
-    font-size: 17px;
+    font-size: 14px;
     color: #111;
     display: block;
+    white-space: nowrap;
+    overflow-x: hidden;
+  }
+  .dropdown-btn {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 14px;
+    color: #111;
     white-space: nowrap;
     overflow-x: hidden;
   }
