@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+#from app.users.models import got_offline
 from users import models as user_models
 
 
@@ -33,3 +34,17 @@ class TestUserModel:
 
     def test_string_user_model(self) -> None:
         assert 'John Doe (johndoe@example.com)' == str(self.user)
+
+    def test_get_absolute_url(self) -> None:
+        assert f'profile/{self.user.pk}/' in self.user.get_absolute_url()
+
+    def test_get_image_url(self) -> None:
+        assert 'default-picture.png' in self.user.get_image_url()
+
+    def test_save_user(self):
+        pass
+
+    def test_got_offline(self,user_client):
+        pass
+        #user_client.force_login(self.user)
+        #got_offline()
