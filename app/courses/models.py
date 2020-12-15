@@ -190,13 +190,13 @@ class Event(models.Model):
         if self.show:
             return True
         if self.time_delta:
-            today = timezone.now().date()
+            today = timezone.now()
             return (self.date - today) < self.time_delta
         return False
 
     @property
     def was_held(self) -> bool:
-        return self.date < timezone.now().date()
+        return self.date < timezone.now()
 
     @property
     def end_date(self) -> datetime.datetime:

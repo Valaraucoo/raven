@@ -1,7 +1,6 @@
 <p align="center"><img width="100" src="https://image.freepik.com/darmowe-wektory/szablon-logo-maskotka-gry-raven-esport_20684-157.jpg" alt="Vue logo"></p>
 <h2 align="center">Raven - smart learning</h2>
 
-----
 
 ## The goal
 
@@ -24,3 +23,11 @@ The technological stack of the system was selected taking into account our skill
 * `Docker` & `Docker Compose`
 
 
+### Logical architecture
+
+The system is designed as a web application. Its architecture is based on the Django frame-bag, i.e. it is based on the MVT (Model-View-Template) pattern, which will allow the separation of individual application components responsible for the user interface and control logic.
+
+
+Additionally, the system uses external cloud services, such as Amazon S3 as storage for static files, or Google API, thanks to which we will be able to create lecture or training meetings for laboratory groups.
+
+![logical](./docs/images/logic-architecture.png)
