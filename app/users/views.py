@@ -116,12 +116,25 @@ class DashboardView(generic.View, LoginRequiredMixin):
     def get_context_data(self, *args, **kwargs):
         courses = courses_models.Course.objects.none()
         marks = None
+        avg_marks = {}
         if self.request.user.is_teacher:
             teacher = models.Teacher.objects.get(email=self.request.user.email)
             courses = teacher.courses_teaching.all()
         else:
             student = models.Student.objects.get(email=self.request.user.email)
             marks = student.courses_marks.all().order_by('-date')[:3]
+            for mark in marks:
+                if mark.course.name not in avg_marks:
+                    avg_marks[mark.course.name] = {
+                        'course': mark.course,
+                        'sum': 0,
+                        'count': 0,
+                        'avg': 0
+                    }
+                avg_marks[mark.course.name]['sum'] += mark.mark
+                avg_marks[mark.course.name]['count'] += 1
+            for key, value in avg_marks.items():
+                avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
             for grade in student.grades.all():
                 courses |= grade.courses.all()
         notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')[:3]
@@ -152,6 +165,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
             'laboratories': laboratories,
             'not_viewed_notices': not_viewed_notices.count(),
             'marks': marks,
+            'avg_marks': avg_marks
         }
 
     def get(self, request, *args, **kwargs):
