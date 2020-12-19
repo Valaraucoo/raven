@@ -140,6 +140,48 @@
         {% endif %}
       </div>
     </div>
+  {% if request.user.is_student %}
+  <div class="flex mt-4">
+    <div class="bg-white pb-4 px-4 rounded-md w-full shadow-md">
+      <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
+        Najnowsze oceny
+      </h4>
+      {% if not marks %}
+        Brak wystawionych ocen.
+      {% else %}
+        <div class="overflow-x-auto mt-6">
+          <table class="table-auto border-collapse w-full mt-1">
+            <thead>
+            <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+              <th class="px-4 py-2">Kurs</th>
+              <th class="px-4 py-2">Ocena</th>
+              <th class="px-4 py-2">Opis</th>
+              <th class="px-4 py-2">Prowadzący</th>
+              <th class="px-4 py-2">Data</th>
+            </tr>
+            </thead>
+            <tbody class="text-sm font-normal text-gray-700">
+            {% for mark in marks %}
+              <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' mark.course.slug %}">{{ mark.course.name }}</a></td>
+                <td class="px-4 py-4">{{ mark.mark }}% ({{ mark.mark_decimal }})</td>
+                <td class="px-4 py-4">{% if mark.description %}{{ mark.description }}{% else %}-{% endif %}</td>
+                <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' mark.teacher.pk %}">{{ mark.teacher.first_name }} {{ mark.teacher.last_name }}</a></td>
+                <td class="px-4 py-4">{{ mark.date }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-8 mb-2">
+          <a href="{% url 'users:marks' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+            Przejdź do ocen
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
   </div>
 {% endblock dashboard_content %}
 

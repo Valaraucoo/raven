@@ -1,0 +1,130 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
+  <div id="marks" class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
+          / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a> /
+          Oceny
+        </h4>
+        <div class="mb-4 border-b">
+          <form action="" method="GET">
+            <div class="mb-2 w-full sm:w-1/2 md:w-1/2">
+              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
+                FILTRUJ WYSTAWIONE OCENY
+              </label>
+              <input name="student" placeholder="Imię i nazwisko studenta" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+              <button type="submit" class="mt-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                Filtruj
+              </button>
+              <a href="{% url 'courses:courses-marks' course.slug %}" class="mt-2 ml-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                Resetuj
+              </a>
+            </div>
+          </form>
+        </div>
+        {% if course.marks.all %}
+        <div class="overflow-x-auto mt-6">
+          <table class="table-auto border-collapse w-full mt-1">
+            <thead>
+            <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+              <th class="px-4 py-2">Student</th>
+              <th class="px-4 py-2">Ocena</th>
+              <th class="px-4 py-2">Opis</th>
+              <th class="px-4 py-2">Prowadzący</th>
+              <th class="px-4 py-2">Data</th>
+              <th class="px-4 py-2">Edycja</th>
+            </tr>
+            </thead>
+            <tbody class="text-sm font-normal text-gray-700">
+            {% for mark in marks %}
+              <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' mark.student.pk %}">{{ mark.student.first_name }} {{ mark.student.last_name }}</a></td>
+                <td class="px-4 py-4">{{ mark.mark }}% ({{ mark.mark_decimal }})</td>
+                <td class="px-4 py-4">{% if mark.description %}{{ mark.description }}{% else %}-{% endif %}</td>
+                <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' mark.teacher.pk %}">{{ mark.teacher.first_name }} {{ mark.teacher.last_name }}</a></td>
+                <td class="px-4 py-4">{{ mark.date }}</td>
+                <td class="px-4 py-4"><a href="{% url 'courses:courses-marks-edit' mark.pk %}" class="text-blue-400 hover:text-blue-500">Edytuj</a> / <span @click="deleteMark({{ forloop.counter0 }})" class="cursor-pointer text-red-400 hover:text-red-600">Usuń</span></td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          Brak wystawionych ocen.
+        {% endif %}
+        <div class="py-4">
+          <form action="" method="POST">
+            {% csrf_token %}
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full sm:w-1/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                  Ocena
+                </label>
+                {{ form.mark }}
+              </div>
+              <div class="w-full sm:w-1/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                  Email studenta
+                </label>
+                <input type="email" name="email" placeholder="Adres email studenta" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name">
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full sm:w-2/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                  Opis
+                </label>
+                {{ form.description }}
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6 px-3">
+              <button type="submit" class="text-sm font-bold mt-2 mb-4 px-3 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                Dodaj ocenę
+              </button>
+              <a href="{% url 'courses:courses-detail' course.slug %}" class="ml-2 text-sm font-bold mt-2 mb-4 px-3 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+                Powrót do kursu
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+
+{% block extraheads %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock extraheads %}
+
+{% block extravue %}
+  <script type="text/javascript">
+    var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#marks',
+      data: {},
+      methods: {
+        deleteMark: function(num) {
+          Swal.fire({
+            text: "Czy na pewno chcesz usunąć tę ocenę?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Tak, usuń!',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const slug = "{{ course.slug }}"
+              window.location.href = `/courses/${slug}/marks/delete/${num}/`
+            }
+          })
+        },
+      }
+    });
+  </script>
+{% endblock extravue %}

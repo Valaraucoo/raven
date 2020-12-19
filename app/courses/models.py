@@ -226,26 +226,38 @@ class Laboratory(Event):
         verbose_name_plural = _('Laboratories')
 
 
-class LectureMark(models.Model):
-    mark = models.DecimalField(decimal_places=10, max_digits=13, validators=[validators.MinValueValidator(0),
+class CourseMark(models.Model):
+    mark = models.IntegerField(default=0, validators=[validators.MinValueValidator(0),
                                                                              validators.MaxValueValidator(100)])
     date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
-    lecture = models.ForeignKey('Lecture', on_delete=models.CASCADE, related_name='marks')
-    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='lecture_marks')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='marks')
+    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_marks')
     teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_lecture_marks')
 
     def __str__(self):
-        return f'Lecture Mark: {self.student}, {self.lecture}'
+        return f'Lecture Mark: {self.student}, {self.course}'
 
     class Meta:
-        ordering = ('date', 'lecture',)
+        ordering = ('-date',)
 
-    def clean(self):
-        super().clean()
-        if self.student not in self.lecture.course.grade.students.all():
-            raise ValidationError('Student must be one of the course students.')
+    @property
+    def mark_decimal(self) -> float:
+        if self.mark < 50:
+            return 2.0
+        elif 50 <= self.mark < 60:
+            return 3.0
+        elif 60 <= self.mark < 70:
+            return 3.5
+        elif 70 <= self.mark < 80:
+            return 4.0
+        elif 80 <= self.mark < 90:
+            return 4.5
+        elif self.mark >= 90:
+            return 5.0
+        else:
+            return 2.0
 
 
 class CourseNotice(models.Model):

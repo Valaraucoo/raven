@@ -190,6 +190,8 @@ class CourseEditView(CoursesDetailView):
             teacher = users_models.Teacher.objects.get(email=user.email)
             if teacher not in self.get_object().teachers.all():
                 return redirect('courses:courses')
+        if user.is_student:
+            return redirect('courses:courses')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -264,7 +266,7 @@ class CourseGroupEditView(DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class LectureDetailView(DetailView):
+class LectureDetailView(LoginRequiredMixin, DetailView):
     template_name = 'courses/lectures/lecture-detail.html'
     model = models.Lecture
     context_object_name = 'lecture'
@@ -304,7 +306,7 @@ class LaboratoryDetailView(LectureDetailView):
         return super().get(request, *args, **kwargs)
 
 
-class LaboratoryEditView(DetailView):
+class LaboratoryEditView(LoginRequiredMixin, DetailView):
     template_name = 'courses/laboratories/laboratory-edit.html'
     model = models.Laboratory
     context_object_name = 'laboratory'
@@ -405,7 +407,7 @@ class LaboratoryEditView(DetailView):
         return render(request, self.template_name, context)
 
 
-class LectureEditView(DetailView):
+class LectureEditView(LoginRequiredMixin, DetailView):
     template_name = 'courses/lectures/lecture-edit.html'
     model = models.Lecture
     context_object_name = 'lecture'
@@ -496,7 +498,7 @@ class LectureEditView(DetailView):
         return render(request, self.template_name, context)
 
 
-class LaboratoryCreateView(DetailView):
+class LaboratoryCreateView(LoginRequiredMixin, DetailView):
     template_name = 'courses/laboratories/laboratory-create.html'
     model = models.Course
     slug_field = 'slug'
@@ -591,7 +593,7 @@ class LaboratoryCreateView(DetailView):
         return render(request, self.template_name, self.get_context_data(**kwargs))
 
 
-class LectureCreateView(DetailView):
+class LectureCreateView(LoginRequiredMixin, DetailView):
     template_name = 'courses/lectures/lecture-create.html'
     model = models.Course
     slug_field = 'slug'
@@ -806,7 +808,7 @@ def delete_laboratory_file(request, pk, num):
     return redirect('courses:laboratory-edit', pk=laboratory.pk)
 
 
-class CourseNoticeView(DetailView):
+class CourseNoticeView(LoginRequiredMixin, DetailView):
     template_name = "courses/notices/notices.html"
     model = models.Course
     slug_field = 'slug'
@@ -871,3 +873,179 @@ class CourseNoticeView(DetailView):
         else:
             messages.error(request, 'Spróbuj ponownie!')
         return super().get(request, *args, **kwargs)
+
+
+class MyCourseMarksView(LoginRequiredMixin, DetailView):
+    template_name = "courses/marks/my-marks.html"
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['marks'] = models.CourseMark.objects.filter(student__email=self.request.user.email, course=self.get_object())
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().grade.students.all():
+                return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+            return redirect('courses:courses-marks', the_slug=self.kwargs.get('the_slug'))
+        return super().get(request, *args, **kwargs)
+
+
+class CourseMarksView(LoginRequiredMixin, DetailView):
+    template_name = "courses/marks/partial-marks.html"
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+    form_class = forms.CourseMarkModelForm
+
+    def get_form_class(self, **kwargs):
+        return self.form_class()
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'form': self.get_form_class(**kwargs),
+            'course': self.get_object(),
+        }
+        return context
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(models.Course, slug=self.kwargs.get(self.slug_url_kwarg))
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        context = self.get_context_data(**kwargs)
+        marks = self.get_object().marks.all()
+
+        if request.GET.get('student'):
+            name_partial = request.GET.get('student').split(' ')
+            if len(name_partial) == 1:
+                marks = marks.filter(student__first_name__contains=name_partial[0])
+            if len(name_partial) == 2:
+                marks = marks.filter(student__first_name__contains=name_partial[0])
+                marks = marks.filter(student__last_name__contains=name_partial[1])
+            if len(name_partial) > 2:
+                marks = marks.filter(student__first_name__contains=name_partial[0])
+                marks = marks.filter(student__last_name__contains=name_partial[1])
+        context['marks'] = marks
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+
+        form = self.form_class(request.POST)
+        email = request.POST.get('email')
+        if form.is_valid() and email:
+            try:
+                student = users_models.Student.objects.get(email=email)
+            except Exception:
+                messages.error(request, 'Nie znaleziono studenta!')
+                return super().get(request, *args, **kwargs)
+            if student and student in self.get_object().grade.students.all():
+                mark = form.save(commit=False)
+                mark.teacher = users_models.Teacher.objects.get(email=user.email)
+                mark.course = self.get_object()
+                mark.student = student
+                mark.save()
+                messages.info(request, 'Pomyslnie dodano ocenę!')
+            else:
+                messages.error(request, 'Nie znaleziono studenta!')
+        return self.get(request, *args, **kwargs)
+
+
+class CourseMarkEditView(LoginRequiredMixin, DetailView):
+    template_name = "courses/marks/mark-edit.html"
+    model = models.CourseMark
+    context_object_name = 'mark'
+    form_class = forms.CourseMarkModelForm
+
+    def get_context_data(self, **kwargs):
+        mark = self.get_object()
+        course = mark.course
+        form = self.form_class(initial={
+            'mark': mark.mark,
+            'description': mark.description
+        })
+        context = {
+            'form': form,
+            'course': course
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().course.grade.students.all():
+                return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            student = users_models.Student.objects.get(email=user.email)
+            if student not in self.get_object().course.grade.students.all():
+                return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            mark = form.cleaned_data.get('mark')
+            description = form.cleaned_data.get('description')
+            obj = self.get_object()
+            obj.mark = mark
+            obj.description = description
+            obj.save()
+            messages.info(request, 'Pomyślnie zapisano zmiany!')
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+        return super().get(request, *args, **kwargs)
+
+
+def delete_course_mark(request, the_slug, num):
+    user = request.user
+    if user.is_student or not user.is_authenticated:
+        return redirect('courses:courses')
+    try:
+        course = models.Course.objects.get(slug=the_slug)
+    except Exception:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+
+    mark = course.marks.all()[num]
+    mark.delete()
+    course.save()
+    messages.info(request, 'Pomyślnie usunięto ocenę!')
+    return redirect('courses:courses-marks', the_slug=course.slug)

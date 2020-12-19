@@ -16,6 +16,11 @@ urlpatterns = [
     path('courses/<slug:the_slug>/edit/', views.CourseEditView.as_view(), name='courses-edit'),
     path('courses/<slug:the_slug>/delete/<int:num>/', views.delete_lecture_view, name='lectures-delete'),
 
+    path('courses/<slug:the_slug>/marks/', views.CourseMarksView.as_view(), name='courses-marks'),
+    path('courses/<slug:the_slug>/my-marks/', views.MyCourseMarksView.as_view(), name='my-marks'),
+    path('courses/<slug:the_slug>/marks/delete/<int:num>/', views.delete_course_mark, name='courses-marks-delete'),
+    path('courses/marks/edit/<int:pk>/', views.CourseMarkEditView.as_view(), name='courses-marks-edit'),
+
     path('courses/lecture/<int:pk>/detail/', views.LectureDetailView.as_view(), name='lectures-detail'),
     path('courses/lecture/<int:pk>/edit/', views.LectureEditView.as_view(), name='lectures-edit'),
     path('courses/lecture/<int:pk>/file/add/', views.lecture_add_file, name='lectures-file-add'),
