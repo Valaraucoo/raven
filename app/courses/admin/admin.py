@@ -35,13 +35,18 @@ class LectureAdmin(admin.ModelAdmin):
     list_filter = ('location',)
 
 
-@admin.register(models.LectureMark)
-class LectureMarkAdmin(admin.ModelAdmin):
+@admin.register(models.Laboratory)
+class LaboratoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(models.Laboratory)
-class LaboratoryAdmin(admin.ModelAdmin):
+@admin.register(models.CourseMark)
+class CourseMarkAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.FinalCourseMark)
+class FinalCourseMarkAdmin(admin.ModelAdmin):
     pass
 
 

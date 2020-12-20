@@ -26,6 +26,11 @@
           <a href="{% url 'courses:notices' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
             Ogłoszenia
           </a>
+          {% if request.user.is_student %}
+            <a href="{% url 'courses:my-marks' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
+              Moje oceny
+            </a>
+          {% endif %}
           {% if request.user.email in student_without_groups_emails %}
           <a href="{% url 'courses:group' course.slug %}" class="text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300 mr-2">
             Dołącz do grupy
@@ -37,6 +42,9 @@
             </a>
             <a href="{% url 'courses:group' course.slug %}" class="ml-2 text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
               Zarządzaj grupami
+            </a>
+            <a href="{% url 'courses:courses-total-marks' course.slug %}" class="ml-2 text-sm font-bold px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Oceny
             </a>
           {% endif %}
         </div>

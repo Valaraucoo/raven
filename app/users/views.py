@@ -115,11 +115,26 @@ class DashboardView(generic.View, LoginRequiredMixin):
 
     def get_context_data(self, *args, **kwargs):
         courses = courses_models.Course.objects.none()
+        marks = None
+        avg_marks = {}
         if self.request.user.is_teacher:
             teacher = models.Teacher.objects.get(email=self.request.user.email)
             courses = teacher.courses_teaching.all()
         else:
             student = models.Student.objects.get(email=self.request.user.email)
+            marks = student.courses_marks.all().order_by('-date')[:3]
+            for mark in marks:
+                if mark.course.name not in avg_marks:
+                    avg_marks[mark.course.name] = {
+                        'course': mark.course,
+                        'sum': 0,
+                        'count': 0,
+                        'avg': 0
+                    }
+                avg_marks[mark.course.name]['sum'] += mark.mark
+                avg_marks[mark.course.name]['count'] += 1
+            for key, value in avg_marks.items():
+                avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
             for grade in student.grades.all():
                 courses |= grade.courses.all()
         notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')[:3]
@@ -148,7 +163,9 @@ class DashboardView(generic.View, LoginRequiredMixin):
             'now': timezone.now(),
             'lectures': lectures,
             'laboratories': laboratories,
-            'not_viewed_notices': not_viewed_notices.count()
+            'not_viewed_notices': not_viewed_notices.count(),
+            'marks': marks,
+            'avg_marks': avg_marks
         }
 
     def get(self, request, *args, **kwargs):
@@ -317,3 +334,53 @@ class LogoutView(LoginRequiredMixin, generic.View):
             request.session['password'] = None
             request.session.set_expiry(0)
         return redirect(settings.LOGIN_URL)
+
+
+class MarksView(LoginRequiredMixin, generic.View):
+    template_name = 'dashboard/marks.html'
+
+    def get_context_data(self, *args, **kwargs):
+        student = models.Student.objects.get(email=self.request.user.email)
+        marks = student.courses_marks.all().order_by('-date')
+        avg_marks = {}
+        for course in courses_models.Course.objects.filter(grade__students__email=student.email):
+            if course.name not in avg_marks:
+                final_mark = student.courses_final_marks.filter(course=course).first()
+                avg_marks[course.name] = {
+                    'course': course,
+                    'sum': 0,
+                    'count': 0,
+                    'avg': 0,
+                    'final_mark': final_mark
+                }
+            course_marks = student.courses_marks.filter(course=course)
+            for mark in course_marks:
+                avg_marks[course.name]['sum'] += mark.mark
+                avg_marks[course.name]['count'] += 1
+        for key, value in avg_marks.items():
+            try:
+                avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
+            except ZeroDivisionError:
+                avg_marks[key]['avg'] = ''
+
+        return {
+            'user': self.request.user,
+            'marks': marks,
+            'avg_marks': avg_marks
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        if self.request.user.is_teacher:
+            return redirect('users:dashboard')
+        context = self.get_context_data(*args, **kwargs)
+
+        marks = context['marks']
+        if request.GET:
+            course = request.GET.get('course')
+            if course:
+                context['query'] = course
+                marks = marks.filter(course__name__icontains=course)
+        context['marks'] = marks
+        return render(request, self.template_name, context)

@@ -1,0 +1,80 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
+  <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
+    <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div class="px-4 py-4 mx-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
+          / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a> /
+          Moje oceny
+        </h4>
+        {% if marks.all %}
+          <div class="overflow-x-auto mt-6">
+            <table class="table-auto border-collapse w-full mt-1">
+              <thead>
+                <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+                  <th class="px-4 py-2">Student</th>
+                  <th class="px-4 py-2">Ocena</th>
+                  <th class="px-4 py-2">Opis</th>
+                  <th class="px-4 py-2">Prowadzący</th>
+                  <th class="px-4 py-2">Data</th>
+                </tr>
+              </thead>
+              <tbody class="text-sm font-normal text-gray-700">
+              {% for mark in marks %}
+                <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                  <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' mark.student.pk %}">{{ mark.student.first_name }} {{ mark.student.last_name }}</a></td>
+                  <td class="px-4 py-4">{{ mark.mark }}% ({{ mark.mark_decimal }})</td>
+                  <td class="px-4 py-4">{% if mark.description %}{{ mark.description }}{% else %}-{% endif %}</td>
+                  <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' mark.teacher.pk %}">{{ mark.teacher.first_name }} {{ mark.teacher.last_name }}</a></td>
+                  <td class="px-4 py-4">{{ mark.date }}</td>
+                </tr>
+              {% endfor %}
+              {% if final_mark %}
+                <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                  <td class="px-4 py-4 font-bold">Ocena końcowa:</td>
+                  <td class="px-4 py-4 font-bold">{{ final_mark.mark_decimal }}</td>
+                  <td class="px-4 py-4 font-bold">{% if final_mark.description %}{{ final_mark.description }}{% else %}-{% endif %}</td>
+                  <td class="px-4 py-4 font-bold"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' final_mark.teacher.pk %}">{{ final_mark.teacher.first_name }} {{ final_mark.teacher.last_name }}</a></td>
+                  <td class="px-4 py-4 font-bold">{{ final_mark.date }}</td>
+                </tr>
+              {% else %}
+                <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                  <td class="px-4 py-4 font-bold">Ocena końcowa:</td>
+                  <td class="px-4 py-4 font-bold">Nie wystawiono</td>
+                  <td class="px-4 py-4 font-bold"></td>
+                  <td class="px-4 py-4 font-bold"></td>
+                  <td class="px-4 py-4 font-bold"></td>
+                </tr>
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+        {% elif not marks.all and final_mark %}
+          <table class="table-auto border-collapse w-full mt-1">
+            <tbody class="text-sm font-normal text-gray-700">
+              <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                <td class="px-4 py-4 font-bold">Ocena końcowa:</td>
+                <td class="px-4 py-4 font-bold">{{ final_mark.mark_decimal }}</td>
+                <td class="px-4 py-4 font-bold">{% if final_mark.description %}{{ final_mark.description }}{% else %}-{% endif %}</td>
+                <td class="px-4 py-4 font-bold"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' final_mark.teacher.pk %}">{{ final_mark.teacher.first_name }} {{ final_mark.teacher.last_name }}</a></td>
+                <td class="px-4 py-4 font-bold">{{ final_mark.date }}</td>
+              </tr>
+            </tbody>
+          </table>
+        {% else %}
+          Brak wystawionych ocen.
+        {% endif %}
+        <div class="flex flex-wrap mt-2 -mx-3 mb-3 px-3">
+          <a href="{% url 'courses:courses-detail' course.slug %}" class="ml-2 text-sm font-bold mt-2 mb-4 px-3 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+            Powrót do kursu
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock dashboard_content %}
+
