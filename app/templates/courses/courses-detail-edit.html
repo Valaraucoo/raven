@@ -189,7 +189,7 @@
                 {% endif %}
               </p>
               <button class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
-                <a href="#">Edytuj</a>
+                <a href="{% url 'courses:laboratory-edit' lecture.pk %}">Edytuj</a>
               </button>
               <button id="delete-lecture-btn" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-red-200 text-gray-800 hover:text-gray-900 hover:bg-red-300">
                 Usuń

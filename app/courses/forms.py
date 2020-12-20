@@ -90,3 +90,18 @@ class CourseMarkModelForm(forms.ModelForm):
                 'placeholder': 'Opis'
             }),
         }
+
+
+class CourseSetFinalMarkModelForm(forms.ModelForm):
+    class Meta:
+        model = models.FinalCourseMark
+        fields = ('mark', 'description')
+        widgets = {
+            'mark': forms.NumberInput(attrs={'class': tailwind_form}),
+            'description': forms.Textarea(attrs={
+                'class': tailwind_form,
+                'cols': 30,
+                'rows': 5,
+                'placeholder': 'Opis'
+            }),
+        }

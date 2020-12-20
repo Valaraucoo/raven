@@ -62,12 +62,14 @@
           </span>
           <span>Ogłoszenia</span>
         </a>
+        {% if request.user.is_student %}
         <a href="{% url 'users:marks' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-graduation-cap"></i>
         </span>
           <span>Oceny</span>
         </a>
+        {% endif %}
         <div class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <button @click="isHidden3 = !isHidden3" class="dropdown-btn">
             <span><i class="fas fa-user-circle"></i></span>

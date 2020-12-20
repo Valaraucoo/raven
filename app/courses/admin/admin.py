@@ -45,6 +45,11 @@ class CourseMarkAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(models.FinalCourseMark)
+class FinalCourseMarkAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(models.CourseGroup)
 class GroupAdmin(admin.ModelAdmin):
     pass

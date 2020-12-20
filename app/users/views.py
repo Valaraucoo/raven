@@ -343,18 +343,25 @@ class MarksView(LoginRequiredMixin, generic.View):
         student = models.Student.objects.get(email=self.request.user.email)
         marks = student.courses_marks.all().order_by('-date')
         avg_marks = {}
-        for mark in marks:
-            if mark.course.name not in avg_marks:
-                avg_marks[mark.course.name] = {
-                    'course': mark.course,
+        for course in courses_models.Course.objects.filter(grade__students__email=student.email):
+            if course.name not in avg_marks:
+                final_mark = student.courses_final_marks.filter(course=course).first()
+                avg_marks[course.name] = {
+                    'course': course,
                     'sum': 0,
                     'count': 0,
-                    'avg': 0
+                    'avg': 0,
+                    'final_mark': final_mark
                 }
-            avg_marks[mark.course.name]['sum'] += mark.mark
-            avg_marks[mark.course.name]['count'] += 1
+            course_marks = student.courses_marks.filter(course=course)
+            for mark in course_marks:
+                avg_marks[course.name]['sum'] += mark.mark
+                avg_marks[course.name]['count'] += 1
         for key, value in avg_marks.items():
-            avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
+            try:
+                avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
+            except ZeroDivisionError:
+                avg_marks[key]['avg'] = ''
 
         return {
             'user': self.request.user,

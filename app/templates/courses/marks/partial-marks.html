@@ -9,6 +9,7 @@
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
           <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
           / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a> /
+          <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-total-marks' course.slug %}">Wykaz ocen</a> /
           Oceny
         </h4>
         <div class="mb-4 border-b">
@@ -17,7 +18,7 @@
               <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
                 FILTRUJ WYSTAWIONE OCENY
               </label>
-              <input name="student" placeholder="Imię i nazwisko studenta" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+              <input name="student" placeholder="Imię i nazwisko studenta" type="text" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" value="{{ student }}">
               <button type="submit" class="mt-2 text-sm font-bold mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
                 Filtruj
               </button>
@@ -27,7 +28,7 @@
             </div>
           </form>
         </div>
-        {% if course.marks.all %}
+        {% if marks.all %}
         <div class="overflow-x-auto mt-6">
           <table class="table-auto border-collapse w-full mt-1">
             <thead>

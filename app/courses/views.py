@@ -884,6 +884,8 @@ class MyCourseMarksView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
+        context['final_mark'] = models.FinalCourseMark.objects.filter(student__email=self.request.user.email,
+                                                             course=self.get_object()).first()
         context['marks'] = models.CourseMark.objects.filter(student__email=self.request.user.email, course=self.get_object())
         return context
 
@@ -944,6 +946,7 @@ class CourseMarksView(LoginRequiredMixin, DetailView):
                 marks = marks.filter(student__first_name__contains=name_partial[0])
                 marks = marks.filter(student__last_name__contains=name_partial[1])
         context['marks'] = marks
+        context['student'] = request.GET.get('student', '')
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -973,6 +976,49 @@ class CourseMarksView(LoginRequiredMixin, DetailView):
             else:
                 messages.error(request, 'Nie znaleziono studenta!')
         return self.get(request, *args, **kwargs)
+
+
+class TotalCourseMarkView(LoginRequiredMixin, DetailView):
+    template_name = "courses/marks/total-marks.html"
+    model = models.Course
+    slug_field = 'slug'
+    slug_url_kwarg = 'the_slug'
+    context_object_name = 'course'
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'course': self.get_object(),
+        }
+        return context
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(models.Course, slug=self.kwargs.get(self.slug_url_kwarg))
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().teachers.all():
+                return redirect('courses:courses')
+        context = self.get_context_data(**kwargs)
+        students = self.get_object().grade.students.all()
+
+        if request.GET.get('student'):
+            name_partial = request.GET.get('student').split(' ')
+            if len(name_partial) == 1:
+                students = students.filter(first_name__contains=name_partial[0])
+            if len(name_partial) == 2:
+                students = students.filter(first_name__contains=name_partial[0])
+                students = students.filter(last_name__contains=name_partial[1])
+            if len(name_partial) > 2:
+                students = students.filter(first_name__contains=name_partial[0])
+                students = students.filter(last_name__contains=name_partial[1])
+
+        context['students'] = students
+        context['student'] = request.GET.get('student', '')
+        return render(request, self.template_name, context)
 
 
 class CourseMarkEditView(LoginRequiredMixin, DetailView):
@@ -1049,3 +1095,85 @@ def delete_course_mark(request, the_slug, num):
     course.save()
     messages.info(request, 'Pomyślnie usunięto ocenę!')
     return redirect('courses:courses-marks', the_slug=course.slug)
+
+
+def set_final_course_mark_view(request, the_slug, pk):
+    user = request.user
+    if user.is_student or not user.is_authenticated:
+        return redirect('courses:courses')
+    try:
+        course = models.Course.objects.get(slug=the_slug)
+    except Exception:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+
+    try:
+        student = users_models.Student.objects.get(pk=pk)
+    except Exception:
+        return redirect('courses:courses-total-marks', the_slug=the_slug)
+    form = forms.CourseSetFinalMarkModelForm()
+
+    if request.method == 'POST':
+        form = forms.CourseSetFinalMarkModelForm(request.POST)
+        if form.is_valid():
+            mark = form.save(commit=False)
+            mark.course = course
+            mark.teacher = users_models.Teacher.objects.get(email=user.email)
+            mark.student = student
+            mark.save()
+            messages.info(request, 'Pomyślnie wystawiono ocenę!')
+            return redirect('courses:courses-total-marks', the_slug=the_slug)
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+
+    template_name = "courses/marks/set-final-mark.html"
+    context = {
+        'student': student,
+        'course': course,
+        'form': form
+    }
+    return render(request, template_name, context)
+
+
+def edit_final_course_mark_view(request, the_slug, pk):
+    user = request.user
+    if user.is_student or not user.is_authenticated:
+        return redirect('courses:courses')
+    try:
+        course = models.Course.objects.get(slug=the_slug)
+    except Exception:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in course.teachers.all():
+            return redirect('courses:courses')
+
+    try:
+        student = users_models.Student.objects.get(pk=pk)
+    except Exception:
+        return redirect('courses:courses-total-marks', the_slug=the_slug)
+
+    mark = student.courses_final_marks.filter(course=course).first()
+    form = forms.CourseSetFinalMarkModelForm(instance=mark)
+
+    if request.method == 'POST':
+        form = forms.CourseSetFinalMarkModelForm(data=request.POST, instance=mark)
+        if form.is_valid():
+            mark = form.save(commit=False)
+            mark.teacher = users_models.Teacher.objects.get(email=user.email)
+            mark.save()
+            messages.info(request, 'Pomyślnie zaktualizowano ocenę!')
+            return redirect('courses:courses-total-marks', the_slug=the_slug)
+        else:
+            messages.error(request, 'Spróbuj ponownie!')
+
+    template_name = "courses/marks/edit-final-mark.html"
+    context = {
+        'student': student,
+        'course': course,
+        'form': form
+    }
+    return render(request, template_name, context)

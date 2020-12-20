@@ -226,21 +226,14 @@ class Laboratory(Event):
         verbose_name_plural = _('Laboratories')
 
 
-class CourseMark(models.Model):
+class CourseMarkBase(models.Model):
     mark = models.IntegerField(default=0, validators=[validators.MinValueValidator(0),
-                                                                             validators.MaxValueValidator(100)])
+                                                      validators.MaxValueValidator(100)])
     date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
-    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='marks')
-    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_marks')
-    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_lecture_marks')
-
-    def __str__(self):
-        return f'Lecture Mark: {self.student}, {self.course}'
-
     class Meta:
-        ordering = ('-date',)
+        abstract = True
 
     @property
     def mark_decimal(self) -> float:
@@ -258,6 +251,31 @@ class CourseMark(models.Model):
             return 5.0
         else:
             return 2.0
+
+
+class CourseMark(CourseMarkBase):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='marks')
+    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_marks')
+    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_lecture_marks')
+
+    def __str__(self):
+        return f'Course Mark: {self.student}, {self.course}'
+
+    class Meta:
+        ordering = ('-date',)
+
+
+class FinalCourseMark(CourseMarkBase):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='final_marks')
+    student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_final_marks')
+    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_final_marks')
+
+    def __str__(self):
+        return f'Final Course Mark: {self.student}, {self.course}'
+
+    class Meta:
+        unique_together = ('student', 'course',)
+        ordering = ('-date',)
 
 
 class CourseNotice(models.Model):
