@@ -122,7 +122,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
             courses = teacher.courses_teaching.all()
         else:
             student = models.Student.objects.get(email=self.request.user.email)
-            marks = student.courses_marks.all().order_by('-date')[:3]
+            marks = student.courses_marks.all().order_by('-date')[:5]
             for mark in marks:
                 if mark.course.name not in avg_marks:
                     avg_marks[mark.course.name] = {
