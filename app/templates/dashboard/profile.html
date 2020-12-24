@@ -92,32 +92,62 @@
           </div>
         {% endif %}
         {% block profile_content %}
-        <div class="flex flex-wrap">
-          <div class="flex flex-col px-4 w-full md:flex-1 md:w-1/2">
-            <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
-              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
-                Ostatnie logowanie
-              </label>
-              <span class="appearance-none block w-full text-gray-700">
-                {%  if profile.last_login %}
-                  {{ profile.last_login|date:"d.m.Y (H:i)" }}
-                {% else %} - {% endif %}
-              </span>
+            <div class="flex flex-wrap">
+              <div class="flex flex-col px-4 w-full md:flex-1 md:w-1/2">
+                <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
+                  <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
+                    Ostatnie logowanie
+                  </label>
+                  <span class="appearance-none block w-full text-gray-700">
+                    {%  if profile.last_login %}
+                      {{ profile.last_login|date:"d.m.Y (H:i)" }}
+                    {% else %} - {% endif %}
+                  </span>
+                </div>
+              </div>
+              <div class="px-4 w-full md:flex-1 md:w-1/2">
+                <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
+                  <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
+                    Konto utworzone
+                  </label>
+                  <span class="appearance-none block w-full text-gray-700">
+                    {{ profile.date_joined|date:"d.m.Y (H:i)" }}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="px-4 w-full md:flex-1 md:w-1/2">
-            <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
-              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
-                Konto utworzone
-              </label>
-              <span class="appearance-none block w-full text-gray-700">
-                {{ profile.date_joined|date:"d.m.Y (H:i)" }}
-              </span>
-            </div>
-          </div>
+
+                      </div>
         </div>
-        {% endblock profile_content %}
       </div>
-    </div>
-  </div>
+      <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-9">
+        <div class="max-w-full mx-auto bg-white py-6 rounded-lg overflow-hidden shadow-lg">
+            <div class="flex flex-row">
+              <div class="flex flex-col w-5/12 my-6 px-5 max-w-full mx-auto">
+                <div class="w-full overflow-auto h-56 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+                  <h5 class="font-bold ">O mnie:</h5>
+                  <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+                  Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+                </div>
+                <div class="w-full overflow-auto :h-32 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+                  <h5 class="font-bold ">Informacje dodatkowe:</h5>
+                  <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+                </div>
+              </div>
+              <div class="w-5/12 h-auto text-sm my-6 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+                  {% if profile.is_student %}
+                    <h5 class="font-bold ">Roczniki:</h5>
+                      <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+                      <!--{#% for i in profile.courses %#} -->
+                  {% else %}
+                      <h5 class="font-bold ">Prowadzone kursy:</h5>
+                      <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+                  {% endif %}
+              </div>
+            </div>
+        </div>
+      </div>
+    {% endblock profile_content %}
+
+
 {% endblock dashboard_content %}

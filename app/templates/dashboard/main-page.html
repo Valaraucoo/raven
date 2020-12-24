@@ -57,14 +57,14 @@
     </div>
     {% if request.user.is_student %}
       <div class="flex flex-wrap mt-4 mb-4 ">
-        <div class="bg-white pb-4 px-4 mb-4 w-full lg:flex-1 lg:mb-0 lg:mr-4 rounded-md shadow-md">
+        <div class="bg-white pb-4 px-4 mb-4 w-full lg:flex-1 lg:mb-0 lg:mr-4 rounded-md shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
           <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
             Najnowsze oceny
           </h4>
           {% if not marks %}
             Brak wystawionych ocen.
           {% else %}
-            <div class="flex pb-12 h-full justify-between flex-col flex-wrap">
+            <div class="h-full flex-col flex-wrap">
               <div class="overflow-x-auto mt-6">
                 <table class="table-auto border-collapse w-full mt-1">
                   <thead>
@@ -97,7 +97,7 @@
             </div>
           {% endif %}
         </div>
-        <div class="bg-white pb-4 px-4 w-full max-w-lg lg:flex-1 rounded-md shadow-md">
+        <div class="bg-white pb-4 px-4 w-full max-w-lg lg:flex-1 rounded-md shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
           <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
             Oceny
           </h4>
@@ -106,7 +106,7 @@
       </div>
     {% endif %}
     <div class="flex ">
-      <div class="bg-white pb-4 px-4 rounded-md w-full shadow-md">
+      <div class="bg-white pb-4 px-4 rounded-md w-full shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
         <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
           Ostatnie ogłoszenia
           {% if not_viewed_notices %}
@@ -153,7 +153,7 @@
       </div>
     </div>
     <div class="flex flex-wrap ">
-      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md ">
+      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
         <h4 class="pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">Nadchodzące wykłady</h4>
         {% if not lectures.all %}
           <p class="text-gray-700 text-sm">Nie znaleziono żadnych nadchodzących wykładów</p>
@@ -172,7 +172,7 @@
           </table>
         {% endif %}
       </div>
-      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md ">
+      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
         <h4 class="pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">Nadchodzące laboratoria</h4>
         {% if not laboratories.all %}
           <p class="text-gray-700 text-sm">Nie znaleziono żadnych nadchodzących laboratoriów</p>

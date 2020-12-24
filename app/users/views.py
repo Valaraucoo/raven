@@ -125,12 +125,12 @@ class DashboardView(generic.View, LoginRequiredMixin):
         avg_marks = {}
         if self.request.user.is_teacher:
             teacher = models.Teacher.objects.get(email=self.request.user.email)
-            courses = teacher.courses_teaching.all()
+            courses = [course for course in teacher.courses_teaching.all() if course.is_actual]
         else:
             student = models.Student.objects.get(email=self.request.user.email)
             marks = student.courses_marks.all().order_by('-date')[:5]
             for mark in marks:
-                if mark.course.name not in avg_marks:
+                if mark.course.name not in avg_marks and mark.course.is_actual:
                     avg_marks[mark.course.name] = {
                         'course': mark.course,
                         'sum': 0,
@@ -160,7 +160,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
             course__in=courses,
             not_viewed__email=self.request.user.email
         ).order_by('-created_at')
-
+        courses = [course for course in courses if course.is_actual]
         return {
             'user': self.request.user,
             'courses': courses,
