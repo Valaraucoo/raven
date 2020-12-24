@@ -72,6 +72,10 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+}
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
