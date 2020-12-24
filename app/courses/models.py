@@ -76,7 +76,7 @@ class Grade(models.Model):
         verbose_name_plural = _('Grades')
 
     def __str__(self) -> str:
-        return 'Grade: {} ({} - {})'.format(self.name, self.start_year.year, self.finish_year.year)
+        return '{} ({} - {})'.format(self.name, self.start_year.year, self.finish_year.year)
 
     @property
     def finish_year(self) -> datetime.date:
@@ -118,6 +118,8 @@ class Course(models.Model):
     files = models.ManyToManyField(CourseFile, blank=True)
     slug = models.SlugField(blank=True, null=True, unique=True)
 
+    start_date = models.DateField(default=timezone.now())
+
     class Meta:
         ordering = ('name',)
         verbose_name = _('Course')
@@ -150,6 +152,10 @@ class Course(models.Model):
             for student in group.students.all():
                 students.append(student)
         return [student for student in self.grade.students.all() if student not in students]
+
+    @property
+    def is_actual(self) -> bool:
+        return self.start_date <= timezone.now().date() <= self.start_date + datetime.timedelta(days=180)
 
 
 class CourseGroup(models.Model):

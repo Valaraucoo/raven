@@ -27,8 +27,14 @@ class ProfileView(generic.View, LoginRequiredMixin):
     template_name = 'dashboard/profile.html'
 
     def get_context_data(self, *args, **kwargs):
+        courses = courses_models.Course.objects.none()
+        if self.request.user.is_student:
+            courses = courses_models.Course.objects.filter(grade__students__email=self.request.user.email)
+        else:
+            courses = models.Teacher.objects.get(email=self.request.user.email).courses_teaching.all()
         return {
-            'profile': self.request.user
+            'profile': self.request.user,
+            'courses': [course for course in courses if course.is_actual]
         }
 
     def get(self, request, *args, **kwargs):
@@ -343,7 +349,9 @@ class MarksView(LoginRequiredMixin, generic.View):
         student = models.Student.objects.get(email=self.request.user.email)
         marks = student.courses_marks.all().order_by('-date')
         avg_marks = {}
-        for course in courses_models.Course.objects.filter(grade__students__email=student.email):
+        courses = [course for course in courses_models.Course.objects.filter(grade__students__email=student.email) if
+                   course.is_actual]
+        for course in courses:
             if course.name not in avg_marks:
                 final_mark = student.courses_final_marks.filter(course=course).first()
                 avg_marks[course.name] = {

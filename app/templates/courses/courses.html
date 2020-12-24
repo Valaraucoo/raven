@@ -88,7 +88,11 @@
           </div>
           <div v-for="(course, index) in courses" class="flex mb-4">
             <div class="flex-shrink-0">
-              <div class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-blue-400 text-white">
+              <div v-if="course.is_actual" class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-blue-400 text-white">
+                <span class="text-xs">ECTS</span>
+                [[ course.ects ]]
+              </div>
+              <div v-else class="flex flex-col items-center justify-center h-12 w-12 rounded-md bg-red-400 text-white">
                 <span class="text-xs">ECTS</span>
                 [[ course.ects ]]
               </div>
