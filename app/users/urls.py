@@ -12,6 +12,7 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('summary/', views.SummaryView.as_view(), name='summary'),
     path('profile/<int:pk>/', views.ProfileDetailView.as_view(), name='profile-detail'),
     path('profile/edit/', views.ProfileEditView.as_view(), name='profile-edit'),
     path('profile/img/delete/', views.delete_profile_image, name='profile-img-delete'),

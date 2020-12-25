@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import generic
@@ -28,13 +29,16 @@ class ProfileView(generic.View, LoginRequiredMixin):
 
     def get_context_data(self, *args, **kwargs):
         courses = courses_models.Course.objects.none()
+        grades = courses_models.Grade.objects.none()
         if self.request.user.is_student:
             courses = courses_models.Course.objects.filter(grade__students__email=self.request.user.email)
+            grades = courses_models.Grade.objects.filter(students__email=self.request.user.email)
         else:
             courses = models.Teacher.objects.get(email=self.request.user.email).courses_teaching.all()
         return {
             'profile': self.request.user,
-            'courses': [course for course in courses if course.is_actual]
+            'courses': [course for course in courses if course.is_actual],
+            'grades': grades
         }
 
     def get(self, request, *args, **kwargs):
@@ -123,6 +127,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
         courses = courses_models.Course.objects.none()
         marks = None
         avg_marks = {}
+        avg = 0
         if self.request.user.is_teacher:
             teacher = models.Teacher.objects.get(email=self.request.user.email)
             courses = [course for course in teacher.courses_teaching.all() if course.is_actual]
@@ -139,8 +144,12 @@ class DashboardView(generic.View, LoginRequiredMixin):
                     }
                 avg_marks[mark.course.name]['sum'] += mark.mark
                 avg_marks[mark.course.name]['count'] += 1
+            count = 0
             for key, value in avg_marks.items():
                 avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
+                avg += avg_marks[key]['avg']
+                count += 1
+            avg = avg / count
             for grade in student.grades.all():
                 courses |= grade.courses.all()
         notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')[:3]
@@ -171,7 +180,8 @@ class DashboardView(generic.View, LoginRequiredMixin):
             'laboratories': laboratories,
             'not_viewed_notices': not_viewed_notices.count(),
             'marks': marks,
-            'avg_marks': avg_marks
+            'avg_marks': avg_marks,
+            'avg': avg
         }
 
     def get(self, request, *args, **kwargs):
@@ -391,4 +401,48 @@ class MarksView(LoginRequiredMixin, generic.View):
                 context['query'] = course
                 marks = marks.filter(course__name__icontains=course)
         context['marks'] = marks
+        return render(request, self.template_name, context)
+
+
+class SummaryView(LoginRequiredMixin, generic.View):
+    template_name = 'dashboard/summary.html'
+
+    def get_context_data(self, *args, **kwargs):
+        grades = courses_models.Grade.objects.filter(students__email=self.request.user.email).order_by('-start_year')
+        summary = {}
+        student = models.Student.objects.get(email=self.request.user.email)
+        for grade in grades:
+            count, avg = 0, 0
+            courses = {}
+            for course in grade.courses.all().order_by('semester'):
+                final_mark = courses_models.FinalCourseMark.objects.filter(course=course, student=student).first()
+                if final_mark:
+                    courses[course] = {
+                        'course': course,
+                        'final_mark': final_mark
+                    }
+                    avg += final_mark.mark
+                    count += 1
+                else:
+                    courses[course] = {
+                        'course': course,
+                        'final_mark': None
+                    }
+            summary[grade] = {
+                'crs': courses,
+                'avg': avg / count if count else 0,
+            }
+
+        return {
+            'profile': self.request.user,
+            'grades': grades,
+            'summary': summary
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        if self.request.user.is_teacher:
+            return redirect('users:dashboard')
+        context = self.get_context_data(*args, **kwargs)
         return render(request, self.template_name, context)

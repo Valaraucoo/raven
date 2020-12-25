@@ -1,8 +1,7 @@
-
 import datetime
 import os
 import uuid
-from typing import Any
+from typing import Any, Optional
 
 from django.conf import settings
 from django.core import validators
@@ -16,7 +15,9 @@ from utils.meetings import meetings
 
 PROFILE_CHOICES = (
     ('CS', _('Computer Science')),
-    ('IS', _('Intelligent Systems'))
+    ('IS', _('Intelligent Systems')),
+    ('AC', _('Automatics Control')),
+    ('MA', _('Maths')),
 )
 
 LANGUAGE_CHOICES = (
@@ -156,6 +157,15 @@ class Course(models.Model):
     @property
     def is_actual(self) -> bool:
         return self.start_date <= timezone.now().date() <= self.start_date + datetime.timedelta(days=180)
+
+    @property
+    def calculated_semester(self) -> Optional[int]:
+        grade_start_date: datetime.date = self.grade.start_year
+        delta: datetime.timedelta = self.start_date - grade_start_date
+        semester = int(delta.days / 183) + 1
+        if 0 < semester <= 7:
+            return semester
+        return None
 
 
 class CourseGroup(models.Model):

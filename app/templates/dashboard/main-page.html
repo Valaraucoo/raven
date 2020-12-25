@@ -28,17 +28,19 @@
               </div>
             </a>
           </div>
+          {% if request.user.is_student %}
           <div class="col-span-12 sm:col-span-6 md:col-span-3">
-            <a href="#" class="border-b-4 border-yellow-400 hover:border-yellow-500 flex flex-row bg-white shadow-sm rounded p-4 duration-300 cursor-pointer hover:bg-gray-100 hover:shadow-lg">
+            <a href="{% url 'users:marks' %}" class="border-b-4 border-yellow-400 hover:border-yellow-500 flex flex-row bg-white shadow-sm rounded p-4 duration-300 cursor-pointer hover:bg-gray-100 hover:shadow-lg">
               <div class="flex items-center justify-center flex-shrink-0 h-12 w-12 rounded-xl bg-orange-100 text-orange-500">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M16.85,7.275l-3.967-0.577l-1.773-3.593c-0.208-0.423-0.639-0.69-1.11-0.69s-0.902,0.267-1.11,0.69L7.116,6.699L3.148,7.275c-0.466,0.068-0.854,0.394-1,0.842c-0.145,0.448-0.023,0.941,0.314,1.27l2.871,2.799l-0.677,3.951c-0.08,0.464,0.112,0.934,0.493,1.211c0.217,0.156,0.472,0.236,0.728,0.236c0.197,0,0.396-0.048,0.577-0.143l3.547-1.864l3.548,1.864c0.18,0.095,0.381,0.143,0.576,0.143c0.256,0,0.512-0.08,0.729-0.236c0.381-0.277,0.572-0.747,0.492-1.211l-0.678-3.951l2.871-2.799c0.338-0.329,0.459-0.821,0.314-1.27C17.705,7.669,17.316,7.343,16.85,7.275z M13.336,11.754l0.787,4.591l-4.124-2.167l-4.124,2.167l0.788-4.591L3.326,8.5l4.612-0.67l2.062-4.177l2.062,4.177l4.613,0.67L13.336,11.754z"></svg>
               </div>
               <div class="flex flex-col flex-grow ml-4">
                 <div class="text-sm text-gray-500">Moje oceny</div>
-                <div class="font-bold text-lg">4.87</div>
+                <div class="font-bold text-lg">{{ avg }}%</div>
               </div>
             </a>
           </div>
+          {% endif %}
           <div class="col-span-12 sm:col-span-6 md:col-span-3">
             <a href="{% url 'users:schedule' %}" class="border-b-4 border-red-400 hover:border-red-500 flex flex-row bg-white shadow-sm rounded p-4 duration-300 cursor-pointer hover:bg-gray-100 hover:shadow-lg">
               <div class="flex items-center justify-center flex-shrink-0 h-12 w-12 rounded-xl bg-red-100 text-red-500">
@@ -163,6 +165,7 @@
             {% for lecture in lectures %}
               <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
                 <td class="px-4 py-4"><a href="{% url 'courses:lectures-detail' lecture.pk %}" class="text-blue-400 hover:text-blue-500">{{ lecture.title }}</a></td>
+                <td class="px-4 py-4">{{ lecture.course.grade }}</td>
                 <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' lecture.course.slug %}">{{ lecture.course.name }}</a></td>
                 <td class="px-4 py-4">{{ lecture.date|date:"h:i, d.m.Y" }}</td>
                 <td class="px-4 py-4">{% if lecture.location == '1' %}Zdalnie{% else %}Na uczelni{% endif %}</td>
@@ -182,6 +185,7 @@
             {% for lab in laboratories %}
               <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
                 <td class="px-4 py-4"><a href="{% url 'courses:laboratory-detail' lab.pk %}" class="text-blue-400 hover:text-blue-500">{{ lab.title }}</a></td>
+                <td class="px-4 py-4">{{ lab.course.grade }}</td>
                 <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' lab.course.slug %}">{{ lab.course.name }}</a></td>
                 <td class="px-4 py-4">{{ lab.date|date:"h:i, d.m.Y" }}</td>
                 <td class="px-4 py-4">{% if lab.location == '1' %}Zdalnie{% else %}Na uczelni{% endif %}</td>
