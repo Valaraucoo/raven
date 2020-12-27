@@ -91,7 +91,7 @@
                   </tbody>
                 </table>
               </div>
-              <div class="mb-2">
+              <div class="mb-2 mt-4">
                 <a href="{% url 'users:marks' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
                   Przejdź do ocen
                 </a>
@@ -108,6 +108,7 @@
       </div>
     {% endif %}
     <div class="flex ">
+    {% if request.user.is_teacher %}
       <div class="bg-white pb-4 px-4 rounded-md w-full shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
         <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
           Ostatnie ogłoszenia
@@ -153,6 +154,91 @@
           </div>
         {% endif %}
       </div>
+    {% else %}
+      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
+        <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
+          Ostatnie ogłoszenia
+          {% if not_viewed_notices %}
+            <a href="{% url 'users:notices' %}" class="ml-4 rounded-full bg-green-400 hover:bg-green-500 duration-300 text-sm text-white px-2 py-1 rounded  leading-none flex items-center">
+              Nowe
+              <span class="bg-white p-1 rounded-full text-blue-600 text-xs ml-2 mr-1">
+            {{ not_viewed_notices }}
+          </span>
+            </a>
+          {% endif %}
+        </h4>
+        {% if not notices %}
+          Brak ogłoszeń.
+        {% else %}
+          <div class="overflow-x-auto mt-6">
+            <table class="table-auto border-collapse w-full mt-1">
+              <thead>
+              <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+                <th class="px-4 py-2">Tytuł</th>
+                <th class="px-4 py-2">Autor</th>
+                <th class="px-4 py-2">Kurs</th>
+              </tr>
+              </thead>
+              <tbody class="text-sm font-normal text-gray-700">
+              {% for notice in notices %}
+                <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                  <td class="px-4 py-4">{{ notice.title }}
+                    {% if user in notice.not_viewed.all %}
+                      <span class="duration-300 rounded-full font-bold px-2 py-1 text-xs text-white bg-green-400 hover:bg-green-500">NOWE</span>
+                    {% endif %}</td>
+                  <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' notice.sender.pk %}">{{ notice.sender.first_name }} {{ notice.sender.last_name }}</a></td>
+                  <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' notice.course.slug %}">{{ notice.course.name }}</a></td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-8 mb-2">
+            <a href="{% url 'users:notices' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Przejdź do ogłoszeń
+            </a>
+          </div>
+        {% endif %}
+      </div>
+      <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">
+        <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
+          Najnowsze zadania
+        </h4>
+        {% if not assignments %}
+          Brak zadan.
+        {% else %}
+          <div class="overflow-x-auto mt-6">
+            <table class="table-auto border-collapse w-full mt-1">
+              <thead>
+              <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+                <th class="px-4 py-2">Tytuł</th>
+                <th class="px-4 py-2">Tresc</th>
+                <th class="px-4 py-2">Prowadzacy</th>
+                <th class="px-4 py-2">Data oddania</th>
+              </tr>
+              </thead>
+              <tbody class="text-sm font-normal text-gray-700">
+              {% for assignment in assignments %}
+                <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                  <td class="px-4 py-4">{{ assignment.title }}</td>
+                  <td class="px-4 py-4">{{ assignment.content }}</td>
+                  <td class="px-4 py-4"><a href="{% url 'users:profile-detail' assignment.teacher.pk %}" class="text-blue-400 hover:text-blue-500">
+                    {{ assignment.teacher.first_name }} {{ assignment.teacher.last_name }}
+                  </a></td>
+                  <td class="px-4 py-4">{{ assignment.deadline|date:"d.m.Y" }}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-8 mb-2">
+            <a href="{% url 'users:assignments' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Przejdź do zadan
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
     </div>
     <div class="flex flex-wrap ">
       <div class="overflow-x-auto mt-6 w-1/2 bg-white pb-4 px-4 lg:flex-1 rounded-md w-full mr-4 shadow-md border-b-4 border-blue-400 hover:border-blue-500 duration-200">

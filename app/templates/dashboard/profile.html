@@ -127,11 +127,9 @@
                 {% if request.user.is_student %}
                   <div class="block ml-2 text-blue-400">
                     <a class="text-sm text-blue-400 hover:text-blue-500" href="{% url 'users:marks' %}">Moje oceny</a>
-                    (<a class="text-sm  hover:text-blue-500" href="#">wydruk ocen</a>)
                   </div>
                   <div class="block ml-2 mt-2 text-blue-400">
                     <a class="text-sm text-blue-400 hover:text-blue-500" href="{% url 'users:summary' %}">Historia studiow</a>
-                    (<a class="text-sm  hover:text-blue-500" href="#">wydruk</a>)
                   </div>
                 {% endif %}
               </div>

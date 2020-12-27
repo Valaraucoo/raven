@@ -311,3 +311,18 @@ class CourseNotice(models.Model):
 
     class Meta:
         ordering = ('-created_at', 'title',)
+
+
+class Assignment(models.Model):
+    laboratory = models.ForeignKey('Laboratory', on_delete=models.CASCADE, related_name='assignments')
+    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_assignments')
+    deadline = models.DateTimeField()
+    title = models.CharField(max_length=100)
+    content = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Assignment: {self.title} {self.deadline}'
+
+    @property
+    def is_actual(self) -> bool:
+        return timezone.now() < self.deadline

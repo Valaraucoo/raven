@@ -126,6 +126,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
     def get_context_data(self, *args, **kwargs):
         courses = courses_models.Course.objects.none()
         marks = None
+        assignments = None
         avg_marks = {}
         avg = 0
         if self.request.user.is_teacher:
@@ -134,6 +135,11 @@ class DashboardView(generic.View, LoginRequiredMixin):
         else:
             student = models.Student.objects.get(email=self.request.user.email)
             marks = student.courses_marks.all().order_by('-date')[:5]
+
+            groups = student.laboratories.all()
+            laboratories = courses_models.Laboratory.objects.filter(group__in=groups)
+            assignments = courses_models.Assignment.objects.filter(laboratory__in=laboratories)[:3]
+
             for mark in marks:
                 if mark.course.name not in avg_marks and mark.course.is_actual:
                     avg_marks[mark.course.name] = {
@@ -149,7 +155,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
                 avg_marks[key]['avg'] = int(avg_marks[key]['sum'] / avg_marks[key]['count'])
                 avg += avg_marks[key]['avg']
                 count += 1
-            avg = avg / count
+            avg = avg / count if count else 0
             for grade in student.grades.all():
                 courses |= grade.courses.all()
         notices = courses_models.CourseNotice.objects.filter(course__in=courses).order_by('-created_at')[:3]
@@ -181,7 +187,8 @@ class DashboardView(generic.View, LoginRequiredMixin):
             'not_viewed_notices': not_viewed_notices.count(),
             'marks': marks,
             'avg_marks': avg_marks,
-            'avg': avg
+            'avg': avg,
+            'assignments': [assignment for assignment in assignments if assignment.is_actual]
         }
 
     def get(self, request, *args, **kwargs):
@@ -437,6 +444,27 @@ class SummaryView(LoginRequiredMixin, generic.View):
             'profile': self.request.user,
             'grades': grades,
             'summary': summary
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect(settings.LOGIN_URL)
+        if self.request.user.is_teacher:
+            return redirect('users:dashboard')
+        context = self.get_context_data(*args, **kwargs)
+        return render(request, self.template_name, context)
+
+
+class AssignmentsView(LoginRequiredMixin, generic.View,):
+    template_name = 'dashboard/assignments.html'
+
+    def get_context_data(self, *args, **kwargs):
+        student = models.Student.objects.get(email=self.request.user.email)
+        groups = student.laboratories.all()
+        laboratories = courses_models.Laboratory.objects.filter(group__in=groups)
+        assignments = courses_models.Assignment.objects.filter(laboratory__in=laboratories)
+        return {
+            'assignments': [assignment for assignment in assignments if assignment.is_actual]
         }
 
     def get(self, request, *args, **kwargs):
