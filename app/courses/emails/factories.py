@@ -15,3 +15,17 @@ class NewCourseNoticeEmail(emails.BaseEmailFactory):
         return {
             'notice': self.notice
         }
+
+
+class NewAssignmentEmail(emails.BaseEmailFactory):
+    subject_template_name = 'assignment/new_assignment_subject.txt'
+    email_template_name = 'assignment/new_assignment.html'
+
+    def __init__(self, assignment, bcc: List[str] = None):
+        self.assignment = assignment
+        self.bcc = bcc
+
+    def get_context_data(self):
+        return {
+            'assignment': self.assignment
+        }

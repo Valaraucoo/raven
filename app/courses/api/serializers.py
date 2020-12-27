@@ -11,7 +11,7 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Course
         fields = ('name', 'teachers', 'head_teacher', 'has_exam', 'ects', 'slug',
-                  'language', 'semester',)
+                  'language', 'semester', 'is_actual', 'calculated_semester')
         lookup_field = 'slug'
 
 

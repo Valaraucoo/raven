@@ -39,6 +39,12 @@ urlpatterns = [
     path('courses/laboratory/<int:pk>/file/delete/<int:num>/', views.delete_laboratory_file,
          name='laboratory-file-delete'),
 
+    path('courses/laboratory/<int:pk>/assignments/add/', views.AssignmentCreateView.as_view(),
+         name='assignments-create'),
+    path('courses/laboratory/<int:pk>/assignments/delete/<int:num>/', views.delete_assignment_view,
+         name='assignments-delete'),
+
+
     path('courses/<slug:the_slug>/groups/', views.CourseGroupJoinListView.as_view(), name='group'),
     path('courses/<slug:the_slug>/groups/create/', views.course_group_create_view, name='group-create'),
     path('courses/<slug:the_slug>/groups/join/<int:num>', views.course_group_join_view, name='group-join-group'),

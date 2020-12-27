@@ -1,8 +1,7 @@
-
 import datetime
 import os
 import uuid
-from typing import Any
+from typing import Any, Optional
 
 from django.conf import settings
 from django.core import validators
@@ -16,7 +15,9 @@ from utils.meetings import meetings
 
 PROFILE_CHOICES = (
     ('CS', _('Computer Science')),
-    ('IS', _('Intelligent Systems'))
+    ('IS', _('Intelligent Systems')),
+    ('AC', _('Automatics Control')),
+    ('MA', _('Maths')),
 )
 
 LANGUAGE_CHOICES = (
@@ -76,7 +77,7 @@ class Grade(models.Model):
         verbose_name_plural = _('Grades')
 
     def __str__(self) -> str:
-        return 'Grade: {} ({} - {})'.format(self.name, self.start_year.year, self.finish_year.year)
+        return '{} ({} - {})'.format(self.name, self.start_year.year, self.finish_year.year)
 
     @property
     def finish_year(self) -> datetime.date:
@@ -118,6 +119,8 @@ class Course(models.Model):
     files = models.ManyToManyField(CourseFile, blank=True)
     slug = models.SlugField(blank=True, null=True, unique=True)
 
+    start_date = models.DateField(default=timezone.now())
+
     class Meta:
         ordering = ('name',)
         verbose_name = _('Course')
@@ -150,6 +153,19 @@ class Course(models.Model):
             for student in group.students.all():
                 students.append(student)
         return [student for student in self.grade.students.all() if student not in students]
+
+    @property
+    def is_actual(self) -> bool:
+        return self.start_date <= timezone.now().date() <= self.start_date + datetime.timedelta(days=180)
+
+    @property
+    def calculated_semester(self) -> Optional[int]:
+        grade_start_date: datetime.date = self.grade.start_year
+        delta: datetime.timedelta = self.start_date - grade_start_date
+        semester = int(delta.days / 183) + 1
+        if 0 < semester <= 7:
+            return semester
+        return None
 
 
 class CourseGroup(models.Model):
@@ -295,3 +311,22 @@ class CourseNotice(models.Model):
 
     class Meta:
         ordering = ('-created_at', 'title',)
+
+
+class Assignment(models.Model):
+    laboratory = models.ForeignKey('Laboratory', on_delete=models.CASCADE, related_name='assignments')
+    teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_assignments')
+    deadline = models.DateTimeField()
+    title = models.CharField(max_length=100)
+    content = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Assignment: {self.title} {self.deadline}'
+
+    @property
+    def is_actual(self) -> bool:
+        return timezone.now() < self.deadline
+
+    @property
+    def timedelta(self) -> datetime.timedelta:
+        return self.deadline - timezone.now()

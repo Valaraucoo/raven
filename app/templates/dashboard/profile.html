@@ -11,8 +11,8 @@
             <img class="h-48 w-48 sm:h-32 sm:w-32 rounded-full border-4 border-white -mt-16 mr-4" src="{{ profile.image.url }}" alt="">
           </div>
           <div class="py-1">
-            <div class="font-bold text-2xl mb-1">
-              {{ profile.first_name }} {{ profile.last_name }}
+            <div class="font-bold text-2xl mb-1 sm:flex items-center">
+              <span>{{ profile.first_name }} {{ profile.last_name }}</span>
               {% if profile.is_online %}
                 <span class="ml-2 inline rounded-full bg-green-400 uppercase px-2 py-1 text-xs text-white font-bold">Online</span>
               {% else %}
@@ -20,58 +20,125 @@
               {% endif %}
             </div>
             <div class="block md:flex md:items-center">
-              <a href="mailto:{{ profile.email }}" class="text-sm text-gray-700">{{ profile.email }}</a>
+              <a href="mailto:{{ profile.email }}" class="text-sm text-blue-400 hover:text-blue-500">{{ profile.email }}</a>
             </div>
             <div class="inline-flex md:flex md:items-center mt-2">
-              <div class="text-sm inline-flex font-medium text-grey-300 sm:flex items-center">
-                <svg class="h-5 w-5 text-grey mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
+              <div class="text-sm inline-flex font-medium text-gray-600 sm:flex items-center">
+                <span><svg class="h-6 w-6 text-grey" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
                   <path d="M10,1.375c-3.17,0-5.75,2.548-5.75,5.682c0,6.685,5.259,11.276,5.483,11.469c0.152,0.132,0.382,0.132,0.534,0c0.224-0.193,5.481-4.784,5.483-11.469C15.75,3.923,13.171,1.375,10,1.375 M10,17.653c-1.064-1.024-4.929-5.127-4.929-10.596c0-2.68,2.212-4.861,4.929-4.861s4.929,2.181,4.929,4.861C14.927,12.518,11.063,16.627,10,17.653 M10,3.839c-1.815,0-3.286,1.47-3.286,3.286s1.47,3.286,3.286,3.286s3.286-1.47,3.286-3.286S11.815,3.839,10,3.839 M10,9.589c-1.359,0-2.464-1.105-2.464-2.464S8.641,4.661,10,4.661s2.464,1.105,2.464,2.464S11.359,9.589,10,9.589"></path>
-                </svg>
+                </svg></span>
                 {{ profile.address }}
-              </div>
-              <div class="text-sm ml-4 inline-flex font-medium text-grey-300 sm:flex items-center">
-                <svg class="svg-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <span class="ml-2"><svg class="svg-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                   <path d="M12.075,10.812c1.358-0.853,2.242-2.507,2.242-4.037c0-2.181-1.795-4.618-4.198-4.618S5.921,4.594,5.921,6.775c0,1.53,0.884,3.185,2.242,4.037c-3.222,0.865-5.6,3.807-5.6,7.298c0,0.23,0.189,0.42,0.42,0.42h14.273c0.23,0,0.42-0.189,0.42-0.42C17.676,14.619,15.297,11.677,12.075,10.812 M6.761,6.775c0-2.162,1.773-3.778,3.358-3.778s3.359,1.616,3.359,3.778c0,2.162-1.774,3.778-3.359,3.778S6.761,8.937,6.761,6.775 M3.415,17.69c0.218-3.51,3.142-6.297,6.704-6.297c3.562,0,6.486,2.787,6.705,6.297H3.415z"></path>
-                </svg>
+                </svg></span>
                 {% if profile.is_student %}Student{% else %}Nauczyciel akademicki{% endif %}
               </div>
             </div>
           </div>
         </div>
-        {% block profile_header %}
-          <a href="{% url 'users:profile-edit' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
-            Edytuj mój profil
-          </a>
-        {% endblock profile_header %}
+        <div class="mt-4">
+          {% block profile_header %}
+            <a href="{% url 'users:profile-edit' %}" class="text-sm font-bold mt-2 mb-4 px-4 transition-all duration-200 py-2 px-2 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300">
+              Edytuj mój profil
+            </a>
+          {% endblock profile_header %}
+        </div>
       </div>
       <div class="px-4 py-4 border-b">
-        {% block profile_content %}
-        <div class="flex flex-wrap">
-          <div class="flex flex-col px-4 w-full md:flex-1 md:w-1/2">
-            <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
+        {% block profile_courses %}
+          {% if request.user.email == profile.email %}
+            <div class="w-full px-4">
+            <span class="block text-gray-700 uppercase tracking-wide text-gray-700 text-xs font-bold mb-1">
+              <a class="hover:text-gray-900" href="{% url 'courses:courses' %}">Bieżące Kursy</a>
+            </span>
+              {% if courses %}
+                <div class="overflow-x-auto mt-2 mb-4">
+                  <table class="table-auto border-collapse w-full mt-1">
+                    <thead>
+                    <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
+                      <th class="px-4 py-2">Kurs</th>
+                      <th class="px-4 py-2">Rocznik</th>
+                      <th class="px-4 py-2">Wykładowca</th>
+                      <th class="px-4 py-2">Język</th>
+                      <th class="px-4 py-2">ECTS</th>
+                    </tr>
+                    </thead>
+                    <tbody class="text-sm font-normal text-gray-700">
+                    {% for course in courses %}
+                      <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
+                        <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a></td>
+                        <td class="px-4 py-4">{{ course.grade }}</td>
+                        <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' course.head_teacher.pk %}">{{ course.head_teacher.first_name }}{{ course.head_teacher.last_name }}</a></td>
+                        <td class="px-4 py-4">{{ course.language }}</td>
+                        <td class="px-4 py-4">{{ course.ects }}</td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <span class="text-xs mb-4 mt-2">Nie należysz do żadnego kursu.</span>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endblock profile_courses %}
+        {% block profile_details %}
+        <div class="flex flex-row">
+          <div class="flex flex-col w-1/2 my-6 px-5 max-w-full mx-auto">
+            <div class="w-full overflow-auto h-56 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+              <h5 class="font-bold ">O mnie:</h5>
+              <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+              {{ profile.description }}
+            </div>
+            {% if profile.is_student %}
+            <div class="w-full overflow-auto :h-32 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+              <h5 class="font-bold ">Roczniki:</h5>
+              <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
+              {% for grade in grades %}
+                <h6>{{ grade }}</h6>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          <div class="flex flex-col w-1/2 my-6 px-5 max-w-full mx-auto">
+            <div class="w-full overflow-auto h-56 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+              <h5 class="font-bold ">Informacje dodatkowe:</h5>
+              <hr class="border-0 my-2 bg-gray-500 text-gray-500 h-px">
               <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
                 Ostatnie logowanie
               </label>
               <span class="appearance-none block w-full text-gray-700">
-                {%  if profile.last_login %}
-                  {{ profile.last_login|date:"d.m.Y (H:i)" }}
-                {% else %} - {% endif %}
-              </span>
-            </div>
-          </div>
-          <div class="px-4 w-full md:flex-1 md:w-1/2">
-            <div class="w-full pr-3 mb-6 md:mb-0 mt-2">
-              <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
+                  {%  if profile.last_login %}
+                    {{ profile.last_login|date:"d.m.Y (H:i)" }}
+                  {% else %} - {% endif %}
+            </span>
+              <label class="block mt-2 uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" for="grid-first-name">
                 Konto utworzone
               </label>
               <span class="appearance-none block w-full text-gray-700">
                 {{ profile.date_joined|date:"d.m.Y (H:i)" }}
-              </span>
+            </span>
             </div>
+            {% if profile.is_student %}
+              <div class="w-full overflow-auto :h-32 text-sm mb-3 py-5 px-5 max-w-full mx-auto rounded-lg bg-gray-100 text-gray-800">
+                <span class="block text-gray-700 uppercase tracking-wide text-gray-700 text-xs font-bold mb-1">
+                  Raporty
+                </span>
+                {% if request.user.is_student %}
+                  <div class="block ml-2 text-blue-400">
+                    <a class="text-sm text-blue-400 hover:text-blue-500" href="{% url 'users:marks' %}">Moje oceny</a>
+                  </div>
+                  <div class="block ml-2 mt-2 text-blue-400">
+                    <a class="text-sm text-blue-400 hover:text-blue-500" href="{% url 'users:summary' %}">Historia studiow</a>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
           </div>
         </div>
+        {% endblock profile_details %}
+        {% block profile_content %}
         {% endblock profile_content %}
-      </div>
-    </div>
-  </div>
+
+
 {% endblock dashboard_content %}

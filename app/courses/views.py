@@ -1177,3 +1177,73 @@ def edit_final_course_mark_view(request, the_slug, pk):
         'form': form
     }
     return render(request, template_name, context)
+
+
+class AssignmentCreateView(LoginRequiredMixin, DetailView):
+    template_name = "courses/assignments/create.html"
+    model = models.Laboratory
+    context_object_name = 'laboratory'
+    form_class = forms.AssignmentCreateModelForm
+
+    def get_context_data(self, **kwargs):
+        laboratory = self.get_object()
+        form = self.form_class()
+        context = {
+            'form': form,
+            'laboratory': laboratory
+        }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated or user.is_student:
+            return redirect('courses:courses')
+        if user.is_teacher:
+            teacher = users_models.Teacher.objects.get(email=user.email)
+            if teacher not in self.get_object().course.teachers.all():
+                return redirect('courses:courses')
+
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.laboratory = self.get_object()
+            assignment.teacher = users_models.Teacher.objects.get(email=user.email)
+            assignment.save()
+            messages.info(request, 'Pomyslnie dodano nowe zadanie!')
+            tasks.send_new_assignment_notification_email(assignment, [], [
+                student.email for student in self.get_object().group.students.all()
+            ])
+            return redirect('courses:laboratory-detail', pk=self.get_object().pk)
+        else:
+            messages.error(request, 'Sprobuj ponownie!')
+        return super().get(request, *args, **kwargs)
+
+
+def delete_assignment_view(request, pk, num):
+    user = request.user
+    if not user.is_authenticated or user.is_student:
+        return redirect('courses:courses')
+
+    lab = models.Laboratory.objects.filter(pk=pk).first()
+    if not lab:
+        return redirect('courses:courses')
+    if user.is_teacher:
+        teacher = users_models.Teacher.objects.get(email=user.email)
+        if teacher not in lab.course.teachers.all():
+            return redirect('courses:courses')
+
+    assignment = lab.assignments.all()[num]
+    assignment.delete()
+    lab.save()
+    messages.info(request, 'Pomyslnie usunieto zadanie!')
+    return redirect('courses:laboratory-detail', pk=lab.pk)

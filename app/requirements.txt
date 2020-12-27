@@ -37,3 +37,4 @@ djangorestframework
 django-cors-headers
 coreapi
 pyyaml
+django_timedeltatemplatefilter

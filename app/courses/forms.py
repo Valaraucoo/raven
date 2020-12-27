@@ -105,3 +105,21 @@ class CourseSetFinalMarkModelForm(forms.ModelForm):
                 'placeholder': 'Opis'
             }),
         }
+
+
+class AssignmentCreateModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Assignment
+        fields = ('deadline', 'title', 'content')
+        widgets = {
+            'deadline': forms.DateTimeInput(attrs={
+                'class': tailwind_form,
+                'placeholder': '01.01.2021'
+            }),
+            'title': forms.TextInput(attrs={'class': tailwind_form, 'placeholder': 'Tytul'}),
+            'content': forms.Textarea(attrs={
+                'class': tailwind_form,
+                'cols': 30,
+                'rows': 5
+            })
+        }

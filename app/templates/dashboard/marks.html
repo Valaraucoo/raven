@@ -5,7 +5,7 @@
   <div class="font-sans leading-tight bg-grey-lighter p-4">
     <div class="bg-white pb-4 px-4 rounded-md w-full shadow-md">
       <h4 class="flex items-center pt-4 text-lg leading-6 font-medium text-gray-900 mb-2">
-        Oceny cząstkowe
+        Oceny
       </h4>
 
       <div class="overflow-x-auto mt-4">
@@ -13,6 +13,7 @@
           <thead>
           <tr class="rounded-t-lg text-sm font-medium text-gray-700 text-left" style="font-size: 0.9674rem">
             <th class="px-4 py-2">Kurs</th>
+            <th class="px-4 py-2">Rocznik</th>
             <th class="px-4 py-2">Średnia ocen</th>
             <th class="px-4 py-2">Ocena końcowa</th>
           </tr>
@@ -21,6 +22,7 @@
           {% for course, data in avg_marks.items %}
             <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
               <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' data.course.slug %}">{{ course }}</a></td>
+              <td class="px-4 py-4">{{ data.course.grade }}</td>
               <td class="px-4 py-4">{% if data.avg %}{{ data.avg }}%{% else %}-{% endif %}</td>
               <td class="px-4 py-4">{% if data.final_mark.mark_decimal %}{{ data.final_mark.mark_decimal }}{% else %}-{% endif %}</td>
             </tr>

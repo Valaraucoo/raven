@@ -32,7 +32,7 @@ class CourseListView(mixins.ListModelMixin, generics.GenericAPIView):
         teacher = self.request.query_params.get('teacher')
         has_exam = int(self.request.query_params.get('exam', 0))
         language = self.request.query_params.get('language')
-        semester = int(self.request.query_params.get('semester', 0))
+        actual = self.request.query_params.get('actual')
 
         if name:
             qs = qs.filter(name__icontains=name)
@@ -45,8 +45,8 @@ class CourseListView(mixins.ListModelMixin, generics.GenericAPIView):
                 qs = qs.filter(has_exam=False)
         if language:
             qs = qs.filter(language=language.upper())
-        if semester and semester > 0:
-            qs = qs.filter(semester=semester)
+        if actual and actual == 'true':
+            qs = [q for q in qs if q.is_actual]
         return qs
 
 

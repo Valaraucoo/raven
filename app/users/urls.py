@@ -6,12 +6,14 @@ app_name = 'users'
 
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
+    path('assignments', views.AssignmentsView.as_view(), name='assignments'),
     path('schedule/', views.ScheduleView.as_view(), name='schedule'),
     path('notices/', views.NoticeView.as_view(), name='notices'),
     path('marks/', views.MarksView.as_view(), name='marks'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('summary/', views.SummaryView.as_view(), name='summary'),
     path('profile/<int:pk>/', views.ProfileDetailView.as_view(), name='profile-detail'),
     path('profile/edit/', views.ProfileEditView.as_view(), name='profile-edit'),
     path('profile/img/delete/', views.delete_profile_image, name='profile-img-delete'),
