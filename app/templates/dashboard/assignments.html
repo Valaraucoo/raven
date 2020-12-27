@@ -1,5 +1,6 @@
 {% extends "dashboard/dashboard.html" %}
 {% load static %}
+{% load timedelta_filter %}
 
 {% block dashboard_content %}
   <div class="font-sans leading-tight bg-grey-lighter p-4">
@@ -19,6 +20,7 @@
               <th class="px-4 py-2">Laboratorium</th>
               <th class="px-4 py-2">Prowadzacy</th>
               <th class="px-4 py-2">Data oddania</th>
+              <th class="px-4 py-2">Pozostaly czas</th>
             </tr>
             </thead>
             <tbody class="text-sm font-normal text-gray-700">
@@ -35,6 +37,7 @@
                   {{ assignment.teacher.first_name }} {{ assignment.teacher.last_name }}
                 </a></td>
                 <td class="px-4 py-4">{{ assignment.deadline|date:"d.m.Y" }}</td>
+                <td class="px-4 py-4 {% if assignment.timedelta.days < 5 %}text-red-500{% endif %}">{{ assignment.timedelta.days }} dni</td>
               </tr>
             {% endfor %}
             </tbody>

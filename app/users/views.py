@@ -188,7 +188,7 @@ class DashboardView(generic.View, LoginRequiredMixin):
             'marks': marks,
             'avg_marks': avg_marks,
             'avg': avg,
-            'assignments': [assignment for assignment in assignments if assignment.is_actual]
+            'assignments': [assignment for assignment in assignments if assignment.is_actual] if assignments else []
         }
 
     def get(self, request, *args, **kwargs):

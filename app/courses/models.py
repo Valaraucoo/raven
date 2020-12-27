@@ -326,3 +326,7 @@ class Assignment(models.Model):
     @property
     def is_actual(self) -> bool:
         return timezone.now() < self.deadline
+
+    @property
+    def timedelta(self) -> datetime.timedelta:
+        return self.deadline - timezone.now()

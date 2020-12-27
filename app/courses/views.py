@@ -1220,6 +1220,9 @@ class AssignmentCreateView(LoginRequiredMixin, DetailView):
             assignment.teacher = users_models.Teacher.objects.get(email=user.email)
             assignment.save()
             messages.info(request, 'Pomyslnie dodano nowe zadanie!')
+            tasks.send_new_assignment_notification_email(assignment, [], [
+                student.email for student in self.get_object().group.students.all()
+            ])
             return redirect('courses:laboratory-detail', pk=self.get_object().pk)
         else:
             messages.error(request, 'Sprobuj ponownie!')
