@@ -10,9 +10,17 @@ from users.forms import LoginForm
 
 @pytest.mark.django_db
 class TestProfileView:
-    def test_get_profile(self, user_client):
+    def test_get_profile(self, client):
+        student = users_factories.StudentFactory()
+        teacher = users_factories.TeacherFactory()
         url = reverse('users:profile')
-        response = user_client.get(url)
+
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        client.force_login(student)
+        response = client.get(url)
         assert response.status_code == 200
 
         profile = response.context.get('profile')
@@ -74,10 +82,14 @@ class TestProfileEditView:
         assert response.status_code == 200
 
 
+@pytest.mark.django_db
 class TestDashboardView:
-    def test_get_dashboard(self, user_client):
+    def test_get_dashboard(self, client):
+        student = users_factories.StudentFactory()
         url = reverse('users:dashboard')
-        response = user_client.get(url)
+
+        client.force_login(student)
+        response = client.get(url)
         assert response.status_code == 200
 
         user = response.context.get('user')

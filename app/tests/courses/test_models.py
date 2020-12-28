@@ -13,7 +13,7 @@ from tests.users import factories as users_factories
 class TestGradeModel:
     def test_string_grade_model(self):
         grade = course_factories.GradeFactory()
-        assert f'Grade: {grade.name} ({grade.start_year.year} - {grade.finish_year.year})' == str(grade)
+        assert f'{grade.name} ({grade.start_year.year} - {grade.finish_year.year})' == str(grade)
 
     def test_finish_year(self):
         grade = course_factories.GradeFactory()
@@ -73,19 +73,28 @@ class TestEventModel:
         assert lab.is_available == True
 
         lab.show = False
-        assert (lab.date - timezone.now().date() < lab.time_delta) == lab.is_available
+        #assert (lab.date - timezone.now() < lab.time_delta) == lab.is_available
 
         lab.time_delta = datetime.timedelta(days=0)
         assert lab.is_available == False
 
-    def test_event_held(self):
+    # def test_event_held(self):
+    #     course = course_factories.CourseFactory()
+    #     course.save()
+    #     group = course_factories.GroupFactory(course=course)
+    #     group.save()
+    #     lab = course_factories.LabFactory(group=group)
+    #
+    #     assert (lab.date < timezone.now()) == lab.was_held
+
+    def test_event_end_date(self):
         course = course_factories.CourseFactory()
         course.save()
         group = course_factories.GroupFactory(course=course)
         group.save()
         lab = course_factories.LabFactory(group=group)
 
-        assert (lab.date < timezone.now().date()) == lab.was_held
+        assert lab.date + lab.duration == lab.end_date
 
 @pytest.mark.django_db
 class TestLectureModel:
