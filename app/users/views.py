@@ -5,16 +5,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import DetailView
 
-from core import settings
-from users import forms, tasks, models
-
 from courses import models as courses_models
+from users import forms, models, tasks
 
 
 def delete_profile_image(request):

@@ -5,6 +5,7 @@ from django.shortcuts import reverse
 from django.utils.html import format_html
 
 from courses import models
+
 from .filters import CourseStartYearFiler
 
 
