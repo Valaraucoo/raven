@@ -79,6 +79,7 @@ class GroupFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.CourseGroup
     name = fuzzy.FuzzyText(length=16)
+
     @factory.post_generation
     def students(self, create, extracted, **kwargs):
         if not create:
@@ -106,4 +107,3 @@ class CourseGroupFactory(factory.django.DjangoModelFactory):
         model = models.CourseGroup
     course = factory.SubFactory(CourseFactory)
     name = fuzzy.FuzzyText(length=16)
-

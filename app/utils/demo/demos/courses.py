@@ -1,5 +1,4 @@
 from tests.courses import factories
-from users.models import Student, Teacher
 
 
 class CourseDemo:

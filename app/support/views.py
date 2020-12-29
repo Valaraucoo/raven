@@ -1,10 +1,8 @@
 from django.contrib import messages
-from django.views import generic
 from django.shortcuts import render
+from django.views import generic
 
-from . import tasks
-from . import forms
-from . import models
+from . import forms, models, tasks
 
 
 class TicketCreateView(generic.View):
