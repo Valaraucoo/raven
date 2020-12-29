@@ -9,18 +9,71 @@
           <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
           / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' laboratory.course.slug %}">{{ laboratory.course.name }}</a> / Laboratorium
         </h4>
-        <p class="text-xl text-gray-800"><span class="text-bold">Tytuł: </span>
+        <p class="flex items-center text-xl text-gray-800 font-medium mt-2">
+          <span class="text-bold mr-2">Tematyka: </span>
           {{ laboratory.title }}
+          {% if laboratory.was_held %}
+            <span class="ml-4 text-xs px-2 bg-red-400 uppercase text-white font-medium py-1 rounded-full">
+            Wydarzenie juz sie odbylo
+          </span>
+          {% endif %}
         </p>
-        <p class="text-sm text-gray-600 mt-2"><span class="font-bold">Data wydarzenia: </span>
-          <span class="{% if laboratory.was_held %}text-red-500{% endif %}">{{ laboratory.date|date:"d.m.Y" }}</span>
+        <p class="text-md text-gray-700 mt-2">
+          <a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' laboratory.course.head_teacher.pk %}">{{ laboratory.course.head_teacher.first_name }} {{ laboratory.course.head_teacher.last_name }}</a>
+          <span class="ml-4">
+          {% if laboratory.location == 1 %}
+            Zdalnie
+          {% elif laboratory.location == 2 %}
+            Na uczelni
+          {% else %}
+            Zdalnie
+          {% endif %}
+            · {{ laboratory.date|date:"d.m.Y" }}
+            {% if laboratory.was_held %}
+              · {{ laboratory.date|timesince }} temu
+            {% else %}
+              · za {{ laboratory.date|timeuntil }}
+            {% endif %}
+        </span>
         </p>
-        <p class="text-sm text-gray-600">
-          <span class="font-bold">Opis:</span> {% if laboratory.description %}{{ laboratory.description }}{% else %}-{% endif %}
+      </div>
+      <div class="px-4 py-4 border-b border-gray-200 mx-2">
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mr-2">Opis:</span>
+          {% if laboratory.description %}
+            {{ laboratory.description }}
+          {% else %}
+            -
+          {% endif %}
+        </p>
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mb-2">Materialy i pliki:</span>
+          {% if not laboratory.files.all %}
+            -
+          {% endif %}
+          {% for file in laboratory.files.all %}
+            <a class="block text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>
+          {% endfor %}
+        </p>
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mb-2">Link do wydarzenia:</span>
+          {% if laboratory.meeting_link %}
+            <a class="block text-blue-400 hover:text-blue-500" href="{{ laboratory.meeting_link }}">Wydarzenie: {{ laboratory.title }}</a>
+          {% else %}
+            -
+          {% endif %}
+        </p>
+        <p class="text-md text-gray-700 mt-24">
+          <span class="font-medium mb-2">Poprzednie laboratorium:</span>
+          {% if previous_lab %}
+            <a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:laboratory-detail' previous_lab.pk %}">{{ previous_lab.title }}</a>
+          {% else %}
+            -
+          {% endif %}
         </p>
       </div>
       <div class="px-4 py-4 mx-2">
-        <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 transition-all duration-200 mb-4">
           Zadania domowe
         </h4>
         {% if not laboratory.assignments.all %}

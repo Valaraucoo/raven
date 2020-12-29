@@ -239,6 +239,7 @@ class Laboratory(Event):
     class Meta:
         verbose_name = _('Laboratory')
         verbose_name_plural = _('Laboratories')
+        ordering = ('date',)
 
 
 class CourseMarkBase(models.Model):
