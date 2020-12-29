@@ -84,7 +84,7 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
-        labs = self.object.laboratories.all()
+        labs = self.object.laboratories.all().order_by('date')
         if self.request.user.is_teacher:
             context['available_labs'] = [lab for lab in labs if lab.is_available]
         else:
@@ -271,6 +271,13 @@ class LectureDetailView(LoginRequiredMixin, DetailView):
     model = models.Lecture
     context_object_name = 'lecture'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        previous_lecture = obj.course.lectures.filter(date__lt=obj.date).last()
+        context['previous_lecture'] = previous_lecture
+        return context
+
     def get(self, request, *args, **kwargs):
         user = request.user
         if not user.is_authenticated:
@@ -290,6 +297,13 @@ class LaboratoryDetailView(LectureDetailView):
     template_name = 'courses/laboratories/laboratory-detail.html'
     model = models.Laboratory
     context_object_name = 'laboratory'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        previous_lab = obj.course.laboratories.filter(date__lt=obj.date, group=obj.group).last()
+        context['previous_lab'] = previous_lab
+        return context
 
     def get(self, request, *args, **kwargs):
         user = request.user

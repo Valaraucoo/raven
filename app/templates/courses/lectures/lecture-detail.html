@@ -5,23 +5,76 @@
   <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
       <div class="px-4 py-4 border-b border-gray-200 mx-2">
-        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+        <h4 class="text-lg leading-6 font-medium text-gray-900 mb-6">
           <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses' %}">Kursy</a>
           / <a class="text-gray-700 transition-all duration-200 hover:text-gray-600" href="{% url 'courses:courses-detail' lecture.course.slug %}">{{ lecture.course.name }}</a> / Wykład
           </a>
         </h4>
-        <p class="text-xl text-gray-800"><span class="text-bold">Tytuł: </span>
+        <p class="flex items-center text-xl text-gray-800 font-medium mt-2">
+          <span class="text-bold mr-2">Tematyka: </span>
           {{ lecture.title }}
+          {% if lecture.was_held %}
+            <span class="ml-4 text-xs px-2 bg-red-400 uppercase text-white font-medium py-1 rounded-full">
+              Wydarzenie juz sie odbylo
+            </span>
+          {% endif %}
         </p>
-        <p class="text-sm text-gray-600 mt-2"><span class="font-bold">Data wydarzenia: </span>
-          <span>{{ lecture.date|date:"d.m.Y" }}</span>
+        <p class="text-md text-gray-700 mt-2">
+          <a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' lecture.course.head_teacher.pk %}">{{ lecture.course.head_teacher.first_name }} {{ lecture.course.head_teacher.last_name }}</a>
+          <span class="ml-4">
+            {% if lecture.location == 1 %}
+              Zdalnie
+            {% elif lecture.location == 2 %}
+              Na uczelni
+            {% else %}
+              Zdalnie
+            {% endif %}
+            · {{ lecture.date|date:"d.m.Y" }}
+            {% if lecture.was_held %}
+              · {{ lecture.date|timesince }} temu
+            {% else %}
+              · za {{ lecture.date|timeuntil }}
+            {% endif %}
+          </span>
         </p>
-        <p class="text-sm text-gray-600">
-          <span class="font-bold">Opis:</span> {% if lecture.description %}{{ lecture.description }}{% else %}-{% endif %}
+      </div>
+      <div class="px-4 py-4 border-b border-gray-200 mx-2">
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mr-2">Opis:</span>
+          {% if lecture.description %}
+            {{ lecture.description }}
+          {% else %}
+            -
+          {% endif %}
+        </p>
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mb-2">Materialy i pliki:</span>
+          {% if not lecture.files.all %}
+            -
+          {% endif %}
+          {% for file in lecture.files.all %}
+            <a class="block text-blue-400 hover:text-blue-500" href="{{ file.file.url }}">{{ file.name }}</a>
+          {% endfor %}
+        </p>
+        <p class="text-md text-gray-700 mt-2">
+          <span class="font-medium mb-2">Link do wydarzenia:</span>
+          {% if lecture.meeting_link %}
+            <a class="block text-blue-400 hover:text-blue-500" href="{{ lecture.meeting_link }}">Wydarzenie: {{ lecture.title }}</a>
+          {% else %}
+            -
+          {% endif %}
+        </p>
+        <p class="text-md text-gray-700 mt-24">
+          <span class="font-medium mb-2">Poprzedni wyklad:</span>
+          {% if previous_lecture %}
+            <a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:lectures-detail' previous_lecture.pk %}">{{ previous_lecture.title }}</a>
+          {% else %}
+            -
+          {% endif %}
         </p>
       </div>
       <div class="px-4 py-4 mx-2">
-        <div class="mt-4 mb-4">
+        <div class="mb-4">
           <a class="text-sm font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:courses-detail' lecture.course.slug %}">Powrót do kursu</a>
           {% if request.user.is_teacher %}
             <a class="text-sm ml-2 font-bold transition-all duration-200 py-2 px-4 rounded-lg bg-gray-200 text-gray-800 hover:text-gray-900 hover:bg-gray-300" href="{% url 'courses:lectures-edit' lecture.pk %}">Edytuj</a>
