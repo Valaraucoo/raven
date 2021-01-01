@@ -1,11 +1,8 @@
 import pytest
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import authenticate, get_user, login
 from django.urls import reverse
 
+from tests.courses import factories as course_factories
 from tests.users import factories as users_factories
-from users.forms import LoginForm
 
 
 @pytest.mark.django_db
@@ -64,7 +61,7 @@ class TestProfileEditView:
         response = user_client.post(url)
         assert response.status_code == 200
 
-    def test_post_password_change(self,user_client):
+    def test_post_password_change(self, user_client):
         url = reverse('users:profile-edit')
 
     def test_post_edit_data(self, user_client):
@@ -95,8 +92,75 @@ class TestDashboardView:
         user = response.context.get('user')
         assert user.full_username == f"{user.first_name} {user.last_name} ({user.email})"
 
+        teacher = users_factories.TeacherFactory()
+        # grade = course_factories.GradeFactory()
+        # grade.students.add(student)
+        # grade.save()
+        # course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        client.force_login(teacher)
+        assert response.status_code == 200
+        # assert [course for course in teacher.courses_teaching.all() if course.is_actual] == response.context.get('courses')
+
     def test_get_unauthenticated_dashboard(self, client):
         url = reverse('users:dashboard')
+        response = client.get(url)
+        assert response.status_code == 302
+
+
+@pytest.mark.django_db
+class TestScheduleView:
+    def test_get_schedule(self, client):
+        student = users_factories.StudentFactory()
+        teacher = users_factories.TeacherFactory()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        course.save()
+        group = course_factories.GroupFactory(course=course)
+        group.save()
+        lab = course_factories.LabFactory(group=group)
+
+        url = reverse('users:schedule')
+
+        client.force_login(student)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        # user = response.context.get('user')
+        # assert False, grade.courses.all()
+
+    def test_get_schedule_unauthenticated(self, client):
+        url = reverse('users:schedule')
+        response = client.get(url)
+        assert response.status_code == 302
+
+
+@pytest.mark.django_db
+class TestNoticeView:
+    def test_get_notice(self, client):
+        student = users_factories.StudentFactory()
+        teacher = users_factories.TeacherFactory()
+
+        url = reverse('users:notices')
+
+        client.force_login(student)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        # user = response.context.get('user')
+        # assert False, grade.courses.all()
+
+    def test_get_notice_unauthenticated(self, client):
+        url = reverse('users:notices')
         response = client.get(url)
         assert response.status_code == 302
 
@@ -126,20 +190,24 @@ class TestLoginView:
         response = user_client.post(url)
         assert response.status_code == 302
 
+    def _get_token(self, client, url, data):
+        resp = client.get(url)
+        data['csrfmiddlewaretoken'] = resp.cookies['csrftoken'].value
+        return data
+
     def test_post_login(self, client):
         url = reverse('users:login')
         user = users_factories.StudentFactory()
         user.save()
+        resp = client.post(url)
         data = {
+            'csrfmiddlewaretoken': resp.cookies['csrftoken'].value,
             'email': user.email,
             'password': user.password,
             'remember': True
         }
-        #form = LoginForm(data)
-        #assert False, form.is_valid()
-        # form = response.context.get('form')
-        # assert False, form
-        response = client.post(url,data)
+        # data = self._get_token(client, url, data)
+        response = client.post(url, data=data)
         assert response.status_code == 200
 
 
@@ -148,6 +216,79 @@ class TestLogoutView:
         url = reverse('users:logout')
         response = user_client.get(url)
         assert response.status_code == 302
+
+
+@pytest.mark.django_db
+class TestMarksView:
+    def test_get_marks(self, client):
+        url = reverse('users:marks')
+        response = client.get(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.url == reverse('users:dashboard')
+
+        student = users_factories.StudentFactory()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade)
+        course.save()
+        mark = course_factories.CourseMarkFactory(student=student, course=course)
+        client.force_login(student)
+        response = client.get(url)
+        marks = response.context.get('marks')
+        assert marks.first().student == mark.student
+
+
+@pytest.mark.django_db
+class TestSummaryView:
+    def test_get_summary(self, client):
+        url = reverse('users:summary')
+        response = client.get(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.url == reverse('users:dashboard')
+
+        student = users_factories.StudentFactory()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade)
+        course.save()
+        final_mark = course_factories.FinalCourseMarkFactory(student=student, course=course)
+
+        client.force_login(student)
+        response = client.get(url)
+
+        summary = response.context.get('summary')
+        grades = response.context.get('grades')
+        assert grades.first() == grade
+        assert list(summary.keys())[0] == grade
+
+
+@pytest.mark.django_db
+class TestAssignmentsView:
+    def test_get_assignments(self, client):
+        url = reverse('users:assignments')
+        response = client.get(url)
+        assert response.status_code == 302
+
+        teacher = users_factories.TeacherFactory()
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.url == reverse('users:dashboard')
+
+        student = users_factories.StudentFactory()
+        client.force_login(student)
+        response = client.get(url)
+        # marks = response.context.get('marks')
+        assert response.status_code == 200
 
 
 class TestDeleteProfileImageView:

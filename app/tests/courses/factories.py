@@ -107,3 +107,26 @@ class CourseGroupFactory(factory.django.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     name = fuzzy.FuzzyText(length=16)
 
+
+class CourseMarkFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.CourseMark
+
+    mark = 5
+    date = fuzzy.FuzzyDate(datetime.date.today())
+    description = factory.Faker('text')
+    course = factory.SubFactory(CourseFactory)
+    student = factory.SubFactory(users_factories.StudentFactory)
+    teacher = factory.SubFactory(users_factories.TeacherFactory)
+
+
+class FinalCourseMarkFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.FinalCourseMark
+
+    mark = 5
+    date = fuzzy.FuzzyDate(datetime.date.today())
+    description = factory.Faker('text')
+    course = factory.SubFactory(CourseFactory)
+    student = factory.SubFactory(users_factories.StudentFactory)
+    teacher = factory.SubFactory(users_factories.TeacherFactory)

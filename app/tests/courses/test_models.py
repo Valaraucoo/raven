@@ -19,6 +19,7 @@ class TestGradeModel:
         grade = course_factories.GradeFactory()
         assert grade.start_year + datetime.timedelta(days=365 * 3) == grade.finish_year
 
+
 @pytest.mark.django_db
 class TestCourseModel:
     def test_string_course_model(self):
@@ -42,6 +43,7 @@ class TestCourseModel:
     def test_students_without_groups(self):
         course = course_factories.CourseFactory()
         assert list(course.total_students) == course.students_without_groups
+
 
 @pytest.mark.django_db
 class TestCourseGroupModel:
@@ -73,7 +75,7 @@ class TestEventModel:
         assert lab.is_available == True
 
         lab.show = False
-        #assert (lab.date - timezone.now() < lab.time_delta) == lab.is_available
+        # assert (lab.date - timezone.now() < lab.time_delta) == lab.is_available
 
         lab.time_delta = datetime.timedelta(days=0)
         assert lab.is_available == False
@@ -96,6 +98,7 @@ class TestEventModel:
 
         assert lab.date + lab.duration == lab.end_date
 
+
 @pytest.mark.django_db
 class TestLectureModel:
     def test_string_lecture_model(self):
@@ -112,6 +115,7 @@ class TestLectureModel:
         lecture = course_factories.LectureFactory(course=course)
         assert list(lecture.course.grade.students.all()) == list(lecture.students)
 
+
 @pytest.mark.django_db
 class TestLaboratoryModel:
     def test_string_laboratory_model(self):
@@ -121,6 +125,7 @@ class TestLaboratoryModel:
         group.save()
         lab = course_factories.LabFactory(group=group)
         assert f'Laboratory: {lab.title}({lab.date})' == str(lab)
+
 
 class TestCourseFileModel:
     pass
@@ -135,4 +140,3 @@ class TestCourseFileModel:
 #         course.save()
 #         lecture_mark = course_factories.LectureMarkFactory(lecture=lecture,student=student,teacher=teacher)
 #         assert f'Lecture Mark: {lecture_mark.student}, {lecture_mark.lecture}' == str(lecture_mark)
-
