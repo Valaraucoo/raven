@@ -13,6 +13,7 @@ DEBUG = int(os.environ.get("DEBUG", default=0))
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
+USE_S3 = int(os.environ.get("USE_S3", default=0))
 
 APPS = [
     'users',
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'timedeltatemplatefilter',
+    'storages',
 ] + APPS
 
 MIDDLEWARE = [
@@ -50,6 +52,7 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://0.0.0.0:8080",
+    "http://*"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -152,15 +155,34 @@ LANGUAGES = [
     ('en', _('English')),
 ]
 
-STATIC_URL = "/files/staticfiles/"
+UPLOAD_FILES_DIR = 'uploads/'
+
+if USE_S3:
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+
+    AWS_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+
+    AWS_PUBLIC_MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'core.storage_backends.PublicMediaStorage'
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, '/files/staticfiles')
+    STATIC_URL = "/files/staticfiles/"
+
+    MEDIA_URL = "/files/mediafiles/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "files/mediafiles")
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "files/staticfiles")
 ]
-
-MEDIA_URL = "/files/mediafiles/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "files/mediafiles")
-
-UPLOAD_FILES_DIR = 'uploads/'
 
 AUTH_USER_MODEL = 'users.User'
 ACCOUNT_UNIQUE_EMAIL = True
