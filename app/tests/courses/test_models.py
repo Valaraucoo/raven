@@ -44,6 +44,13 @@ class TestCourseModel:
         course = course_factories.CourseFactory()
         assert list(course.total_students) == course.students_without_groups
 
+    #def test_calculated_semester(self):
+    #    grade = course_factories.GradeFactory()
+    #    course = course_factories.CourseFactory(grade=grade)
+    #    grade_start_date: datetime.date = grade.start_year
+    #    #delta: datetime.timedelta = timezone.now().date() - grade_start_date
+    #    #semester = int(delta.days / 183) + 1
+    #    assert course.calculated_semester() == semester
 
 @pytest.mark.django_db
 class TestCourseGroupModel:
@@ -126,6 +133,46 @@ class TestLaboratoryModel:
         lab = course_factories.LabFactory(group=group)
         assert f'Laboratory: {lab.title}({lab.date})' == str(lab)
 
+
+@pytest.mark.django_db
+class TestCourseMarkModel:
+    def test_string_course_mark_model(self):
+        mark = course_factories.CourseMarkFactory()
+        mark.save()
+        assert f'Course Mark: {mark.student}, {mark.course}' == str(mark)
+
+
+@pytest.mark.django_db
+class TestFinalCourseMarkModel:
+    def test_string_final_course_mark_model(self):
+        final_mark = course_factories.FinalCourseMarkFactory()
+        final_mark.save()
+        assert f'Final Course Mark: {final_mark.student}, {final_mark.course}' == str(final_mark)
+
+
+@pytest.mark.django_db
+class TestCourseNoticeModel:
+    def test_string_course_notice_model(self):
+        notice = course_factories.NoticeFactory()
+        notice.save()
+        assert f'Course Notice: {notice.course}, {notice.title}' == str(notice)
+
+
+#@pytest.mark.django_db
+#class TestAssignmentModel:
+#    def test_string_assignment_model(self):
+#        assignment = course_factories.AssignmentFactory()
+#        assert f'Assignment: {assignment.title} {assignment.deadline}' == str(assignment)
+#
+#    def test_is_actual(self):
+#        assignment = course_factories.AssignmentFactory()
+#        is_actual: bool = timezone.now() < assignment.deadline
+#        assert assignment.is_actual == is_actual
+#
+#    def test_timedelta(self):
+#        assignment = course_factories.AssignmentFactory()
+#        timedelta = assignment.deadline - timezone.now()
+#        assert assignment.timedelta == timedelta
 
 class TestCourseFileModel:
     pass
