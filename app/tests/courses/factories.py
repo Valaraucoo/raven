@@ -130,3 +130,26 @@ class FinalCourseMarkFactory(factory.django.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     student = factory.SubFactory(users_factories.StudentFactory)
     teacher = factory.SubFactory(users_factories.TeacherFactory)
+
+
+class NoticeFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.CourseNotice
+
+    course = factory.SubFactory(CourseFactory)
+    sender = factory.SubFactory(users_factories.TeacherFactory)
+    title = fuzzy.FuzzyText(length=16)
+    content = factory.Faker('text')
+    created_at = fuzzy.FuzzyDate(datetime.date.today())
+
+
+class AssignmentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Assignment
+
+    laboratory = factory.SubFactory(LabFactory)
+    teacher = factory.SubFactory(users_factories.TeacherFactory)
+    deadline = fuzzy.FuzzyDate(datetime.date.today())
+    title = fuzzy.FuzzyText(length=16)
+    content = factory.Faker('text')
+
