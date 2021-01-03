@@ -1,6 +1,8 @@
 {% extends "dashboard/dashboard.html" %}
 {% load static %}
 
+{% block title %}Mój profil{% endblock title %}
+
 {% block dashboard_content %}
   <div class="font-sans leading-tight bg-grey-lighter p-4 md:pt-8">
     <div class="max-w-full mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
@@ -68,7 +70,7 @@
                       <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
                         <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' course.slug %}">{{ course.name }}</a></td>
                         <td class="px-4 py-4">{{ course.grade }}</td>
-                        <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' course.head_teacher.pk %}">{{ course.head_teacher.first_name }}{{ course.head_teacher.last_name }}</a></td>
+                        <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' course.head_teacher.pk %}">{{ course.head_teacher.first_name }} {{ course.head_teacher.last_name }}</a></td>
                         <td class="px-4 py-4">{{ course.language }}</td>
                         <td class="px-4 py-4">{{ course.ects }}</td>
                       </tr>
