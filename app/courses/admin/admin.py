@@ -67,33 +67,107 @@ class CourseFileAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(models.Lecture)
-class LectureAdmin(admin.ModelAdmin):
-    autocomplete_fields = ('course',)
+class EventAdminBase(admin.ModelAdmin):
+    search_fields = ('title',)
+    list_display = ('title', 'date', 'location', 'duration', 'is_available', 'was_held')
+    list_filter = ('date', 'location',)
     filter_horizontal = ('files',)
-    list_display = ('title', 'date', 'location', 'duration',)
-    search_fields = ('title', 'location', 'course__head_teacher')
-    list_filter = ('location',)
+
+    readonly_fields = ('is_available', 'was_held',)
+
+    def is_available(self, obj: models.Laboratory) -> bool:
+        return obj.is_available
+    is_available.boolean = True
+
+    def was_held(self, obj: models.Laboratory) -> bool:
+        return obj.was_held
+    was_held.boolean = True
+
+
+@admin.register(models.Lecture)
+class LectureAdmin(EventAdminBase):
+    autocomplete_fields = ('course',)
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'location', 'course', 'description', 'date', 'duration', 'files', 'reminders'),
+        }),
+        ('Event', {
+            'fields': ('create_event', 'event_id', 'meeting_link', 'hangout_link'),
+            'classes': ('collapse', 'open'),
+        })
+    )
 
 
 @admin.register(models.Laboratory)
-class LaboratoryAdmin(admin.ModelAdmin):
-    pass
+class LaboratoryAdmin(EventAdminBase):
+    autocomplete_fields = ('course', 'group',)
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'location', 'course', 'group', 'description', 'date', 'duration', 'files', 'reminders'),
+        }),
+        ('Event', {
+            'fields': ('create_event', 'event_id', 'meeting_link', 'hangout_link'),
+            'classes': ('collapse', 'open'),
+        })
+    )
+
+
+class CourseMarkBase(admin.ModelAdmin):
+    fields = ('course', 'student', 'mark', 'description', 'teacher',)
+    autocomplete_fields = ('course', 'student', 'teacher',)
+    list_display = ('course', 'student', 'teacher', 'mark', 'mark_decimal',)
+    list_filter = ('course',)
+    search_fields = ('student__first_name', 'student__last_name')
+
+    readonly_fields = ('mark_decimal',)
+
+    def mark_decimal(self, obj: models.CourseMark) -> float:
+        return obj.mark_decimal
 
 
 @admin.register(models.CourseMark)
-class CourseMarkAdmin(admin.ModelAdmin):
+class CourseMarkAdmin(CourseMarkBase):
     pass
 
 
 @admin.register(models.FinalCourseMark)
-class FinalCourseMarkAdmin(admin.ModelAdmin):
+class FinalCourseMarkAdmin(CourseMarkBase):
     pass
 
 
 @admin.register(models.CourseGroup)
 class GroupAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ('name',)
+    autocomplete_fields = ('course',)
+    filter_horizontal = ('students',)
+    list_display = ('name', 'course_link', 'students_count')
+
+    readonly_fields = ('course_link', 'students_count',)
+
+    def course_link(self, obj: models.CourseGroup):
+        href = reverse('admin:courses_course_change', args=(obj.course.pk,))
+        return format_html(f'<a href="{href}">{obj.course.name}</a>')
+
+    def students_count(self, obj: models.CourseGroup) -> int:
+        return obj.students_count
+
+
+@admin.register(models.Assignment)
+class AssignmentAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('teacher', 'laboratory',)
+    list_display = ('title', 'deadline', 'laboratory_link', 'is_actual')
+    list_filter = ('deadline',)
+    search_fields = ('laboratory__title', 'title',)
+
+    readonly_fields = ('laboratory_link', 'is_actual')
+
+    def laboratory_link(self, obj: models.Assignment):
+        href = reverse("admin:courses_laboratory_change", args=(obj.laboratory.pk,))
+        return format_html(f'<a href="{href}">{obj.laboratory.title}</a>')
+
+    def is_actual(self, obj: models.Assignment):
+        return obj.is_actual
+    is_actual.boolean = True
 
 
 @admin.register(models.CourseNotice)

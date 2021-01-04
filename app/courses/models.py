@@ -11,7 +11,6 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-
 PROFILE_CHOICES = (
     ('CS', _('Computer Science')),
     ('IS', _('Intelligent Systems')),
