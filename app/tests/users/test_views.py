@@ -97,8 +97,13 @@ class TestDashboardView:
         # grade.students.add(student)
         # grade.save()
         # course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        course1 = course_factories.CourseFactory(head_teacher=teacher)
+        course1.save()
+
         client.force_login(teacher)
         assert response.status_code == 200
+
+        assert [course for course in teacher.courses_teaching.all() if course.is_actual] == [course1]
         # assert [course for course in teacher.courses_teaching.all() if course.is_actual] == response.context.get('courses')
 
     def test_get_unauthenticated_dashboard(self, client):
@@ -184,6 +189,12 @@ class TestLoginView:
         # assert user.is_authenticated
         # response = client.get(url)
         # assert response.status_code == 302
+
+        student = users_factories.StudentFactory()
+        client.force_login(student)
+        response = client.get(url)
+        assert response.url == reverse('users:dashboard')
+
 
     def test_post_authenticated_login(self, user_client):
         url = reverse('users:login')
