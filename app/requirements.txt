@@ -38,3 +38,5 @@ django-cors-headers
 coreapi
 pyyaml
 django_timedeltatemplatefilter
+django-storages
+boto3
