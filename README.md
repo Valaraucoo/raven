@@ -1,6 +1,8 @@
 <p align="center"><img width="100" src="https://image.freepik.com/darmowe-wektory/szablon-logo-maskotka-gry-raven-esport_20684-157.jpg" alt="Vue logo"></p>
 <h2 align="center">Raven - smart learning</h2>
 
+<img src="https://github.com/Valaraucoo/raven/workflows/Docker%20Compose%20Actions%20Workflow/badge.svg"></img> 
+
 
 ## The goal
 
@@ -20,6 +22,8 @@ The technological stack of the system was selected taking into account our skill
 * Frontend:
   * `VueJS`
   * `TailwindCSS`
+* Testing tools:
+  * `pytest` & `selenium`
 * `Docker` & `Docker Compose`
 
 

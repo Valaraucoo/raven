@@ -1,6 +1,9 @@
 {% extends "dashboard/profile.html" %}
 {% load static %}
 
+{% block title %}{{ user.first_name }} {{ user.last_name }}{% endblock title %}
+
+
 {% block profile_header %}
 {% endblock profile_header %}
 

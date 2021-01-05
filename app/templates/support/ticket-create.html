@@ -1,6 +1,9 @@
 {% extends "users/login.html" %}
 {% load static %}
 
+{% block title %}Pomoc{% endblock title %}
+
+
 {% block form %}
   <div class="header">
     <img class="mx-auto w-auto" src="{% static 'images/logo.png' %}" alt="Workflow">
@@ -35,10 +38,11 @@
         {{ form.description }}
       </div>
     </div>
-    <div class="login-button">
+    <div class="login-button mb-2">
       <button type="submit" class="group">
         Wyślij
       </button>
     </div>
+    <a class="text-sm text-blue-400 hover:text-blue-500" href="{% url 'users:dashboard' %}">Powrót do strony głównej</a>
   </form>
 {% endblock form %}

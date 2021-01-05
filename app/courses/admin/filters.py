@@ -1,12 +1,11 @@
 from django.contrib import admin
-from django.utils import timezone
 from django.db.models import Q
+from django.utils import timezone
 
 
 class CourseStartYearFiler(admin.SimpleListFilter):
     title = 'Filter by start year'
     parameter_name = 'year'
-
 
     def lookups(self, request, model_admin):
         year = timezone.now().year

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Logowanie{% endblock title %}
+
 {% block content %}
 
 <div class="container bg-white">
@@ -45,7 +47,7 @@
       </div>
     </form>
 
-    <div class="first_time_check">
+    <div class="first_time_check text-sm">
       <button id="modal-trigger" >
         Czy jesteś w tym serwisie po raz pierwszy?
       </button>

@@ -35,38 +35,38 @@
   <transition name="list">
     <div v-if="!isHidden" id="mySidebar" class="sidebar bg-white shadow-md">
       <div>
-        <a href="{% url "users:dashboard" %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+        <a href="{% url "users:dashboard" %}" class="{% if request.path == '/' %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <span>
             <i class="fas fa-home"></i>
           </span>
           <span>Strona Główna</span>
         </a>
-        <a href="{% url 'users:schedule' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+        <a href="{% url 'users:schedule' %}" class="{% if '/schedule/' in request.path %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-calendar-minus"></i>
         </span>
           <span>Plan zajęć</span>
         </a>
-        <a href="{% url "courses:courses" %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+        <a href="{% url "courses:courses" %}" class="{% if '/courses/' in request.path %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-home"></i>
         </span>
           <span>Kursy</span>
         </a>
-        <a href="{% url 'users:notices' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+        <a href="{% url 'users:notices' %}" class="{% if '/notices/' in request.path %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <span>
             <i class="fas fa-calendar"></i>
           </span>
           <span>Ogłoszenia</span>
         </a>
         {% if request.user.is_student %}
-          <a href="{% url 'users:assignments' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+          <a href="{% url 'users:assignments' %}" class="{% if '/assignments/' in request.path %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
           <span>
             <i class="fas fa-pencil-ruler"></i>
           </span>
             <span>Zadania</span>
           </a>
-        <a href="{% url 'users:marks' %}" class="hover:bg-gray-200 ml-4 mr-2 rounded-lg">
+        <a href="{% url 'users:marks' %}" class="{% if '/marks/' in request.path %}bg-gray-200{% endif %} hover:bg-gray-200 ml-4 mr-2 rounded-lg">
         <span>
           <i class="fas fa-graduation-cap"></i>
         </span>

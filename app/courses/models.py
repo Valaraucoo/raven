@@ -11,7 +11,6 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from utils.meetings import meetings
 
 PROFILE_CHOICES = (
     ('CS', _('Computer Science')),
@@ -240,6 +239,7 @@ class Laboratory(Event):
     class Meta:
         verbose_name = _('Laboratory')
         verbose_name_plural = _('Laboratories')
+        ordering = ('date',)
 
 
 class CourseMarkBase(models.Model):

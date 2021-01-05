@@ -84,7 +84,7 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['available_lectures'] = [lecture for lecture in self.object.lectures.all() if lecture.is_available]
-        labs = self.object.laboratories.all()
+        labs = self.object.laboratories.all().order_by('date')
         if self.request.user.is_teacher:
             context['available_labs'] = [lab for lab in labs if lab.is_available]
         else:
@@ -271,6 +271,13 @@ class LectureDetailView(LoginRequiredMixin, DetailView):
     model = models.Lecture
     context_object_name = 'lecture'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        previous_lecture = obj.course.lectures.filter(date__lt=obj.date).last()
+        context['previous_lecture'] = previous_lecture
+        return context
+
     def get(self, request, *args, **kwargs):
         user = request.user
         if not user.is_authenticated:
@@ -290,6 +297,13 @@ class LaboratoryDetailView(LectureDetailView):
     template_name = 'courses/laboratories/laboratory-detail.html'
     model = models.Laboratory
     context_object_name = 'laboratory'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        previous_lab = obj.course.laboratories.filter(date__lt=obj.date, group=obj.group).last()
+        context['previous_lab'] = previous_lab
+        return context
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -396,8 +410,7 @@ class LaboratoryEditView(LoginRequiredMixin, DetailView):
                 laboratory.group = group
                 laboratory.save()
 
-                #TODO: tworzenie wydarzenia w Google Calendar
-                #TODO: powiadomienie (?) do prowadzącego, że utworzył labke
+                # TODO: tworzenie wydarzenia w Google Calendar
                 messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
                 return redirect('courses:laboratory-edit', pk=laboratory.pk)
             else:
@@ -486,8 +499,7 @@ class LectureEditView(LoginRequiredMixin, DetailView):
                 lecture.show = show == 'on'
                 lecture.create_event = meeting == 'on'
 
-                #TODO: update wydarzenia w Google Calendar
-                #TODO: powiadomienie (?) do prowadzącego, że utworzył wykład
+                # TODO: update wydarzenia w Google Calendar
                 lecture.save()
                 messages.info(request, 'Pomyślnie zaktualizowano wykład!')
                 return redirect('courses:lectures-edit', pk=lecture.pk)
@@ -582,8 +594,7 @@ class LaboratoryCreateView(LoginRequiredMixin, DetailView):
                     show=show == 'on',
                     create_event=meeting == 'on',
                 )
-                #TODO: tworzenie wydarzenia w Google Calendar
-                #TODO: powiadomienie (?) do prowadzącego, że utworzył labke
+                # TODO: tworzenie wydarzenia w Google Calendar
                 messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
                 return redirect('courses:laboratory-detail', pk=laboratory.pk)
             else:
@@ -665,8 +676,7 @@ class LectureCreateView(LoginRequiredMixin, DetailView):
                     show=show == 'on',
                     create_event=meeting == 'on',
                 )
-                #TODO: tworzenie wydarzenia w Google Calendar
-                #TODO: powiadomienie (?) do prowadzącego, że utworzył wykład
+                # TODO: tworzenie wydarzenia w Google Calendar
                 messages.info(request, 'Pomyślnie utworzono nowy wykład!')
                 return redirect('courses:lectures-detail', pk=lecture.pk)
             else:
@@ -690,7 +700,7 @@ def delete_lecture_view(request, the_slug, num):
             return redirect('courses:courses')
         lecture = course.lectures.all()[num]
         lecture.delete()
-        #TODO: usuwanie spotkania
+        # TODO: usuwanie spotkania
         messages.info(request, 'Pomyślnie usunięto wykład!')
     return redirect('courses:courses-edit', the_slug=course.slug)
 
@@ -710,7 +720,7 @@ def lecture_add_file(request, pk):
 
         if request.method == 'GET':
             return render(request, 'courses/lectures/lecture-file.html', {'lecture': lecture,
-                                                                       'form': forms.CourseFileForm})
+                                                                          'form': forms.CourseFileForm})
 
         form = forms.CourseFileForm(request.POST, request.FILES)
 
@@ -727,7 +737,8 @@ def lecture_add_file(request, pk):
             messages.info(request, 'Pomyślnie dodano plik!')
         else:
             messages.error(request, 'Spróbuj ponownie!')
-            return render(request, 'courses/lectures/lecture-file.html', {'lecture': lecture, 'form': forms.CourseFileForm})
+            return render(request, 'courses/lectures/lecture-file.html', {'lecture': lecture,
+                                                                          'form': forms.CourseFileForm})
     return redirect('courses:lectures-edit', pk=lecture.pk)
 
 
@@ -885,8 +896,9 @@ class MyCourseMarksView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['final_mark'] = models.FinalCourseMark.objects.filter(student__email=self.request.user.email,
-                                                             course=self.get_object()).first()
-        context['marks'] = models.CourseMark.objects.filter(student__email=self.request.user.email, course=self.get_object())
+                                                                      course=self.get_object()).first()
+        context['marks'] = models.CourseMark.objects.filter(student__email=self.request.user.email,
+                                                            course=self.get_object())
         return context
 
     def get(self, request, *args, **kwargs):

@@ -35,7 +35,7 @@ class LectureCreateForm(forms.Form):
 
 class LaboratoryCreateForm(LectureCreateForm):
     group = forms.ModelChoiceField(queryset=models.CourseGroup.objects.all(),
-                                           widget=forms.RadioSelect(attrs={'class': 'text-sm text-gray-700'}))
+                                   widget=forms.RadioSelect(attrs={'class': 'text-sm text-gray-700'}))
 
 
 class CourseFileForm(forms.Form):
