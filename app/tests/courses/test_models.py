@@ -158,21 +158,36 @@ class TestCourseNoticeModel:
         assert f'Course Notice: {notice.course}, {notice.title}' == str(notice)
 
 
-#@pytest.mark.django_db
-#class TestAssignmentModel:
-#    def test_string_assignment_model(self):
-#        assignment = course_factories.AssignmentFactory()
-#        assert f'Assignment: {assignment.title} {assignment.deadline}' == str(assignment)
-#
-#    def test_is_actual(self):
-#        assignment = course_factories.AssignmentFactory()
-#        is_actual: bool = timezone.now() < assignment.deadline
-#        assert assignment.is_actual == is_actual
-#
-#    def test_timedelta(self):
-#        assignment = course_factories.AssignmentFactory()
-#        timedelta = assignment.deadline - timezone.now()
-#        assert assignment.timedelta == timedelta
+@pytest.mark.django_db
+class TestAssignmentModel:
+    assignment = None
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self, db):
+        teacher = users_factories.TeacherFactory()
+        course = course_factories.CourseFactory(head_teacher=teacher)
+        course.teachers.add(teacher)
+        course.save()
+        group = course_factories.GroupFactory(course=course)
+        group.save()
+        lab = course_factories.LabFactory(course=course, group=group)
+        assignment = course_factories.AssignmentFactory(laboratory=lab, teacher=teacher)
+
+        self.assignment = assignment
+
+    def test_string_assignment_model(self):
+        #assignment = course_factories.AssignmentFactory()
+        assert f'Assignment: {self.assignment.title} {self.assignment.deadline}' == str(self.assignment)
+
+    #def test_is_actual(self):
+        #assignment = course_factories.AssignmentFactory()
+        #is_actual: bool = timezone.now().date() < self.assignment.deadline
+        #assert self.assignment.is_actual == is_actual
+
+    #def test_timedelta(self):
+        #assignment = course_factories.AssignmentFactory()
+        #timedelta = self.assignment.deadline - timezone.now().date()
+        #assert self.assignment.timedelta == timedelta
 
 class TestCourseFileModel:
     pass

@@ -12,13 +12,32 @@ from tests.users import factories as users_factories
 class TestCoursesGuardianPermissionMixin:
     def get_courses_guardian_permission(self, client):
         student = users_factories.StudentFactory()
+        student2 = users_factories.StudentFactory()
         teacher = users_factories.TeacherFactory()
+        teacher2 = users_factories.TeacherFactory()
 
         grade = course_factories.GradeFactory()
+        grade.students.add(student)
         grade.save()
         course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
 
         url = reverse('courses:courses-detail')
+        client.force_login(student)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        client.force_login(student2)
+        response = client.get(url)
+        assert response.url == reverse('courses:courses')
+
+        client.force_login(teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        client.force_login(teacher2)
+        response = client.get(url)
+        assert response.url == reverse('courses:courses')
+
         # client.force_login(student)
         response = client.get(url)
         # assert response.status_code == 302
@@ -590,7 +609,19 @@ class TestCoursesGroupEditView:
 
         client.force_login(student_without_group)
         response = client.get(url)
-        assert response.status_code == 302  # response.url == reverse('courses:courses-detail', args=(course.slug,))
+        #assert response.status_code == 302  # response.url == reverse('courses:courses-detail', args=(course.slug,))
+        assert response.url == reverse('courses:courses')
+
+        grade.students.add(student_without_group)
+        grade.save()
+        group = course_factories.GroupFactory(course=course)
+        group.save()
+        group.students.add(student_without_group)
+
+        assert [student for student in group.students.all()] == [student_without_group]
+        client.force_login(student_without_group)
+        response = client.get(url)
+        assert response.status_code == 302
 
 
 class TestLectureChangesView:
