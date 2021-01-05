@@ -774,7 +774,7 @@ def laboratory_add_file(request, pk):
             messages.info(request, 'Pomyślnie dodano plik!')
         else:
             messages.error(request, 'Spróbuj ponownie!')
-            return render(request, 'courses/lectures/lecture-file.html',
+            return render(request, 'courses/laboratories/laboratory-file.html',
                           {'laboratory': laboratory, 'form': forms.CourseFileForm})
     return redirect('courses:laboratory-edit', pk=laboratory.pk)
 
