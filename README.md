@@ -10,6 +10,8 @@
 
 The main assumption of the application is to improve the workflow, automate the course, communication between users and increase the efficiency of teaching.
 
+This application was prepared as a final project in **Software Engineering**, AGH UST course.
+
 
 ### Used technologies
 The technological stack of the system was selected taking into account our skills, knowledge of programming environments and design requirements. Due to limited resources
@@ -25,6 +27,14 @@ The technological stack of the system was selected taking into account our skill
 * Testing tools:
   * `pytest` & `selenium`
 * `Docker` & `Docker Compose`
+* Storages:
+  * `AWS S3`
+* External APIs:
+  * `Google API`
+
+
+### Build and setup
+To run the application locally, see the instructions [here](./docs/SETUP_LOCAL_TESTING_ENVIROMENT.md)
 
 
 ### Logical architecture
