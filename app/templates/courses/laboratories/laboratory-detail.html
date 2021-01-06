@@ -60,10 +60,14 @@
         </p>
         <p class="text-md text-gray-700 mt-2">
           <span class="font-medium mb-2">Link do wydarzenia:</span>
-          {% if laboratory.meeting_link %}
-            <a class="block text-blue-400 hover:text-blue-500" href="{{ laboratory.meeting_link }}">Wydarzenie: {{ laboratory.title }}</a>
+          {% if laboratory.was_held %}
+            Wydarzenie już się odbyło
           {% else %}
-            -
+            {% if laboratory.hangout_link %}
+              <a class="text-blue-400 hover:text-blue-500" href="{{ laboratory.hangout_link }}">Wydarzenie: {{ laboratory.title }}</a>
+            {% else %}
+              -
+            {% endif %}
           {% endif %}
         </p>
         <p class="text-md text-gray-700 mt-24">

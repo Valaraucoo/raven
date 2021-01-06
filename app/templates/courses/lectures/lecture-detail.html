@@ -61,10 +61,14 @@
         </p>
         <p class="text-md text-gray-700 mt-2">
           <span class="font-medium mb-2">Link do wydarzenia:</span>
-          {% if lecture.meeting_link %}
-            <a class="block text-blue-400 hover:text-blue-500" href="{{ lecture.meeting_link }}">Wydarzenie: {{ lecture.title }}</a>
+          {% if laboratory.was_held %}
+            Wydarzenie już się odbyło
           {% else %}
-            -
+            {% if lecture.hangout_link %}
+              <a class="text-blue-400 hover:text-blue-500" href="{{ lecture.hangout_link }}">Wydarzenie: {{ lecture.title }}</a>
+            {% else %}
+              -
+            {% endif %}
           {% endif %}
         </p>
         <p class="text-md text-gray-700 mt-24">
