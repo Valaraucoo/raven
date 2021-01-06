@@ -34,7 +34,7 @@
             <tbody class="text-sm font-normal text-gray-700">
             {% for notice in notices %}
               <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
-                <td class="px-4 py-4">{{ notice.notice.title }}{% if notice.is_new %}<span class="ml-2 duration-300 rounded-full font-bold px-2 py-1 text-xs text-white bg-green-400 hover:bg-green-500">NOWE</span>{% endif %}</td>
+                <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:notices' notice.notice.course.slug %}">{{ notice.notice.title }}</a>{% if notice.is_new %}<span class="ml-2 duration-300 rounded-full font-bold px-2 py-1 text-xs text-white bg-green-400 hover:bg-green-500">NOWE</span>{% endif %}</td>
                 <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' notice.notice.sender.pk %}">{{ notice.notice.sender.first_name }} {{ notice.notice.sender.last_name }}</a></td>
                 <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-detail' notice.notice.course.slug %}">{{ notice.notice.course.name }}</a></td>
                 <td class="px-4 py-4">

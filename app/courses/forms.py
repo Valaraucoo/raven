@@ -7,6 +7,9 @@ tailwind_form = 'appearance-none block w-full bg-gray-200 text-gray-700 border b
 
 
 class LectureCreateForm(forms.Form):
+    """
+    LectureCreateForm is used to create new Lecture at `courses.views.LectureCreateView`.
+    """
     title = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': tailwind_form,
         'placeholder': 'Tytuł',
@@ -34,11 +37,17 @@ class LectureCreateForm(forms.Form):
 
 
 class LaboratoryCreateForm(LectureCreateForm):
+    """
+    LaboratoryCreateForm is used to create new Laboratory at `courses.views.LaboratoryCreateView`.
+    """
     group = forms.ModelChoiceField(queryset=models.CourseGroup.objects.all(),
                                    widget=forms.RadioSelect(attrs={'class': 'text-sm text-gray-700'}))
 
 
 class CourseFileForm(forms.Form):
+    """
+    CourseFileForm is used to create/edit file within `course` module.
+    """
     filename = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': tailwind_form,
         'placeholder': 'Nazwa pliku',
@@ -54,6 +63,9 @@ class CourseFileForm(forms.Form):
 
 
 class CourseGroupModelForm(forms.ModelForm):
+    """
+    CourseGroupModelForm is used to create/edit `courses.CourseGroup` objects
+    """
     class Meta:
         model = models.CourseGroup
         fields = ('name', 'students',)
@@ -64,6 +76,9 @@ class CourseGroupModelForm(forms.ModelForm):
 
 
 class CourseNoticeModelForm(forms.ModelForm):
+    """
+    CourseNoticeModelForm is used to create/edit `courses.CourseNotice` objects
+    """
     class Meta:
         model = models.CourseNotice
         fields = ('title', 'content',)
@@ -78,6 +93,9 @@ class CourseNoticeModelForm(forms.ModelForm):
 
 
 class CourseMarkModelForm(forms.ModelForm):
+    """
+    CourseMarkModelForm is used to create/edit `courses.CourseMark` objects
+    """
     class Meta:
         model = models.CourseMark
         fields = ('mark', 'description')
@@ -93,6 +111,9 @@ class CourseMarkModelForm(forms.ModelForm):
 
 
 class CourseSetFinalMarkModelForm(forms.ModelForm):
+    """
+    CourseSetFinalMarkModelForm is used to create/edit `courses.FinalCourseMark` objects
+    """
     class Meta:
         model = models.FinalCourseMark
         fields = ('mark', 'description')
@@ -108,6 +129,9 @@ class CourseSetFinalMarkModelForm(forms.ModelForm):
 
 
 class AssignmentCreateModelForm(forms.ModelForm):
+    """
+    AssignmentCreateModelForm is used to create/edit `courses.Assignment` objects
+    """
     class Meta:
         model = models.Assignment
         fields = ('deadline', 'title', 'content')

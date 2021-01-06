@@ -11,6 +11,9 @@ from .filters import CourseStartYearFiler
 
 @admin.register(models.Grade)
 class GradeAdmin(admin.ModelAdmin):
+    """
+    GradeAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('supervisor',)
     filter_horizontal = ('students',)
     search_fields = ('name', 'start_year',)
@@ -54,6 +57,9 @@ class GradeAdmin(admin.ModelAdmin):
 
 @admin.register(models.Course)
 class CourseAdmin(admin.ModelAdmin):
+    """
+    CourseAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('head_teacher', 'grade')
     filter_horizontal = ('teachers', 'additional_students')
     search_fields = ('name', 'head_teacher__last_name', 'head_teacher__first_name', 'code_meu',)
@@ -63,11 +69,17 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(models.CourseFile)
 class CourseFileAdmin(admin.ModelAdmin):
+    """
+    CourseFileAdmin is customized admin.ModelAdmin class
+    """
     list_display = ('name',)
     search_fields = ('name',)
 
 
 class EventAdminBase(admin.ModelAdmin):
+    """
+    EventAdminBase is customized admin.ModelAdmin class
+    """
     search_fields = ('title',)
     list_display = ('title', 'date', 'location', 'duration', 'is_available', 'was_held')
     list_filter = ('date', 'location',)
@@ -86,6 +98,9 @@ class EventAdminBase(admin.ModelAdmin):
 
 @admin.register(models.Lecture)
 class LectureAdmin(EventAdminBase):
+    """
+    LectureAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('course',)
     fieldsets = (
         (None, {
@@ -100,10 +115,14 @@ class LectureAdmin(EventAdminBase):
 
 @admin.register(models.Laboratory)
 class LaboratoryAdmin(EventAdminBase):
+    """
+    LaboratoryAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('course', 'group',)
     fieldsets = (
         (None, {
-            'fields': ('title', 'location', 'course', 'group', 'description', 'date', 'duration', 'files', 'reminders'),
+            'fields': ('title', 'location', 'course', 'group',
+                       'description', 'date', 'duration', 'files', 'reminders'),
         }),
         ('Event', {
             'fields': ('create_event', 'event_id', 'meeting_link', 'hangout_link'),
@@ -113,6 +132,9 @@ class LaboratoryAdmin(EventAdminBase):
 
 
 class CourseMarkBase(admin.ModelAdmin):
+    """
+    CourseMarkBase is customized admin.ModelAdmin class
+    """
     fields = ('course', 'student', 'mark', 'description', 'teacher',)
     autocomplete_fields = ('course', 'student', 'teacher',)
     list_display = ('course', 'student', 'teacher', 'mark', 'mark_decimal',)
@@ -127,16 +149,25 @@ class CourseMarkBase(admin.ModelAdmin):
 
 @admin.register(models.CourseMark)
 class CourseMarkAdmin(CourseMarkBase):
+    """
+    CourseMarkAdmin is customized admin.ModelAdmin class
+    """
     pass
 
 
 @admin.register(models.FinalCourseMark)
 class FinalCourseMarkAdmin(CourseMarkBase):
+    """
+    FinalCourseMarkAdmin is customized admin.ModelAdmin class
+    """
     pass
 
 
 @admin.register(models.CourseGroup)
 class GroupAdmin(admin.ModelAdmin):
+    """
+    GroupAdmin is customized admin.ModelAdmin class
+    """
     search_fields = ('name',)
     autocomplete_fields = ('course',)
     filter_horizontal = ('students',)
@@ -154,6 +185,9 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
+    """
+    AssignmentAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('teacher', 'laboratory',)
     list_display = ('title', 'deadline', 'laboratory_link', 'is_actual')
     list_filter = ('deadline',)
@@ -172,6 +206,9 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(models.CourseNotice)
 class CourseNoticeAdmin(admin.ModelAdmin):
+    """
+    CourseNoticeAdmin is customized admin.ModelAdmin class
+    """
     autocomplete_fields = ('course', 'sender')
     filter_horizontal = ('not_viewed',)
     list_display = ('course', 'title', 'sender', 'created_at',)

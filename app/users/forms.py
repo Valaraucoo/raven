@@ -10,6 +10,9 @@ tailwind_form2 = 'appearance-none block w-full bg-gray-200 text-gray-700 border 
 
 
 class LoginForm(forms.Form):
+    """
+    LoginForm is used by users to authenticate.
+    """
     email = forms.CharField(max_length=100, widget=forms.EmailInput(attrs={
         'class': tailwind_form + 'rounded-t-md',
         'placeholder': 'Adres Email',
@@ -24,6 +27,9 @@ class LoginForm(forms.Form):
 
 
 class PasswordChangeForm(forms.Form):
+    """
+    PasswordChangeForm is used by users to change theirs password.
+    """
     password1 = forms.CharField(max_length=100, widget=forms.PasswordInput(attrs={
         'class': tailwind_form2,
         'placeholder': '***********',

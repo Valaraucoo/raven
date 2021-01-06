@@ -4,6 +4,10 @@ from utils import emails
 
 
 class UserActivateEmailFactory(emails.BaseEmailFactory):
+    """
+    UserActivateEmailFactory is used to create and send email instances
+    about account activation.
+    """
     subject_template_name = 'users/user_create_subject.txt'
     email_template_name = 'users/user_create_email.html'
 
@@ -18,5 +22,9 @@ class UserActivateEmailFactory(emails.BaseEmailFactory):
 
 
 class UserChangePasswordEmailFactory(UserActivateEmailFactory):
+    """
+    UserChangePasswordEmailFactory is used to create and send email instances
+    about changing password.
+    """
     subject_template_name = 'users/user_change_password_subject.txt'
     email_template_name = 'users/user_change_password_email.html'

@@ -5,6 +5,9 @@ tailwind_form = 'appearance-none block w-full bg-gray-200 text-gray-700 border b
 
 
 class TicketCreateForm(forms.Form):
+    """
+    TicketCreateForm is used to create new SupportTicket
+    """
     email = forms.CharField(max_length=100, required=False, widget=forms.EmailInput(attrs={
         'class': tailwind_form,
         'placeholder': 'Adres Email',

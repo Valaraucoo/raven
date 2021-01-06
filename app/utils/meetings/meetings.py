@@ -4,7 +4,6 @@ from typing import Dict, List
 from apiclient.discovery import build
 from django.conf import settings
 
-
 if settings.USE_GOOGLE_API:
     SERVICE = build('calendar', 'v3', credentials=settings.GOOGLE_API_CREDENTIALS)
     CALENDAR_ID = SERVICE.calendarList().list().execute()['items'][0]['id']

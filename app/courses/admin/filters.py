@@ -4,6 +4,9 @@ from django.utils import timezone
 
 
 class CourseStartYearFiler(admin.SimpleListFilter):
+    """
+    CourseStartYearFiler is custom filter for django admin page used to filtering courses.
+    """
     title = 'Filter by start year'
     parameter_name = 'year'
 

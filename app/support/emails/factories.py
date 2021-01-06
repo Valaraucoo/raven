@@ -4,6 +4,10 @@ from utils import emails
 
 
 class SupportEmail(emails.BaseEmailFactory):
+    """
+    SupportEmail is used to create and send email instances
+    about new SupportTicket.
+    """
     subject_template_name = 'support/ticket_create_subject.txt'
     email_template_name = 'support/ticket_create_email.html'
 
