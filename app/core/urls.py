@@ -7,6 +7,7 @@ from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('', include('users.urls', namespace='users')),
     path('', include('courses.urls', namespace='courses')),
     path('support/', include('support.urls', namespace='support')),

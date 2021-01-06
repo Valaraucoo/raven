@@ -25,6 +25,11 @@ LANGUAGE_CHOICES = (
 
 
 def get_file_path(instance: Any, filename: str) -> str:
+    """
+    :param instance: Any
+    :param filename: str
+    :return: prepared filepath with timestamp
+    """
     today = datetime.date.today().strftime("%Y-%m-%d")
     return os.path.join(settings.UPLOAD_FILES_DIR, today, str(uuid.uuid4()) + filename)
 

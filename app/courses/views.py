@@ -7,10 +7,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 from django.views.generic.detail import DetailView
 
-from courses import forms, models, tasks
 from core import settings
+from courses import forms, models, tasks
 from users import models as users_models
-
 from utils.meetings import meetings
 
 
@@ -29,6 +28,22 @@ class CoursesGuardianPermissionMixin(LoginRequiredMixin, DetailView):
 
 
 class CourseView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /courses/ GET requests.
+
+    **Context:**
+    Returns the courses the user is enrolled in / or which user conducts.
+
+    ``courses``
+        An instance of :Queryset: - user's courses
+
+    ``has_courses``
+        Boolean, :True if len(courses) > 0:
+
+    **Template:**
+
+    :template:`courses/courses.html`
+    """
     template_name = 'courses/courses.html'
 
     def get_context_data(self, **kwargs):
@@ -78,6 +93,28 @@ class CourseView(LoginRequiredMixin, generic.View):
 
 
 class CoursesDetailView(CoursesGuardianPermissionMixin):
+    """
+    View used to handle /courses/<slug>/ GET requests.
+
+    **Context:**
+    Returns details of the specified course.
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    ``available_lectures``
+        An instance of :Queryset: - all available lectures in specified course
+
+    ``available_labs``
+        An instance of :Queryset: - all available laboratories in specified course
+
+    ``student_without_groups_emails``
+        An instance of `users.Student` - all students without group
+
+    **Template:**
+
+    :template:`courses/courses-detail.html`
+    """
     model = models.Course
     template_name = 'courses/courses-detail.html'
     slug_field = 'slug'
@@ -106,6 +143,30 @@ class CoursesDetailView(CoursesGuardianPermissionMixin):
 
 
 class CourseGroupJoinListView(CoursesDetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/groups/ GET requests.
+
+    **Context:**
+
+    ``groups``
+        An instance of :Queryset: `courses.CourseGroup`
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    ``available_lectures``
+        An instance of :Queryset: - all available lectures in specified course
+
+    ``available_labs``
+        An instance of :Queryset: - all available laboratories in specified course
+
+    ``student_without_groups_emails``
+        An instance of `users.Student` - all students without group
+
+    **Template:**
+
+    :template:`courses/courses-group-join.html`
+    """
     template_name = 'courses/courses-group-join.html'
 
     def get_context_data(self, **kwargs):
@@ -115,6 +176,22 @@ class CourseGroupJoinListView(CoursesDetailView):
 
 
 def course_group_create_view(request, the_slug):
+    """
+    View used to handle /courses/<slug:the_slug>/groups/create/ GET/POST requests.
+    View is used to create new groups within the specified course.
+
+    **Context:**
+
+    ``form``
+        An instance of :forms.ModelForm:
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    **Template:**
+
+    :template:`courses/groups/group-create.html`
+    """
     user = request.user
     course = models.Course.objects.get(slug=the_slug)
     if not course:
@@ -142,6 +219,14 @@ def course_group_create_view(request, the_slug):
 
 
 def course_group_delete_view(request, the_slug, num):
+    """
+    View used to handle /courses/<slug:the_slug>/groups/<int:num>/delete/ GET requests.
+    View is used to delete groups within the specified course.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     course = models.Course.objects.get(slug=the_slug)
     group = course.groups.all()[num]
@@ -159,6 +244,14 @@ def course_group_delete_view(request, the_slug, num):
 
 
 def course_group_join_view(request, the_slug, num):
+    """
+    View used to handle /courses/<slug:the_slug>/groups/join/<int:num> GET requests.
+    View is used by students to join specified group within the course.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if not user.is_authenticated:
         return redirect('courses:courses')
@@ -179,6 +272,34 @@ def course_group_join_view(request, the_slug, num):
 
 
 class CourseEditView(CoursesDetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/edit/ GET/POST requests.
+    View is used by teachers to edit specified course.
+
+    **Context:**
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    ``available_lectures``
+        An instance of :Queryset: - all available lectures in specified course
+
+    ``available_labs``
+        An instance of :Queryset: - all available laboratories in specified course
+
+    ``lectures``
+        An instance of :Queryset: - all lectures in specified course
+
+    ``laboratories``
+        An instance of :Queryset: - all laboratories in specified course
+
+    ``student_without_groups_emails``
+        An instance of `users.Student` - all students without group
+
+    **Template:**
+
+    :template:`courses/courses-detail-edit.html`
+    """
     template_name = 'courses/courses-detail-edit.html'
 
     def get_context_data(self, **kwargs):
@@ -220,6 +341,22 @@ class CourseEditView(CoursesDetailView):
 
 
 class CourseGroupEditView(DetailView):
+    """
+    View used to handle /courses/groups/<int:pk>/ GET/POST requests.
+    View is used by teachers to edit specified group within the course.
+
+    **Context:**
+
+    ``group``
+        An instance of :model: `courses.CourseGroup`
+
+    ``form``
+        An instance of `courses.forms.CourseGroupModelForm`
+
+    **Template:**
+
+    :template:`courses/groups/group-edit.html`
+    """
     template_name = 'courses/groups/group-edit.html'
     model = models.CourseGroup
 
@@ -270,6 +407,21 @@ class CourseGroupEditView(DetailView):
 
 
 class LectureDetailView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/lecture/<int:pk>/detail/ GET requests.
+
+    **Context:**
+
+    ``lecture``
+        An instance of :model: `courses.Lecture`
+
+    ``previous_lecture``
+        An instance of :model: `courses.Lecture`
+
+    **Template:**
+
+    :template:`courses/lectures/lecture-detail.html`
+    """
     template_name = 'courses/lectures/lecture-detail.html'
     model = models.Lecture
     context_object_name = 'lecture'
@@ -297,6 +449,21 @@ class LectureDetailView(LoginRequiredMixin, DetailView):
 
 
 class LaboratoryDetailView(LectureDetailView):
+    """
+    View used to handle /courses/laboratory/<int:pk>/detail/ GET requests.
+
+    **Context:**
+
+    ``laboratory``
+        An instance of :model: `courses.Laboratory`
+
+    ``previous_lab``
+        An instance of :model: `courses.Laboratory`
+
+    **Template:**
+
+    :template:`courses/laboratories/laboratory-detail.html`
+    """
     template_name = 'courses/laboratories/laboratory-detail.html'
     model = models.Laboratory
     context_object_name = 'laboratory'
@@ -324,6 +491,23 @@ class LaboratoryDetailView(LectureDetailView):
 
 
 class LaboratoryEditView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/laboratory/<int:pk>/edit/ GET/POST requests.
+    Views is used by teachers to edit specified laboratory.
+
+    **Context:**
+    Returns all available groups within the course.
+
+    ``laboratory``
+        An instance of :model: `courses.Laboratory`
+
+    ``form``
+        An instance of `courses.forms.LaboratoryCreateForm`
+
+    **Template:**
+
+    :template:`courses/laboratories/laboratory-edit.html`
+    """
     template_name = 'courses/laboratories/laboratory-edit.html'
     model = models.Laboratory
     context_object_name = 'laboratory'
@@ -457,6 +641,23 @@ class LaboratoryEditView(LoginRequiredMixin, DetailView):
 
 
 class LectureEditView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/lecture/<int:pk>/edit/ GET/POST requests.
+    Views is used by teachers to edit specified lecture.
+
+    **Context:**
+    Returns all available groups within the course.
+
+    ``lecture``
+        An instance of :model: `courses.Lecture`
+
+    ``form``
+        An instance of `courses.forms.LectureCreateForm`
+
+    **Template:**
+
+    :template:`courses/lectures/lecture-edit.html`
+    """
     template_name = 'courses/lectures/lecture-edit.html'
     model = models.Lecture
     context_object_name = 'lecture'
@@ -581,6 +782,23 @@ class LectureEditView(LoginRequiredMixin, DetailView):
 
 
 class LaboratoryCreateView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/laboratory/create/ GET/POST requests.
+    Views is used by teachers to create new laboratory.
+
+    **Context:**
+    Returns all available groups within the course.
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    ``form``
+        An instance of `courses.forms.LaboratoryCreateForm`
+
+    **Template:**
+
+    :template:`courses/laboratories/laboratory-create.html`
+    """
     template_name = 'courses/laboratories/laboratory-create.html'
     model = models.Course
     slug_field = 'slug'
@@ -689,6 +907,23 @@ class LaboratoryCreateView(LoginRequiredMixin, DetailView):
 
 
 class LectureCreateView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/lecture/create/ GET/POST requests.
+    Views is used by teachers to create new lecture.
+
+    **Context:**
+    Returns all available groups within the course.
+
+    ``course``
+        An instance of :model: `courses.Course`
+
+    ``form``
+        An instance of `courses.forms.LectureCreateForm`
+
+    **Template:**
+
+    :template:`courses/lectures/lecture-create.html`
+    """
     template_name = 'courses/lectures/lecture-create.html'
     model = models.Course
     slug_field = 'slug'
@@ -787,6 +1022,16 @@ class LectureCreateView(LoginRequiredMixin, DetailView):
 
 
 def delete_lecture_view(request, the_slug, num):
+    """
+    View used to handle /courses/<slug:the_slug>/delete/<int:num>/ GET requests.
+    Views is used by teachers to delete specified lecture.
+
+    **Context:**
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')
@@ -806,6 +1051,22 @@ def delete_lecture_view(request, the_slug, num):
 
 
 def lecture_add_file(request, pk):
+    """
+    View used to handle /courses/lecture/<int:pk>/file/add/ GET/POST requests.
+    Views is used by teachers to add file to specified lecture.
+
+    **Context:**
+
+    ``lecture``
+        An instance of `courses.Lecture`
+
+    ``form``
+        An instance of `courses.forms.CourseFileForm`
+
+    **Template:**
+
+    :template:`courses/lectures/lecture-file.html`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')
@@ -843,6 +1104,22 @@ def lecture_add_file(request, pk):
 
 
 def laboratory_add_file(request, pk):
+    """
+    View used to handle /courses/laboratory/<int:pk>/file/add/ GET/POST requests.
+    Views is used by teachers to add file to specified laboratory.
+
+    **Context:**
+
+    ``laboratory``
+        An instance of `courses.Labroatory`
+
+    ``form``
+        An instance of `courses.forms.CourseFileForm`
+
+    **Template:**
+
+    :template:`courses/laboratories/laboratory-file.html`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')
@@ -880,6 +1157,14 @@ def laboratory_add_file(request, pk):
 
 
 def delete_lecture_file(request, pk, num):
+    """
+    View used to handle /courses/lecture/<int:pk>/file/delete/<int:num>/ GET requests.
+    Views is used by teachers to delete file to specified lecture.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')
@@ -900,6 +1185,14 @@ def delete_lecture_file(request, pk, num):
 
 
 def delete_laboratory_file(request, pk, num):
+    """
+    View used to handle /courses/laboratory/<int:pk>/file/delete/<int:num>/ GET requests.
+    Views is used by teachers to delete file to specified laboratory.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')
@@ -920,6 +1213,25 @@ def delete_laboratory_file(request, pk, num):
 
 
 class CourseNoticeView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/notices/ GET/POST requests.
+    Views is used to edit and view notices.
+
+    **Context:**
+
+    ``course``
+        An instance of `courses.Course`
+
+    ``notices``
+        An instance of `courses.CourseNotice`
+
+    ``form``
+        An instance of `courses.forms.CourseNoticeModelForm`
+
+    **Template:**
+
+    :template:`courses/notices/notices.html`
+    """
     template_name = "courses/notices/notices.html"
     model = models.Course
     slug_field = 'slug'
@@ -987,6 +1299,25 @@ class CourseNoticeView(LoginRequiredMixin, DetailView):
 
 
 class MyCourseMarksView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/my-marks/ GET requests.
+    Views is used by students to view theirs marks at specified course.
+
+    **Context:**
+
+    ``final_mark``
+        An instance of `courses.FinalCourseMark`
+
+    ``marks``
+        An instance of `courses.CourseMark`
+
+    ``course``
+        An instance of `courses.Course`
+
+    **Template:**
+
+    :template:`courses/marks/my-marks.html`
+    """
     template_name = "courses/marks/my-marks.html"
     model = models.Course
     slug_field = 'slug'
@@ -1016,6 +1347,22 @@ class MyCourseMarksView(LoginRequiredMixin, DetailView):
 
 
 class CourseMarksView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/marks/ GET/POST requests.
+    Views is used to explore and edit marks at specified course.
+
+    **Context:**
+
+    ``form``
+        An instance of `courses.forms.CourseMarkModelForm`
+
+    ``course``
+        An instance of `courses.Course`
+
+    **Template:**
+
+    :template:`courses/marks/partial-marks.html`
+    """
     template_name = "courses/marks/partial-marks.html"
     model = models.Course
     slug_field = 'slug'
@@ -1091,6 +1438,19 @@ class CourseMarksView(LoginRequiredMixin, DetailView):
 
 
 class TotalCourseMarkView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/<slug:the_slug>/total-marks/ GET requests.
+    Views is used to explore student's marks summary.
+
+    **Context:**
+
+    ``course``
+        An instance of `courses.Course`
+
+    **Template:**
+
+    :template:`courses/marks/total-marks.html`
+    """
     template_name = "courses/marks/total-marks.html"
     model = models.Course
     slug_field = 'slug'
@@ -1134,6 +1494,25 @@ class TotalCourseMarkView(LoginRequiredMixin, DetailView):
 
 
 class CourseMarkEditView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/marks/edit/<int:pk>/ GET/POST requests.
+    Views is used to edit specified mark instance.
+
+    **Context:**
+
+    ``mark``
+        An instance of `courses.CourseMark`
+
+    ``course``
+        An instance of `courses.Course`
+
+    ``form``
+        An instance of `course.forms.CourseMarkModelForm`
+
+    **Template:**
+
+    :template:`courses/marks/mark-edit.html`
+    """
     template_name = "courses/marks/mark-edit.html"
     model = models.CourseMark
     context_object_name = 'mark'
@@ -1190,6 +1569,14 @@ class CourseMarkEditView(LoginRequiredMixin, DetailView):
 
 
 def delete_course_mark(request, the_slug, num):
+    """
+    View used to handle /courses/<slug:the_slug>/marks/delete/<int:num>/ GET requests.
+    Views is used to delete specified mark instance.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if user.is_student or not user.is_authenticated:
         return redirect('courses:courses')
@@ -1210,6 +1597,25 @@ def delete_course_mark(request, the_slug, num):
 
 
 def set_final_course_mark_view(request, the_slug, pk):
+    """
+    View used to handle /courses/<slug:the_slug>/marks/final/set/<int:pk>/ GET/POST requests.
+    Views is used to set final mark for specified student.
+
+    **Context:**
+
+    ``course``
+        An instance of `courses.Course`
+
+    ``student``
+        An instance of `users.Student`
+
+    ``form``
+        An instance of `courses.forms.CourseSetFinalMarkModelForm`
+
+    **Template:**
+
+    :template:`courses/marks/set-final-mark.html`
+    """
     user = request.user
     if user.is_student or not user.is_authenticated:
         return redirect('courses:courses')
@@ -1251,6 +1657,25 @@ def set_final_course_mark_view(request, the_slug, pk):
 
 
 def edit_final_course_mark_view(request, the_slug, pk):
+    """
+    View used to handle /courses/<slug:the_slug>/marks/final/edit/<int:pk>/ GET/POST requests.
+    Views is used to edit final mark for specified student.
+
+    **Context:**
+
+    ``course``
+        An instance of `courses.Course`
+
+    ``student``
+        An instance of `users.Student`
+
+    ``form``
+        An instance of `courses.forms.CourseSetFinalMarkModelForm`
+
+    **Template:**
+
+    :template:`courses/marks/edit-final-mark.html`
+    """
     user = request.user
     if user.is_student or not user.is_authenticated:
         return redirect('courses:courses')
@@ -1292,6 +1717,25 @@ def edit_final_course_mark_view(request, the_slug, pk):
 
 
 class AssignmentCreateView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /courses/laboratory/<int:pk>/assignments/add/ GET/POST requests.
+    Views is used by teachers to create new assignment.
+
+    **Context:**
+
+    ``laboratory``
+        An instance of `courses.Laboratory`
+
+    ``student``
+        An instance of `users.Student`
+
+    ``form``
+        An instance of `courses.forms.AssignmentCreateModelForm`
+
+    **Template:**
+
+    :template:`courses/assignments/create.html`
+    """
     template_name = "courses/assignments/create.html"
     model = models.Laboratory
     context_object_name = 'laboratory'
@@ -1342,6 +1786,14 @@ class AssignmentCreateView(LoginRequiredMixin, DetailView):
 
 
 def delete_assignment_view(request, pk, num):
+    """
+    View used to handle /courses/laboratory/<int:pk>/assignments/delete/<int:num>/ GET requests.
+    Views is used by teachers to delete specified assignment.
+
+    **Template:**
+
+    :template:`None`
+    """
     user = request.user
     if not user.is_authenticated or user.is_student:
         return redirect('courses:courses')

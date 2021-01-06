@@ -6,6 +6,19 @@ from . import forms, models, tasks
 
 
 class TicketCreateView(generic.View):
+    """
+    View used to handle /contact/ GET/POST requests.
+    Views is used to contact with support.
+
+    **Context:**
+
+    ``form``
+        An instance of `support.forms.TicketCreateForm`
+
+    **Template:**
+
+    :template:`support/ticket-create.html`
+    """
     template_name = "support/ticket-create.html"
     form_class = forms.TicketCreateForm
 

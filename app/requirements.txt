@@ -40,3 +40,4 @@ pyyaml
 django_timedeltatemplatefilter
 django-storages
 boto3
+docutils

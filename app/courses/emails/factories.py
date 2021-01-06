@@ -4,6 +4,10 @@ from utils import emails
 
 
 class NewCourseNoticeEmail(emails.BaseEmailFactory):
+    """
+    NewCourseNoticeEmail is used to create and send email instances
+    about new CourseNotice.
+    """
     subject_template_name = 'notice/new_notice_subject.txt'
     email_template_name = 'notice/new_notice.html'
 
@@ -18,6 +22,10 @@ class NewCourseNoticeEmail(emails.BaseEmailFactory):
 
 
 class NewAssignmentEmail(emails.BaseEmailFactory):
+    """
+    NewAssignmentEmail is used to create and send email instances
+    about new CourseAssignment.
+    """
     subject_template_name = 'assignment/new_assignment_subject.txt'
     email_template_name = 'assignment/new_assignment.html'
 

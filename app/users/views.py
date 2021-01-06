@@ -15,6 +15,14 @@ from users import forms, models, tasks
 
 
 def delete_profile_image(request):
+    """
+    View used to handle /profile/img/delete/ GET requests.
+    Views is used delete user's profile image.
+
+    **Template:**
+
+    :template:`None`
+    """
     request.user.image = settings.DEFAULT_USER_IMAGE
     request.user.save()
     messages.info(request, 'Twoje zdjęcie zostało usunięte')
@@ -22,6 +30,25 @@ def delete_profile_image(request):
 
 
 class ProfileView(generic.View, LoginRequiredMixin):
+    """
+    View used to handle /profile/ GET requests.
+    Views is used to retrieve user's profile.
+
+    **Context:**
+
+    ``profile``
+        An instance of `users.User`
+
+    ``courses``
+        A list of actual `courses.Course`
+
+    ``grades``
+        A Quieryset of `courses.CourseGrade`
+
+    **Template:**
+
+    :template:`dashboard/profile.html`
+    """
     template_name = 'dashboard/profile.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -46,6 +73,19 @@ class ProfileView(generic.View, LoginRequiredMixin):
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
+    """
+    View used to handle /profile/<int:pk>/ GET requests.
+    Views is used to retrieve user's profile.
+
+    **Context:**
+
+    ``profile``
+        An instance of `users.User`
+
+    **Template:**
+
+    :template:`dashboard/profile-detail.html`
+    """
     model = get_user_model()
     template_name = 'dashboard/profile-detail.html'
 
@@ -61,6 +101,22 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
 
 class ProfileEditView(ProfileView):
+    """
+    View used to handle /profile/edit/ GET requests.
+    Views is used to edit user's profile.
+
+    **Context:**
+
+    ``profile``
+        An instance of `users.User`
+
+    ``password_change_form``
+        An instance of `users.forms.PasswordChangeForm`
+
+    **Template:**
+
+    :template:`dashboard/profile-edit.html`
+    """
     template_name = 'dashboard/profile-edit.html'
     form_class = forms.PasswordChangeForm
 
@@ -118,6 +174,55 @@ class ProfileEditView(ProfileView):
 
 
 class DashboardView(generic.View, LoginRequiredMixin):
+    """
+    View used to handle / GET requests.
+    Views is used to retrieve dashboard page.
+
+    **Context:**
+
+    ``user``
+        An instance of `users.User`
+
+    ``courses``
+        A list of actual `courses.Course`
+
+    ``courses_count``
+        Length of `courses`
+
+    ``notices``
+        A Queryset of `courses.CourseNotice`
+
+    ``grades``
+        A Quieryset of `courses.CourseGrade`
+
+    ``lectures``
+        A Queryset of `courses.Lectures`
+
+    ``laboratories``
+        A Queryset of `courses.Laboratory`
+
+    ``now``
+        A `datetime.datetime.now()`
+
+    ``not_viewed_notices``
+        Number of not viewed notices
+
+    ``marks``
+        A Queryset of `courses.CourseMark`
+
+    ``avg_marks``
+        A list of `courses.CourseMark` with average values
+
+    ``avg``
+        An average value of student's marks
+
+    ``assignments``
+        A list of `course.Assignments`
+
+    **Template:**
+
+    :template:`dashboard/main-page.html`
+    """
     template_name = 'dashboard/main-page.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -196,6 +301,22 @@ class DashboardView(generic.View, LoginRequiredMixin):
 
 
 class ScheduleView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /schedule/ GET requests.
+    Views is used to retrieve user's schedule.
+
+    **Context:**
+
+    ``user``
+        An instance of `users.User`
+
+    ``schedule``
+        Dictionary
+
+    **Template:**
+
+    :template:`dashboard/schedule.html`
+    """
     template_name = 'dashboard/schedule.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -242,6 +363,22 @@ class ScheduleView(LoginRequiredMixin, generic.View):
 
 
 class NoticeView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /schedule/ GET requests.
+    Views is used to retrieve user's notices.
+
+    **Context:**
+
+    ``user``
+        An instance of `users.User`
+
+    ``notices``
+        A Queryset of `courses.CourseNotice`
+
+    **Template:**
+
+    :template:`dashboard/schedule.html`
+    """
     template_name = 'dashboard/notice.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -281,6 +418,22 @@ class NoticeView(LoginRequiredMixin, generic.View):
 
 
 class LoginView(generic.View):
+    """
+    View used to handle /login/ GET/POST requests.
+    Views is used to login.
+
+    **Context:**
+
+    ``is_authenticated``
+        Boolean
+
+    ``form``
+        An instance of `users.formsLoginForm.`
+
+    **Template:**
+
+    :template:`users/login.html`
+    """
     template_name = 'users/login.html'
     form_class = forms.LoginForm
 
@@ -346,6 +499,14 @@ class LoginView(generic.View):
 
 
 class LogoutView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /login/ GET requests.
+    Views is used to logout user.
+
+    **Template:**
+
+    :template:`None`
+    """
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             messages.info(request, 'Do zobaczenia ponownie!')
@@ -357,6 +518,25 @@ class LogoutView(LoginRequiredMixin, generic.View):
 
 
 class MarksView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /schedule/ GET requests.
+    Views is used to retrieve user's marks.
+
+    **Context:**
+
+    ``user``
+        An instance of `users.User`
+
+    ``marks``
+        A Queryset of `courses.CourseMark`
+
+    ``avg_marks``
+        Dictionary
+
+    **Template:**
+
+    :template:`dashboard/marks.html`
+    """
     template_name = 'dashboard/marks.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -409,6 +589,25 @@ class MarksView(LoginRequiredMixin, generic.View):
 
 
 class SummaryView(LoginRequiredMixin, generic.View):
+    """
+    View used to handle /schedule/ GET requests.
+    Views is used to retrieve user's summary.
+
+    **Context:**
+
+    ``profile``
+        An instance of `users.User`
+
+    ``grades``
+        A Queryset of `courses.Grade`
+
+    ``summary``
+        Dictionary
+
+    **Template:**
+
+    :template:`dashboard/summary.html`
+    """
     template_name = 'dashboard/summary.html'
 
     def get_context_data(self, *args, **kwargs):
@@ -453,6 +652,19 @@ class SummaryView(LoginRequiredMixin, generic.View):
 
 
 class AssignmentsView(LoginRequiredMixin, generic.View,):
+    """
+    View used to handle /assignments/ GET requests.
+    Views is used to retrieve user's assignments.
+
+    **Context:**
+
+    ``assignments``
+        A Queryset of `courses.CourseAssignments`
+
+    **Template:**
+
+    :template:`dashboard/assignments.html`
+    """
     template_name = 'dashboard/assignments.html'
 
     def get_context_data(self, *args, **kwargs):
