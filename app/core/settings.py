@@ -202,12 +202,20 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
 
+USE_GOOGLE_API = int(os.environ.get("USE_GOOGLE_API", default=0))
+
 # Google calendar credentials
 GOOGLE_API_ID = os.environ.get('GOOGLE_API_ID')
 GOOGLE_API_SECRET = os.environ.get('GOOGLE_API_SECRET')
 GOOGLE_API_PROJECT_ID = os.environ.get('GOOGLE_API_PROJECT_ID')
 
-# GOOGLE_API_CREDENTIALS = pickle.load(open('./token.pkl', 'rb'))
+GOOGLE_API_CREDENTIALS = None
+
+if USE_GOOGLE_API:
+    try:
+        GOOGLE_API_CREDENTIALS = pickle.load(open('./core/token/token.pkl', 'rb'))
+    except (FileExistsError, FileNotFoundError):
+        raise FileNotFoundError("Can't open 'token/token.pkl'. Before using google API please generate your api token!")
 
 if 'test' in sys.argv:
     try:

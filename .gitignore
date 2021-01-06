@@ -15,3 +15,4 @@ app/htmlcov
 app/.pytest_cache
 app/files/mediafiles/*
 !app/files/mediafiles/defaults/
+app/core/token/*

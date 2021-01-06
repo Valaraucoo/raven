@@ -58,6 +58,30 @@
    - open `localhost:8080/admin` on your web browser and try login to demo account.
    - change permissions for `chmod +x ./app/scripts/test.sh` and run `./app/scripts/test.sh`.
      
-   
-   
+     
+### Using `Google API` for creating calendar events
+
+If you want to use Google APIs with application you should first generate your API token. 
+More information incl. how to prepare your account to use api can be found [here](https://developers.google.com/calendar).
+
+After that, you have to prepare yours API credentials and generate token using `generate_api_token.py` script.
+* First, create local python enviroment and activate it:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+* Then, move to `core` directory and run script:
+```bash
+cd app/core
+python generate_api_token.py
+```
+* Give yours API credentials and change `USE_GOOGLE_API` at your `.env`
+ file to `USE_GOOGLE_API=1`.
+ 
+### Using `AWS S3` for file storage
+
+If you want to host static and media files on AWS S3 storage backend, you should set enviroment variable
+`USE_S3` to `1` and provide appropriate parameters of S3 bucket. 
+
+You can find more details [here](https://simpleisbetterthancomplex.com/tutorial/2017/08/01/how-to-setup-amazon-s3-in-a-django-project.html).
   

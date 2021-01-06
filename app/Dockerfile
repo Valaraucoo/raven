@@ -14,6 +14,8 @@ RUN apk add zlib-dev jpeg-dev gcc musl-dev
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 
+COPY ./core/token/token.pkl .
+
 RUN pip install -r requirements.txt
 
 COPY ./scripts/entrypoint.sh .

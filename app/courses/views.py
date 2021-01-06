@@ -8,7 +8,10 @@ from django.views import generic
 from django.views.generic.detail import DetailView
 
 from courses import forms, models, tasks
+from core import settings
 from users import models as users_models
+
+from utils.meetings import meetings
 
 
 class CoursesGuardianPermissionMixin(LoginRequiredMixin, DetailView):
@@ -410,7 +413,40 @@ class LaboratoryEditView(LoginRequiredMixin, DetailView):
                 laboratory.group = group
                 laboratory.save()
 
-                # TODO: tworzenie wydarzenia w Google Calendar
+                if laboratory.event_id and laboratory.create_event and settings.USE_GOOGLE_API:
+                    meeting = meetings.update_google_calendar_event(
+                        event_id=laboratory.event_id,
+                        data={
+                            'start': laboratory.date,
+                            'end': laboratory.date + laboratory.duration,
+                            'description': laboratory.description,
+                            'location': laboratory.location
+                        }
+                    )
+                    laboratory.event_id = meeting.get('id', '')
+                    laboratory.hangout_link = meeting.get('hangoutLink', '')
+                elif not laboratory.create_event and laboratory.event_id and settings.USE_GOOGLE_API:
+                    meetings.delete_google_calendar_event(laboratory.event_id)
+                    laboratory.event_id = ''
+                    laboratory.hangout_link = ''
+                    laboratory.save()
+                    messages.info(request, 'Pomyślnie zaktualizowano laboratorium! Usunieto wydarzenie!')
+                    return redirect('courses:laboratory-edit', pk=laboratory.pk)
+                elif laboratory.create_event and settings.USE_GOOGLE_API:
+                    meeting = meetings.create_google_calendar_event(
+                        title=laboratory.title,
+                        location=laboratory.location or '',
+                        description=laboratory.description or '',
+                        start_date=laboratory.date,
+                        end_date=laboratory.date + laboratory.duration,
+                        organizer_email=laboratory.course.head_teacher.email,
+                        attendees=[student.email for student in laboratory.group.students.all()],
+                        create_meet=True
+                    )
+                    laboratory.event_id = meeting.get('id', '')
+                    laboratory.hangout_link = meeting.get('hangoutLink', '')
+                laboratory.save()
+
                 messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
                 return redirect('courses:laboratory-edit', pk=laboratory.pk)
             else:
@@ -499,7 +535,41 @@ class LectureEditView(LoginRequiredMixin, DetailView):
                 lecture.show = show == 'on'
                 lecture.create_event = meeting == 'on'
 
-                # TODO: update wydarzenia w Google Calendar
+                lecture.save()
+
+                if lecture.create_event and lecture.event_id and lecture.create_event and \
+                        settings.USE_GOOGLE_API:
+                    meeting = meetings.update_google_calendar_event(
+                        event_id=lecture.event_id,
+                        data={
+                            'start': lecture.date,
+                            'end': lecture.date + lecture.duration,
+                            'description': lecture.description,
+                            'location': lecture.location
+                        }
+                    )
+                    lecture.event_id = meeting.get('id', '')
+                    lecture.hangout_link = meeting.get('hangoutLink', '')
+                elif not lecture.create_event and lecture.event_id and settings.USE_GOOGLE_API:
+                    meetings.delete_google_calendar_event(lecture.event_id)
+                    lecture.event_id = ''
+                    lecture.hangout_link = ''
+                    lecture.save()
+                    messages.info(request, 'Pomyślnie zaktualizowano wykład! Usunieto wydarzenie!')
+                    return redirect('courses:lectures-edit', pk=lecture.pk)
+                elif lecture.create_event and settings.USE_GOOGLE_API:
+                    meeting = meetings.create_google_calendar_event(
+                        title=lecture.title,
+                        location=lecture.location or '',
+                        description=lecture.description or '',
+                        start_date=lecture.date,
+                        end_date=lecture.date + lecture.duration,
+                        organizer_email=lecture.course.head_teacher.email,
+                        attendees=[student.email for student in lecture.course.grade.students.all()],
+                        create_meet=True
+                    )
+                    lecture.event_id = meeting.get('id', '')
+                    lecture.hangout_link = meeting.get('hangoutLink', '')
                 lecture.save()
                 messages.info(request, 'Pomyślnie zaktualizowano wykład!')
                 return redirect('courses:lectures-edit', pk=lecture.pk)
@@ -594,7 +664,21 @@ class LaboratoryCreateView(LoginRequiredMixin, DetailView):
                     show=show == 'on',
                     create_event=meeting == 'on',
                 )
-                # TODO: tworzenie wydarzenia w Google Calendar
+                laboratory.save()
+                if laboratory.create_event and settings.USE_GOOGLE_API:
+                    meeting = meetings.create_google_calendar_event(
+                        title=laboratory.title,
+                        location=laboratory.location or '',
+                        description=laboratory.description or '',
+                        start_date=laboratory.date,
+                        end_date=laboratory.date + laboratory.duration,
+                        organizer_email=laboratory.course.head_teacher.email,
+                        attendees=[student.email for student in laboratory.group.students.all()],
+                        create_meet=True
+                    )
+                    laboratory.event_id = meeting.get('id', '')
+                    laboratory.hangout_link = meeting.get('hangoutLink', '')
+                    laboratory.save()
                 messages.info(request, 'Pomyślnie utworzono nowe laboratorium!')
                 return redirect('courses:laboratory-detail', pk=laboratory.pk)
             else:
@@ -676,7 +760,23 @@ class LectureCreateView(LoginRequiredMixin, DetailView):
                     show=show == 'on',
                     create_event=meeting == 'on',
                 )
-                # TODO: tworzenie wydarzenia w Google Calendar
+                lecture.save()
+
+                if lecture.create_event and settings.USE_GOOGLE_API:
+                    meeting = meetings.create_google_calendar_event(
+                        title=lecture.title,
+                        location=lecture.location or '',
+                        description=lecture.description or '',
+                        start_date=lecture.date,
+                        end_date=lecture.date + lecture.duration,
+                        organizer_email=lecture.course.head_teacher.email,
+                        attendees=[student.email for student in lecture.course.grade.students.all()],
+                        create_meet=True
+                    )
+                    lecture.event_id = meeting.get('id', '')
+                    lecture.hangout_link = meeting.get('hangoutLink', '')
+                lecture.save()
+
                 messages.info(request, 'Pomyślnie utworzono nowy wykład!')
                 return redirect('courses:lectures-detail', pk=lecture.pk)
             else:
