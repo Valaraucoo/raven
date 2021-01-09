@@ -1,15 +1,18 @@
 import datetime
 import os
 import uuid
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import QuerySet
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from users import models as users_models
 
 PROFILE_CHOICES = (
     ('CS', _('Computer Science')),
@@ -144,15 +147,16 @@ class Course(models.Model):
             self.slug = slugify(f"{self.name}-{year}-{uid}")
         super().save(*args, **kwargs)
 
-    def student_has_final_mark(self):
+    @property
+    def students_with_final_mark(self) -> List[users_models.Student]:
         return [mark.student for mark in self.final_marks.all()]
 
     @property
-    def total_students(self):
+    def total_students(self) -> QuerySet:
         return self.grade.students.all() | self.additional_students.all()
 
     @property
-    def students_without_groups(self):
+    def students_without_groups(self) -> List[users_models.Student]:
         groups = self.groups.all()
         students = []
         for group in groups:
