@@ -114,7 +114,7 @@ class Course(models.Model):
     semester = models.IntegerField(validators=[validators.MinValueValidator(1)])
     language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
     site = models.CharField(max_length=255, null=True, blank=True, verbose_name=_('WWW site'))
-    additional_students = models.ManyToManyField('users.Student', 'additional_courses')
+    additional_students = models.ManyToManyField('users.Student', 'additional_courses', blank=True, null=True)
 
     lecture_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
     labs_hours = models.IntegerField(validators=[validators.MinValueValidator(0)])
@@ -143,6 +143,9 @@ class Course(models.Model):
             year = datetime.date.today().year
             self.slug = slugify(f"{self.name}-{year}-{uid}")
         super().save(*args, **kwargs)
+
+    def student_has_final_mark(self):
+        return [mark.student for mark in self.final_marks.all()]
 
     @property
     def total_students(self):
@@ -329,7 +332,9 @@ class Assignment(models.Model):
 
     @property
     def is_actual(self) -> bool:
-        return timezone.now() < self.deadline
+        if self.deadline:
+            return timezone.now() < self.deadline
+        return True
 
     @property
     def timedelta(self) -> datetime.timedelta:

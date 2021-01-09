@@ -44,7 +44,7 @@
                 <tr class="hover:bg-gray-100 border-b border-gray-200 py-10">
                   <td class="px-4 py-4"><a class="text-blue-400 hover:text-blue-500" href="{% url 'users:profile-detail' student.pk %}">{{ student.first_name }} {{ student.last_name }}</a></td>
                   <td class="px-4 py-4">{% if not student.courses_marks.all %}<a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:courses-marks' course.slug %}?student={{ student.first_name }}+{{ student.last_name }}">Edytuj</a>{% else %}{% for mark in student.courses_marks.all %}{% if mark.course == course %}{{ mark.mark }}%{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}<a class="text-blue-400 hover:text-blue-500 ml-2" href="{% url 'courses:courses-marks' course.slug %}?student={{ student.first_name }}+{{ student.last_name }}">Edytuj</a>{% endif %} </td>
-                  <td class="px-4 py-4">{% if student.courses_final_marks.all %}{{ student.courses_final_marks.first.mark_decimal }}<a class="ml-2 text-blue-400 hover:text-blue-500" href="{% url 'courses:edit-final-mark' course.slug student.pk %}">Edytuj</a>{% else %}<a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:set-final-mark' course.slug student.pk %}">Wstaw</a>{% endif %}</td>
+                  <td class="px-4 py-4">{% if student in course.student_has_final_mark %}{{ student.courses_final_marks.first.mark_decimal }}<a class="ml-2 text-blue-400 hover:text-blue-500" href="{% url 'courses:edit-final-mark' course.slug student.pk %}">Edytuj</a>{% else %}<a class="text-blue-400 hover:text-blue-500" href="{% url 'courses:set-final-mark' course.slug student.pk %}">Wstaw</a>{% endif %}</td>
                 </tr>
               {% endfor %}
               </tbody>
