@@ -1,7 +1,7 @@
 import datetime
 import os
 import uuid
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
 from django.conf import settings
 from django.core import validators
@@ -38,6 +38,9 @@ def get_file_path(instance: Any, filename: str) -> str:
 
 
 class CourseFile(models.Model):
+    """
+    CourseFile is a model used to store files in Course application.
+    """
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to=get_file_path, verbose_name=_('File'))
@@ -59,6 +62,9 @@ class CourseFile(models.Model):
 
 
 class Grade(models.Model):
+    """
+    Grade represents the year of students studying a specific field of study.
+    """
     name = models.CharField(max_length=50, verbose_name=_('Grade\'s name'))
     start_year = models.DateField(verbose_name=_('Grade start year'))
     students = models.ManyToManyField(
@@ -91,6 +97,9 @@ class Grade(models.Model):
 
 
 class Course(models.Model):
+    """
+    A Course is a model that represents a specific university course for a given grade.
+    """
     name = models.CharField(max_length=50, verbose_name=_('Course\'s name'))
     description = models.TextField(null=True, blank=True)
     head_teacher = models.ForeignKey(
@@ -179,6 +188,9 @@ class Course(models.Model):
 
 
 class CourseGroup(models.Model):
+    """
+    A CourseGroup represents a certain group of students within a certain Course.
+    """
     name = models.CharField(max_length=255)
     course = models.ForeignKey('Course', related_name='groups', on_delete=models.CASCADE)
     students = models.ManyToManyField('users.Student', related_name='laboratories', blank=True)
@@ -192,6 +204,9 @@ class CourseGroup(models.Model):
 
 
 class Event(models.Model):
+    """
+    Event is an abstract model represents event, ex. lecture or laboratory.
+    """
     title = models.CharField(max_length=100, verbose_name=_('Lecture\'s title'))
     location = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -230,6 +245,9 @@ class Event(models.Model):
 
 
 class Lecture(Event):
+    """
+    A Lecture is a model that represents a lecture that takes place as part of a specific Course for the Grade.
+    """
     course = models.ForeignKey('Course', related_name='lectures', on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -241,6 +259,9 @@ class Lecture(Event):
 
 
 class Laboratory(Event):
+    """
+    A Laboratory is a model that represents a laboratory that takes place as part of a specific Course for the Grade.
+    """
     course = models.ForeignKey('Course', related_name='laboratories', on_delete=models.CASCADE)
     group = models.ForeignKey('CourseGroup', related_name='laboratory', on_delete=models.CASCADE, null=True)
 
@@ -254,6 +275,9 @@ class Laboratory(Event):
 
 
 class CourseMarkBase(models.Model):
+    """
+    CourseMarkBase is an abstract model represents the mark that a student may receive as part of the Course.
+    """
     mark = models.IntegerField(default=0, validators=[validators.MinValueValidator(0),
                                                       validators.MaxValueValidator(100)])
     date = models.DateTimeField(auto_now_add=True)
@@ -281,6 +305,9 @@ class CourseMarkBase(models.Model):
 
 
 class CourseMark(CourseMarkBase):
+    """
+    CourseMark is a partial mark that a student may receive as part of a Course.
+    """
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='marks')
     student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_marks')
     teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_lecture_marks')
@@ -293,6 +320,9 @@ class CourseMark(CourseMarkBase):
 
 
 class FinalCourseMark(CourseMarkBase):
+    """
+    CourseMark is a final mark that a student may receive as part of a Course.
+    """
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='final_marks')
     student = models.ForeignKey('users.Student', on_delete=models.CASCADE, related_name='courses_final_marks')
     teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_final_marks')
@@ -306,6 +336,9 @@ class FinalCourseMark(CourseMarkBase):
 
 
 class CourseNotice(models.Model):
+    """
+    CourseNotice is a model that represents a notice that can be made public as part of a Course.
+    """
     course = models.ForeignKey('Course', related_name='notices', on_delete=models.CASCADE)
     sender = models.ForeignKey('users.Teacher', related_name='notices', on_delete=models.CASCADE)
     # NOTE: take care about sender Teacher must be one of the teachers at specified course
@@ -325,6 +358,9 @@ class CourseNotice(models.Model):
 
 
 class Assignment(models.Model):
+    """
+    Assignment is a model representing the assignment assigned to students in a specific Laboratory.
+    """
     laboratory = models.ForeignKey('Laboratory', on_delete=models.CASCADE, related_name='assignments')
     teacher = models.ForeignKey('users.Teacher', on_delete=models.CASCADE, related_name='setted_assignments')
     deadline = models.DateTimeField()

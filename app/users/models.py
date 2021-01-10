@@ -32,7 +32,7 @@ ROLE_CHOICES = (
 
 
 class User(auth_models.AbstractUser):
-    '''
+    """
     Custom User model for raven platform.
 
     email: PK                 user's email, used for logging in
@@ -46,7 +46,7 @@ class User(auth_models.AbstractUser):
 
     if role == 'teacher':
     running_courses: FK(...)
-    '''
+    """
     username = None
 
     first_name = models.CharField(max_length=30, blank=True, verbose_name=_('First name'))
@@ -98,6 +98,9 @@ class User(auth_models.AbstractUser):
 
 
 class Teacher(User):
+    """
+    Teacher is a submodel of the User
+    """
     objects = managers.TeacherUserManager()
 
     class Meta:
@@ -107,6 +110,9 @@ class Teacher(User):
 
 
 class Student(User):
+    """
+    Student is a submodel of the User
+    """
     objects = managers.StudentUserManager()
 
     class Meta:

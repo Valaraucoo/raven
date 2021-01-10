@@ -16,6 +16,9 @@ class SupportStatus(models.TextChoices):
 
 
 class SupportTicket(models.Model):
+    """
+    SupportTicket is a model representing the request reported to support by the user.
+    """
     category = models.CharField(max_length=10, choices=SupportCategories.choices)
     email = models.EmailField()
     issuer_fullname = models.CharField(max_length=255)
