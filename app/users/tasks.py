@@ -1,9 +1,8 @@
 from typing import List
 
 from core import celery
-from users.emails import factories
-
 from users import models
+from users.emails import factories
 
 
 @celery.app.task(shared=True)
