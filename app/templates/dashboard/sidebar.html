@@ -3,6 +3,9 @@
 <div id="header" class="hidden md:block">
   <header class="flex fixed shadow-sm justify-end items-center bg-white w-full py-2 px-4">
     <div class="ml-4 flex items-center md:ml-6">
+      <a href="{% url 'support:support-contact' %}" class="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-gray-600 focus:outline-none focus:text-white focus:bg-gray-700">
+        <i class="fas fa-question"></i>
+      </a>
       <a href="{% url 'users:profile-edit' %}" class="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-gray-600 focus:outline-none focus:text-white focus:bg-gray-700">
         <i class="fas fa-cog"></i>
       </a>

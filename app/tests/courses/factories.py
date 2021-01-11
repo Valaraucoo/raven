@@ -3,6 +3,7 @@ import random
 
 import factory
 import factory.fuzzy as fuzzy
+from django.core.files.base import ContentFile
 
 from courses import models
 from courses.models import LANGUAGE_CHOICES, PROFILE_CHOICES
@@ -112,7 +113,7 @@ class CourseMarkFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.CourseMark
 
-    mark = 5
+    mark = 65
     date = fuzzy.FuzzyDate(datetime.date.today())
     description = factory.Faker('text')
     course = factory.SubFactory(CourseFactory)
@@ -154,3 +155,18 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     content = factory.Faker('text')
 
 
+class CourseFileFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.CourseFile
+
+    name = fuzzy.FuzzyText(length=16)
+    description = factory.Faker('text')
+    file = factory.LazyAttribute(
+        lambda _: ContentFile(
+            factory.django.ImageField()._make_data(
+                {'width': 600, 'height': 600}
+            ), 'example.jpg'
+        )
+    )
+    created_at = fuzzy.FuzzyDate(datetime.date.today())
+    updated_at = fuzzy.FuzzyDate(datetime.date.today())
