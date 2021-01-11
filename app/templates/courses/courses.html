@@ -11,8 +11,8 @@
         <h4 class="text-lg leading-6 font-medium text-gray-900 mb-2">Kursy</h4>
         {% if not has_courses %}
           <p class="text-gray-700 text-sm">
-            Nie jesteś przypisany do żadnego kursu.
-            <a href="#" class="text-blue-400 hover:text-blue-500">Zapisz się teraz</a>
+            Nie jesteś przypisany do żadnego kursu. Skontaktuj się z administracją
+            <a href="{% url 'support:support-contact' %}" class="text-blue-400 hover:text-blue-500">tutaj</a>.
           </p>
         {% else %}
           <div class="mb-4 border-b">

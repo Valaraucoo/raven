@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.messages import get_messages
 from django.urls import reverse
 
 from tests.courses import factories as course_factories
@@ -63,6 +64,28 @@ class TestProfileEditView:
 
     def test_post_password_change(self, user_client):
         url = reverse('users:profile-edit')
+        data = {
+            'password1': "nowehaslo",
+            'password2': "nowehaslo"
+        }
+        response = user_client.post(url, data=data)
+        assert response.status_code == 200
+        #
+        # data = {
+        #     'password1': "0",
+        #     'password2': "0"
+        # }
+        # response = user_client.post(url, data=data)
+        # messages = list(get_messages(response.wsgi_request))
+        # assert False, messages
+        #
+        # data = {
+        #     'password1': "nowehaslo",
+        #     'password2': "innehaslo"
+        # }
+        # response = user_client.post(url, data=data)
+        # messages = list(get_messages(response.wsgi_request))
+        # assert False, messages
 
     def test_post_edit_data(self, user_client):
         user = users_factories.StudentFactory()
@@ -93,18 +116,22 @@ class TestDashboardView:
         assert user.full_username == f"{user.first_name} {user.last_name} ({user.email})"
 
         teacher = users_factories.TeacherFactory()
-        # grade = course_factories.GradeFactory()
-        # grade.students.add(student)
-        # grade.save()
-        # course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
-        course1 = course_factories.CourseFactory(head_teacher=teacher)
-        course1.save()
+        grade = course_factories.GradeFactory()
+        grade.students.add(student)
+        grade.save()
+        course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        course.teachers.add(teacher)
+        course.save()
+        mark = course_factories.CourseMarkFactory(student=student, course=course)
+        student.refresh_from_db()
 
         client.force_login(teacher)
         assert response.status_code == 200
-
-        assert [course for course in teacher.courses_teaching.all() if course.is_actual] == [course1]
         # assert [course for course in teacher.courses_teaching.all() if course.is_actual] == response.context.get('courses')
+
+        client.force_login(student)
+        assert response.status_code == 200
+        # assert mark == response.context.get('avg_marks')
 
     def test_get_unauthenticated_dashboard(self, client):
         url = reverse('users:dashboard')
@@ -175,26 +202,18 @@ class TestLoginView:
     def test_get_login(self, user_client):
         url = reverse('users:login')
         response = user_client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('users:dashboard')
 
     def test_get_unauthenticated_login(self, client):
         url = reverse('users:login')
-        response = client.get(url)
+        user = users_factories.StudentFactory()
+        data = {
+            "email": user.email,
+            "password": user.password,
+            "remember": True
+        }
+        response = client.get(url, data)
         assert response.status_code == 200
-
-        # student = users_factories.StudentFactory()
-        # user = authenticate(email=student.email, password=student.email)
-        # client.force_login(student)
-        # user = get_user(client)
-        # assert user.is_authenticated
-        # response = client.get(url)
-        # assert response.status_code == 302
-
-        student = users_factories.StudentFactory()
-        client.force_login(student)
-        response = client.get(url)
-        assert response.url == reverse('users:dashboard')
-
 
     def test_post_authenticated_login(self, user_client):
         url = reverse('users:login')
@@ -210,14 +229,15 @@ class TestLoginView:
         url = reverse('users:login')
         user = users_factories.StudentFactory()
         user.save()
-        resp = client.post(url)
+        resp = client.get(url)
+
         data = {
-            'csrfmiddlewaretoken': resp.cookies['csrftoken'].value,
-            'email': user.email,
-            'password': user.password,
-            'remember': True
+            "csrfmiddlewaretoken": resp.cookies['csrftoken'].value,
+            "email": user.email,
+            "password": user.password,
+            "remember": True
         }
-        # data = self._get_token(client, url, data)
+
         response = client.post(url, data=data)
         assert response.status_code == 200
 
@@ -248,6 +268,7 @@ class TestMarksView:
         course = course_factories.CourseFactory(grade=grade)
         course.save()
         mark = course_factories.CourseMarkFactory(student=student, course=course)
+
         client.force_login(student)
         response = client.get(url)
         marks = response.context.get('marks')

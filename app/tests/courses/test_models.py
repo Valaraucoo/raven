@@ -2,9 +2,7 @@ import datetime
 
 import pytest
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
-from courses import models as course_models
 from tests.courses import factories as course_factories
 from tests.users import factories as users_factories
 
@@ -44,13 +42,6 @@ class TestCourseModel:
         course = course_factories.CourseFactory()
         assert list(course.total_students) == course.students_without_groups
 
-    #def test_calculated_semester(self):
-    #    grade = course_factories.GradeFactory()
-    #    course = course_factories.CourseFactory(grade=grade)
-    #    grade_start_date: datetime.date = grade.start_year
-    #    #delta: datetime.timedelta = timezone.now().date() - grade_start_date
-    #    #semester = int(delta.days / 183) + 1
-    #    assert course.calculated_semester() == semester
 
 @pytest.mark.django_db
 class TestCourseGroupModel:
@@ -82,19 +73,8 @@ class TestEventModel:
         assert lab.is_available == True
 
         lab.show = False
-        # assert (lab.date - timezone.now() < lab.time_delta) == lab.is_available
-
         lab.time_delta = datetime.timedelta(days=0)
         assert lab.is_available == False
-
-    # def test_event_held(self):
-    #     course = course_factories.CourseFactory()
-    #     course.save()
-    #     group = course_factories.GroupFactory(course=course)
-    #     group.save()
-    #     lab = course_factories.LabFactory(group=group)
-    #
-    #     assert (lab.date < timezone.now()) == lab.was_held
 
     def test_event_end_date(self):
         course = course_factories.CourseFactory()
@@ -141,6 +121,22 @@ class TestCourseMarkModel:
         mark.save()
         assert f'Course Mark: {mark.student}, {mark.course}' == str(mark)
 
+    def test_mark_decimal(self):
+        mark = course_factories.CourseMarkFactory(mark=20)
+        assert mark.mark_decimal == 2.0
+
+        mark = course_factories.CourseMarkFactory(mark=50)
+        assert mark.mark_decimal == 3.0
+
+        mark = course_factories.CourseMarkFactory(mark=70)
+        assert mark.mark_decimal == 4.0
+
+        mark = course_factories.CourseMarkFactory(mark=80)
+        assert mark.mark_decimal == 4.5
+
+        mark = course_factories.CourseMarkFactory(mark=90)
+        assert mark.mark_decimal == 5.0
+
 
 @pytest.mark.django_db
 class TestFinalCourseMarkModel:
@@ -176,29 +172,11 @@ class TestAssignmentModel:
         self.assignment = assignment
 
     def test_string_assignment_model(self):
-        #assignment = course_factories.AssignmentFactory()
         assert f'Assignment: {self.assignment.title} {self.assignment.deadline}' == str(self.assignment)
 
-    #def test_is_actual(self):
-        #assignment = course_factories.AssignmentFactory()
-        #is_actual: bool = timezone.now().date() < self.assignment.deadline
-        #assert self.assignment.is_actual == is_actual
 
-    #def test_timedelta(self):
-        #assignment = course_factories.AssignmentFactory()
-        #timedelta = self.assignment.deadline - timezone.now().date()
-        #assert self.assignment.timedelta == timedelta
-
+@pytest.mark.django_db
 class TestCourseFileModel:
-    pass
-
-# class TestLectureMarkModel:
-#     def test_string_lecture_model(self,db):
-#         student = users_factories.StudentFactory()
-#         teacher = users_factories.TeacherFactory()
-#         course = course_factories.CourseFactory()
-#         course.save()
-#         lecture = course_factories.LectureFactory(course=course)
-#         course.save()
-#         lecture_mark = course_factories.LectureMarkFactory(lecture=lecture,student=student,teacher=teacher)
-#         assert f'Lecture Mark: {lecture_mark.student}, {lecture_mark.lecture}' == str(lecture_mark)
+    def test_string_file_model(self):
+        file = course_factories.CourseFileFactory()
+        assert f'{file.name} - {file.filename}' == str(file)

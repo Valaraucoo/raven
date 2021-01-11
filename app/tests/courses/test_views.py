@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from courses import forms
 from tests.courses import factories as course_factories
 from tests.users import factories as users_factories
 
@@ -347,10 +346,6 @@ class TestLaboratoryDetailView:
 
     def test_get_laboratory_detail(self, client):
         url = reverse('courses:laboratory-detail', args=(self.laboratory.pk,))
-
-        # client.force_login(self.student)
-        # response = client.get(url)
-        # assert response.status_code == 200
 
         student = users_factories.StudentFactory()
         client.force_login(student)
