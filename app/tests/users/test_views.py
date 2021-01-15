@@ -220,26 +220,31 @@ class TestLoginView:
         response = user_client.post(url)
         assert response.status_code == 302
 
-    def _get_token(self, client, url, data):
-        resp = client.get(url)
-        data['csrfmiddlewaretoken'] = resp.cookies['csrftoken'].value
-        return data
 
     def test_post_login(self, client):
         url = reverse('users:login')
         user = users_factories.StudentFactory()
-        user.save()
-        resp = client.get(url)
 
         data = {
-            "csrfmiddlewaretoken": resp.cookies['csrftoken'].value,
             "email": user.email,
-            "password": user.password,
-            "remember": True
+            "password": "haslo123",
+            "remember": "on"
         }
 
         response = client.post(url, data=data)
         assert response.status_code == 200
+
+        user.set_password("haslo123")
+        user.save()
+
+        client.post(url, data=data)
+        #assert response.url == reverse("users:profile-edit")
+
+        url_logout = reverse('users:logout')
+        client.get(url_logout)
+
+        response = client.post(url, data=data)
+        assert response.url == reverse("users:dashboard")
 
 
 class TestLogoutView:
