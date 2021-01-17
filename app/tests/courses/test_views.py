@@ -11,14 +11,16 @@ from tests.users import factories as users_factories
 class TestCoursesGuardianPermissionMixin:
     def get_courses_guardian_permission(self, client):
         student = users_factories.StudentFactory()
-        student2 = users_factories.StudentFactory()
         teacher = users_factories.TeacherFactory()
-        teacher2 = users_factories.TeacherFactory()
 
         grade = course_factories.GradeFactory()
         grade.students.add(student)
         grade.save()
         course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        course.teachers.add(teacher)
+
+        student2 = users_factories.StudentFactory()
+        teacher2 = users_factories.TeacherFactory()
 
         url = reverse('courses:courses-detail')
         client.force_login(student)
@@ -36,10 +38,6 @@ class TestCoursesGuardianPermissionMixin:
         client.force_login(teacher2)
         response = client.get(url)
         assert response.url == reverse('courses:courses')
-
-        # client.force_login(student)
-        response = client.get(url)
-        # assert response.status_code == 302
 
 
 @pytest.mark.django_db
@@ -61,8 +59,6 @@ class TestCourseView:
         response = client.get(url)
         assert response.status_code == 200
 
-        # query = response.context.get('courses')
-
         resp_name = client.get(url, {'name': course.name})
         assert resp_name.status_code == 200
 
@@ -71,7 +67,6 @@ class TestCourseView:
 
         resp_exam = client.get(url, {'has_exam': 2})
         assert resp_exam.status_code == 200
-        # assert query.first().has_exam == resp_exam.context.get('courses').first().has_exam
 
         resp_exam = client.get(url, {'has_exam': 1})
         assert resp_exam.status_code == 200
@@ -91,8 +86,6 @@ class TestCoursesDetailView:
         response = client.get(url)
         assert response.status_code == 200
 
-        # labs = response.context.get('available_labs')
-
 
 @pytest.mark.django_db
 class TestCourseGroupJoinListView:
@@ -101,20 +94,32 @@ class TestCourseGroupJoinListView:
         grade = course_factories.GradeFactory()
         grade.students.add(student)
         grade.save()
-        course = course_factories.CourseFactory()
+        course = course_factories.CourseFactory(grade=grade)
+        course.students_without_groups.append(student)
         course.save()
-        group = course_factories.GroupFactory(course=course)
 
-        client.force_login(student)
         url = reverse('courses:group', args=(course.slug,))
+        client.force_login(student)
         response = client.get(url)
         assert response.status_code == 200
 
 
 @pytest.mark.django_db
 class TestCourseGroupCreateView:
-    def test_corde_group_create(self, client):
-        pass
+    def test_course_group_create(self, client):
+        teacher = users_factories.TeacherFactory()
+        course = course_factories.CourseFactory()
+        course.teachers.add(teacher)
+        course.save()
+
+        # url = reverse('courses:group-create', args=(course.slug + 'nieistniejacy',))
+        # client.force_login(teacher)
+        # response = client.post(url)
+        # assert response.status_code == 302
+
+        url = reverse('courses:group-create', args=(course.slug,))
+        response = client.post(url)
+        assert response.status_code == 302
 
 
 @pytest.mark.django_db
@@ -239,6 +244,7 @@ class TestLectureDetailView:
         grade.students.add(student)
         grade.save()
         course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
+        course.teachers.add(teacher)
         course.save()
         lecture = course_factories.LectureFactory(course=course)
 
@@ -250,20 +256,22 @@ class TestLectureDetailView:
     def test_get_lecture_detail(self, client):
         url = reverse('courses:lectures-detail', args=(self.lecture.pk,))
 
-        # client.force_login(self.student)
-        # response = client.get(url)
-        # assert response.status_code == 200
+        response = client.get(url)
+        assert response.status_code == 302
 
         student = users_factories.StudentFactory()
         client.force_login(student)
         response = client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('courses:courses')
 
         teacher = users_factories.TeacherFactory()
         client.force_login(teacher)
         response = client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('courses:courses')
 
+        client.force_login(self.teacher)
+        response = client.get(url)
+        assert response.status_code == 200
 
 class TestLectureEditView:
     student = None
@@ -306,6 +314,16 @@ class TestLectureEditView:
     def test_post_lecture_edit(self, client):
         url = reverse('courses:lectures-edit', args=(self.lecture.pk,))
 
+        data = {
+            "title": 'wykl 1',
+            "date": "12.02.2021",
+            "time": "12:30",
+            "duration": "90",
+            "localization": '1',
+            "description": "opis",
+            "show": "on",
+        }
+
         client.force_login(self.student)
         response = client.post(url)
         assert response.status_code == 302
@@ -318,6 +336,17 @@ class TestLectureEditView:
         client.force_login(self.teacher)
         response = client.post(url)
         assert response.status_code == 200
+
+        data["meeting"] = "on"
+
+        response = client.post(url, data=data)
+        assert response.status_code == 302
+
+        settings.USE_GOOGLE_API = True
+        data["meeting"] = False
+
+        response = client.post(url, data=data)
+        assert response.url == url
 
 
 class TestLaboratoryDetailView:
@@ -347,21 +376,29 @@ class TestLaboratoryDetailView:
     def test_get_laboratory_detail(self, client):
         url = reverse('courses:laboratory-detail', args=(self.laboratory.pk,))
 
+        response = client.get(url)
+        assert response.status_code == 302
+
         student = users_factories.StudentFactory()
         client.force_login(student)
         response = client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('courses:courses')
 
         teacher = users_factories.TeacherFactory()
         client.force_login(teacher)
         response = client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('courses:courses')
+
+        client.force_login(self.teacher)
+        response = client.get(url)
+        assert response.status_code == 200
 
 
 class TestLaboratoryEditView:
     student = None
     teacher = None
     course = None
+    group = None
     laboratory = None
 
     @pytest.fixture(autouse=True)
@@ -381,6 +418,7 @@ class TestLaboratoryEditView:
         self.student = student
         self.course = course
         self.teacher = teacher
+        self.group = group
         self.laboratory = lab
 
     def test_get_laboratory_edit(self, client):
@@ -402,6 +440,16 @@ class TestLaboratoryEditView:
     def test_post_laboratory_edit(self, client):
         url = reverse('courses:laboratory-edit', args=(self.laboratory.pk,))
 
+        data = {
+            "title": 'lab 1',
+            "date": "12.02.2021",
+            "time": "12:30",
+            "duration": "90",
+            "localization": '1',
+            "description": "opis",
+            "show": "on"
+        }
+
         client.force_login(self.student)
         response = client.post(url)
         assert response.status_code == 302
@@ -415,12 +463,27 @@ class TestLaboratoryEditView:
         response = client.post(url)
         assert response.status_code == 200
 
+        data["meeting"] = "on"
+
+        response = client.post(url, data=data)
+        assert response.status_code == 200
+
+        data["group"] = self.group.pk
+
+        response = client.post(url, data=data)
+        assert response.url == url
+
+        settings.USE_GOOGLE_API = True
+        data["meeting"] = False
+
+        response = client.post(url, data=data)
+        assert response.url == url
+
 
 class TestLectureCreateView:
     student = None
     teacher = None
     course = None
-    lecture = None
 
     @pytest.fixture(autouse=True)
     def setup_method(self, db):
@@ -431,12 +494,10 @@ class TestLectureCreateView:
         grade.save()
         course = course_factories.CourseFactory(grade=grade, head_teacher=teacher)
         course.save()
-        lecture = course_factories.LectureFactory(course=course)
 
         self.student = student
         self.course = course
         self.teacher = teacher
-        self.lecture = lecture
 
     def test_get_lecture_create(self, client):
         url = reverse('courses:lectures-create', args=(self.course.slug,))
@@ -454,7 +515,7 @@ class TestLectureCreateView:
         response = client.get(url)
         assert response.status_code == 200
 
-    def test_post_lecture_edit(self, client):
+    def test_post_lecture_create(self, client):
         url = reverse('courses:lectures-create', args=(self.course.slug,))
 
         client.force_login(self.student)
@@ -470,13 +531,26 @@ class TestLectureCreateView:
         response = client.post(url)
         assert response.status_code == 200
 
+        data = {
+            "title": 'wykl 1',
+            "date": "12.02.2021",
+            "time": "12:30",
+            "duration": "90",
+            "localization": '1',
+            "description": "opis",
+            "show": "on",
+            "meeting": "on"
+        }
+
+        response = client.post(url, data=data)
+        assert response.status_code == 302
+
 
 class TestLaboratoryCreateView:
     student = None
     teacher = None
     course = None
     group = None
-    laboratory = None
 
     @pytest.fixture(autouse=True)
     def setup_method(self, db):
@@ -489,13 +563,11 @@ class TestLaboratoryCreateView:
         course.save()
         group = course_factories.GroupFactory(course=course)
         group.save()
-        lab = course_factories.LabFactory(group=group)
 
         self.student = student
         self.course = course
         self.teacher = teacher
         self.group = group
-        self.laboratory = lab
 
     def test_get_laboratory_create(self, client):
         url = reverse('courses:laboratory-create', args=(self.course.slug,))
@@ -528,14 +600,32 @@ class TestLaboratoryCreateView:
         client.force_login(self.teacher)
         response = client.post(url)
         assert response.status_code == 200
-        # form = response.context.get('form')
-        # assert form.is_valid()
+
+        data = {
+            "title": 'lab 1',
+            "date": "12.02.2021",
+            "time": "12:30",
+            "duration": "90",
+            "localization": '1',
+            "description": "opis",
+            "show": "on",
+            "meeting": "on"
+        }
+
+        response = client.post(url, data=data)
+        assert response.status_code == 200
+
+        data["group"] = self.group.pk
+
+        response = client.post(url, data=data)
+        assert response.status_code == 302
 
 
 class TestCoursesGroupEditView:
     student = None
     teacher = None
     course = None
+    grade = None
     group = None
 
     @pytest.fixture(autouse=True)
@@ -551,6 +641,7 @@ class TestCoursesGroupEditView:
         group.save()
 
         self.student = student
+        self.grade = grade
         self.course = course
         self.teacher = teacher
         self.group = group
@@ -596,27 +687,19 @@ class TestCoursesGroupEditView:
         assert response.status_code == 302
 
         student_without_group = users_factories.StudentFactory()
-        grade = course_factories.GradeFactory()
-        grade.students.add(student_without_group)
-        grade.save()
-        course = course_factories.CourseFactory(grade=grade)
-        course.save()
 
         client.force_login(student_without_group)
         response = client.get(url)
-        # assert response.status_code == 302  # response.url == reverse('courses:courses-detail', args=(course.slug,))
         assert response.url == reverse('courses:courses')
 
-        grade.students.add(student_without_group)
-        grade.save()
-        group = course_factories.GroupFactory(course=course)
-        group.save()
-        group.students.add(student_without_group)
+        self.grade.students.add(student_without_group)
+        self.grade.save()
+        self.course.students_without_groups.append(student_without_group)
+        self.course.save()
 
-        assert [student for student in group.students.all()] == [student_without_group]
         client.force_login(student_without_group)
         response = client.get(url)
-        assert response.status_code == 302
+        assert response.url == reverse('courses:courses-detail', args=(self.course.slug,))
 
 
 class TestLectureChangesView:
@@ -1023,7 +1106,6 @@ class TestCourseFinalMarkView:
         self.student = student
         self.teacher = teacher
         self.course = course
-
 
     def test_set_final_mark(self, client):
         url = reverse('courses:set-final-mark', args=(self.course.slug + 'nieistniejacy', self.student.pk,))

@@ -553,17 +553,17 @@ class LaboratoryEditView(LoginRequiredMixin, DetailView):
         context = self.get_context_data(**kwargs)
         form = forms.LaboratoryCreateForm(request.POST)
 
-        if form.is_valid():
-            title = form.data.get('title')
-            date = form.data.get('date')
-            time = form.data.get('time')
-            duration = form.data.get('duration')
-            localization = request.POST.get('localization', 'Remote')
-            description = form.data.get('description', '')
-            show = form.data.get('show', False)
-            meeting = form.data.get('meeting', False)
-            group_pk = form.data.get('group')
+        title = form.data.get('title')
+        date = form.data.get('date')
+        time = form.data.get('time')
+        duration = form.data.get('duration')
+        localization = request.POST.get('localization', 'Remote')
+        description = form.data.get('description', '')
+        show = form.data.get('show', False)
+        meeting = form.data.get('meeting', False)
+        group_pk = form.data.get('group')
 
+        if title and date and time and duration and localization and description:
             if not group_pk:
                 messages.error(request, 'Wybierz grupę!')
                 return render(request, self.template_name, self.get_context_data(**kwargs))
@@ -700,16 +700,17 @@ class LectureEditView(LoginRequiredMixin, DetailView):
         context = self.get_context_data(**kwargs)
         form = forms.LectureCreateForm(request.POST)
 
-        if form.is_valid():
-            title = form.data.get('title')
-            date = form.data.get('date')
-            time = form.data.get('time')
-            duration = form.data.get('duration')
-            localization = request.POST.get('localization', 'Remote')
-            description = form.data.get('description', '')
-            show = form.data.get('show', False)
-            meeting = form.data.get('meeting', False)
+        data = form.data
+        title = data.get('title')
+        date = data.get('date')
+        time = data.get('time')
+        duration = data.get('duration')
+        localization = request.POST.get('localization', 'Remote')
+        description = data.get('description', '')
+        show = data.get('show', False)
+        meeting = data.get('meeting', False)
 
+        if title and date and time and duration and localization and description:
             try:
                 date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
             except Exception:
@@ -777,7 +778,7 @@ class LectureEditView(LoginRequiredMixin, DetailView):
             else:
                 messages.error(request, 'Uzupełnij poprawnie formularz!')
         else:
-            messages.error(request, 'Uzupełnij poprawnie formularz!')
+            messages.error(request, 'Uzupełnij poprawnie formularz!!!')
         return render(request, self.template_name, context)
 
 
@@ -838,17 +839,17 @@ class LaboratoryCreateView(LoginRequiredMixin, DetailView):
 
         form = forms.LaboratoryCreateForm(request.POST)
 
-        if form.is_valid():
-            title = form.data.get('title')
-            date = form.data.get('date')
-            time = form.data.get('time')
-            duration = form.data.get('duration')
-            localization = request.POST.get('localization', 'Remote')
-            description = form.data.get('description', '')
-            show = form.data.get('show', False)
-            meeting = form.data.get('meeting', False)
-            group_pk = form.data.get('group')
+        title = form.data.get('title')
+        date = form.data.get('date')
+        time = form.data.get('time')
+        duration = form.data.get('duration')
+        localization = request.POST.get('localization', 'Remote')
+        description = form.data.get('description', '')
+        show = form.data.get('show', False)
+        meeting = form.data.get('meeting', False)
+        group_pk = form.data.get('group')
 
+        if title and date and time and duration and localization and description:
             if not group_pk:
                 messages.error(request, 'Wybierz grupę!')
                 return render(request, self.template_name, self.get_context_data(**kwargs))
@@ -958,16 +959,17 @@ class LectureCreateView(LoginRequiredMixin, DetailView):
 
         form = forms.LectureCreateForm(request.POST)
 
-        if form.is_valid():
-            title = form.data.get('title')
-            date = form.data.get('date')
-            time = form.data.get('time')
-            duration = form.data.get('duration')
-            localization = request.POST.get('localization', 'Remote')
-            description = form.data.get('description', '')
-            show = form.data.get('show', False)
-            meeting = form.data.get('meeting', False)
+        data = form.data
+        title = data.get('title')
+        date = data.get('date')
+        time = data.get('time')
+        duration = data.get('duration')
+        localization = request.POST.get('localization', 'Remote')
+        description = data.get('description', '')
+        show = data.get('show', False)
+        meeting = data.get('meeting', False)
 
+        if title and date and time and duration and localization and description:
             try:
                 date_parsed = datetime.datetime.strptime(date, '%d.%m.%Y')
             except Exception:
