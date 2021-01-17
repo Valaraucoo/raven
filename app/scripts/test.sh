@@ -4,7 +4,7 @@ NOCOLOR='\033[0m'
 GREEN='\033[0;32m'
 
 echo "${GREEN}Running Tests${NOCOLOR}"
-docker-compose exec web coverage run --source='.' --omit=*/venv/*,*/migrations/*,*/__init__*,*/core/*,*/demo/*,*/tests/*,*/utils/* manage.py test
+docker-compose exec web coverage run --source='.' --omit=*/venv/*,*/migrations/*,*/__init__*,*/core/*,*/demo/*,*/tests/*,*/utils/*,*/users/apps*,*/courses/apps*,*/support/apps*  manage.py test
 docker-compose exec web coverage report
 docker-compose exec web coverage html
 

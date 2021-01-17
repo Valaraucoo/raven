@@ -468,6 +468,7 @@ class LoginView(generic.View):
             return redirect('users:dashboard')
         context = self.get_context_data(*args, **kwargs)
         form = self.form_class(request.POST)
+
         if form.is_valid():
             data = form.cleaned_data
             email = data.get('email')

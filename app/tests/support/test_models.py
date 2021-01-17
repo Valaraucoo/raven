@@ -1,6 +1,4 @@
 import pytest
-from django.conf import settings
-from django.urls import reverse
 
 from support import models as support_models
 from tests.users import factories as users_factories

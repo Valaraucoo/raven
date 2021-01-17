@@ -1,5 +1,4 @@
 import datetime
-
 import pytest
 from django.core.exceptions import ValidationError
 
